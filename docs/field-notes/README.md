@@ -55,3 +55,4 @@ later corrections, add a dated correction explaining what changed.
 | Entry | Date | Stage | Status |
 | --- | --- | --- | --- |
 | [001 — When Market Data Isn't Complete](001-when-market-data-isnt-complete.md) | 2026-10-13 | 1B.3 | Draft |
+| [002 — When a Backtest Meets Trading Costs](002-when-a-backtest-meets-trading-costs.md) | 2026-10-14 | 2C | Draft |
