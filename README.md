@@ -90,6 +90,9 @@ plus lint and formatting checks. There is no deployment automation.
 See [architecture](docs/architecture.md), [roadmap](docs/roadmap.md),
 [agent guidelines](AGENTS.md) and the [prompt archive](prompts/README.md).
 
+[Field Notes](docs/field-notes/README.md) is the curated technical research journal,
+with draft stories intended for the future website's Field Notes section.
+
 ## License
 
 The new project's code is licensed under the [MIT License](LICENSE),

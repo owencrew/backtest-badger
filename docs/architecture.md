@@ -82,10 +82,36 @@ runtime dependencies were needed. January 2025 4h validation imported 186 candle
 per market, with zero gaps and zero revisions. See the
 [archive ingestion guide](stage-01b2-archive-ingestion.md) for operations and results.
 
+## Implemented in Stage 1B.3
+
+`history.py` iterates explicit completed months chronologically and reuses
+`ingest_archive` for one atomic transaction per month, stopping on failure.
+`archives.py` recognises only the verified August 2017 native 4h boundary for the
+two selected markets; later months require complete calendar grids by default.
+An explicit `--allow-source-gaps` range option can atomically persist valid rows
+while excluding irregular-close observations and recording absent identities.
+Checksums, CSV/economic validity, identity checks and database conflict handling
+remain strict; unexpected anomaly classes stop the range for review.
+No timestamp repairs or alternative-source replacements are performed.
+
+`research.py` compares the stored UTC grid with PostgreSQL `generate_series`,
+reports revisions, local import evidence and persistent source diagnostics, and
+streams deterministic exact CSVs. A successful partial commit does not erase a
+month's anomalies or imply complete coverage. Export manifests include the full
+gap/exclusion diagnostics. Future rolling windows must validate consecutive UTC
+identities and explicitly handle interruptions; native boundaries alone do not
+prove uninterrupted trading.
+Both markets and all coverage queries share one read-only REPEATABLE READ snapshot.
+New export directories retain immutable dataset bytes and JSON metadata with their
+SHA-256, version/source policy, completeness and implementation revision. Missing
+coverage refuses export unless explicitly acknowledged. No schema migration,
+provider framework or dependency was added. See the
+[full-history guide](stage-01b3-full-history.md) for actual live results and limits.
+
 ## Intended direction (not implemented)
 
-Add modules only when a development stage needs them. Full historical coverage,
-versioned dataset exports and incremental REST ingestion remain planned.
+Add modules only when a development stage needs them. Incremental REST ingestion
+and deliberate historical revalidation remain planned.
 Later stages add causal features, chronological ML evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
@@ -94,9 +120,10 @@ selects Binance Spot native UTC 4h candles for BTCUSDT and ETHUSDT: Vision
 archives for historical data and the public market-data-only REST API for the
 recent tail. Native 1h candles may be added independently when needed. Three
 implemented application tables (`market`, `candle`, `candle_revision`) keep current
-values and superseded versions. Future versioned dataset exports will preserve
-research inputs. Stage 1B.3 aims for full available history in bounded resumable
-increments, not a permanent 2024 cutoff. Stage 1C retains initial defaults of a
+values and superseded versions. Frozen versioned dataset exports can preserve
+research inputs. Stage 1B.3 processes explicit historical ranges in bounded resumable
+increments; actual completeness is reported from stored data, not assumed.
+Stage 1C retains initial defaults of a
 60-second settling delay and seven-day refresh overlap. Raw artifacts/manifests
 now live in ignored `artifacts/`, with durable retention addressed as
 research and deployment progress. No REST ingestion, derived-candle tables, parent

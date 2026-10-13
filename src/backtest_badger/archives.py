@@ -1,4 +1,4 @@
-"""Bounded Binance Spot monthly acquisition and complete-grid validation."""
+"""Bounded monthly acquisition; strict grids or explicit source-gap diagnostics."""
 
 import csv
 import hashlib
@@ -21,10 +21,13 @@ MAX_CSV_BYTES = 8 * 1024 * 1024
 MAX_CHECKSUM_BYTES = 1024
 MAX_ROWS = 744
 EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+# Stage 1A independently checked both archives and REST startTime=0, limit=1.
+# This is a verified source boundary, not proof of no earlier Binance trading.
+FIRST_4H_OPEN = datetime(2017, 8, 17, 4, tzinfo=UTC)
 
 
 class ArchiveError(ValueError):
-    """Safe diagnostics containing no raw network errors or provider row values."""
+    """Safe diagnostics without raw network errors or arbitrary CSV field values."""
 
     def __init__(self, category, message, **details):
         super().__init__(message)
@@ -77,8 +80,14 @@ class ArchiveRequest:
         )
 
     @property
+    def coverage_start(self):
+        if self.interval == "4h" and self.month == "2017-08":
+            return FIRST_4H_OPEN
+        return self.bounds[0]
+
+    @property
     def grid(self):
-        start, end = self.bounds
+        start, end = self.coverage_start, self.bounds[1]
         step = timedelta(seconds=self.seconds)
         return [start + i * step for i in range((end - start) // step)]
 
@@ -135,7 +144,9 @@ def _fetch(url: str, limit: int) -> bytes:
             error.close()
             if error.code not in (500, 502, 503, 504) or attempt == 2:
                 raise ArchiveError(
-                    "http", f"Archive acquisition failed (HTTP {error.code})."
+                    "http",
+                    f"Archive acquisition failed (HTTP {error.code}).",
+                    http_status=error.code,
                 ) from None
         except (URLError, TimeoutError, OSError, HTTPException):
             if attempt == 2:
@@ -182,13 +193,20 @@ def download_archive(request: ArchiveRequest) -> DownloadedArchive:
 
 
 def parse_archive(
-    request: ArchiveRequest, download: DownloadedArchive, *, market_id: int
+    request: ArchiveRequest,
+    download: DownloadedArchive,
+    *,
+    market_id: int,
+    allow_source_gaps=False,
+    diagnostics=None,
 ) -> list[CandleObservation]:
     """Verify before opening; retain acquisition time when parsing/replaying bytes.
 
     The CSV has no symbol field: identity comes from the explicit request and exact
     member/sidecar names. Exclusive end is open_time + interval, as in persistence.
     """
+    if allow_source_gaps and request.interval != "4h":
+        raise ValueError("Gap-tolerant history supports native 4h only.")
     digest = verify_checksum(download.body, download.checksum, request)
     if digest != download.sha256:
         raise ArchiveError(
@@ -227,6 +245,8 @@ def parse_archive(
     except (UnicodeError, csv.Error):
         raise ArchiveError("csv", "Invalid UTF-8 CSV content.") from None
     observations = []
+    excluded = []
+    source_opens = []
     expected = set(request.grid)
     seen, duplicates, unexpected = set(), set(), set()
     # Contract is based on the requested archive date, never on epoch digit count.
@@ -247,8 +267,6 @@ def parse_archive(
             exclusive_end = EPOCH + timedelta(
                 microseconds=(int(row[6]) + 1) * microseconds_per_tick
             )
-            if exclusive_end != opened + timedelta(seconds=request.seconds):
-                raise ValueError("Incorrect inclusive close-time boundary.")
             observation = CandleObservation(
                 market_id=market_id,
                 interval_seconds=request.seconds,
@@ -268,31 +286,86 @@ def parse_archive(
                 source_sha256=digest,
             )
             validate_observation(observation)
-        except (ValueError, OverflowError):
+            end = opened + timedelta(seconds=request.seconds)
+            irregular_close = exclusive_end != end
+            if irregular_close:
+                # Do not normalize partial bars or infer a valid duration from OHLCV.
+                # Only the investigated classes (shortened or exact-exclusive close)
+                # can be quarantined. Inverted/overlong times stop for review.
+                raw_close = exclusive_end - timedelta(
+                    microseconds=microseconds_per_tick
+                )
+                if not allow_source_gaps or not opened <= raw_close <= end:
+                    raise ValueError("Incorrect inclusive close-time boundary.")
+        except (ValueError, OverflowError) as error:
+            # All ValueErrors above contain fixed validation messages, not row values.
+            reason = (
+                "Timestamp is outside the supported range."
+                if isinstance(error, OverflowError)
+                else str(error)
+            )
             raise ArchiveError(
                 "row",
-                f"Invalid candle at CSV row {row_number}.",
+                f"Invalid candle at CSV row {row_number}: {reason}",
                 actual_count=len(rows),
                 invalid_row=row_number,
+                invalid_reason=reason,
+                excluded_observations=excluded,
+                excluded_count=len(excluded),
+                inspection_complete=False,
             ) from None
         if opened in seen:
             duplicates.add(opened)
         if opened not in expected:
             unexpected.add(opened)
         seen.add(opened)
-        observations.append(observation)
+        source_opens.append(opened)
+        if irregular_close:
+            excluded.append(
+                {
+                    "csv_row": row_number,
+                    "open_time": opened.isoformat(),
+                    "raw_close_time": row[6],
+                    "expected_inclusive_close_time": str(
+                        (end - EPOCH) // timedelta(microseconds=microseconds_per_tick)
+                        - 1
+                    ),
+                    "reason": "irregular_close_time",
+                    "close_time_class": "exclusive_boundary"
+                    if raw_close == end
+                    else "shortened_interval",
+                    "action": "excluded_without_normalization",
+                }
+            )
+        else:
+            observations.append(observation)
     missing = expected - seen
-    ordered = [o.open_time for o in observations] == sorted(
-        o.open_time for o in observations
-    )
-    if missing or duplicates or unexpected or not ordered:
-        details = {
-            "actual_count": len(rows),
-            "missing_intervals": [v.isoformat() for v in sorted(missing)],
-            "duplicate_intervals": [v.isoformat() for v in sorted(duplicates)],
-            "unexpected_intervals": [v.isoformat() for v in sorted(unexpected)],
-            "chronological": ordered,
-        }
+    ordered = source_opens == sorted(source_opens)
+    details = {
+        "actual_count": len(rows),
+        "accepted_count": len(observations),
+        "inspection_complete": True,
+        "source_missing_intervals": [v.isoformat() for v in sorted(missing)],
+        "missing_intervals": [
+            v.isoformat()
+            for v in sorted(expected - {o.open_time for o in observations})
+        ],
+        "excluded_observations": excluded,
+        "excluded_count": len(excluded),
+        "duplicate_intervals": [v.isoformat() for v in sorted(duplicates)],
+        "unexpected_intervals": [v.isoformat() for v in sorted(unexpected)],
+        "chronological": ordered,
+        "candle_complete": not (
+            missing or excluded or duplicates or unexpected or not ordered
+        ),
+    }
+    if diagnostics is not None:
+        diagnostics.update(details)
+    if allow_source_gaps and not observations:
+        raise ArchiveError(
+            "coverage", "No eligible observations; stop for review.", **details
+        )
+    if (missing and not allow_source_gaps) or duplicates or unexpected or not ordered:
         raise ArchiveError(
             "coverage",
             f"Archive grid invalid: {len(missing)} missing, "

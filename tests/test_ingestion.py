@@ -138,6 +138,7 @@ def test_write_failure_reporting(
     elif failure == "database":
         assert result["database_write_outcome"] == "failed_or_unknown"
         assert result["rejected"] is None
+        assert result["failed_observations"] is None
     elif failure == "constraint":
         assert result["database_write_outcome"] == "rolled_back"
         assert result["rejected"] == 186

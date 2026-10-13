@@ -55,6 +55,19 @@ Do not represent simulated performance as real trading results.
 - Do not claim tests passed unless they were actually executed.
 - Do not commit, push or deploy unless explicitly requested.
 
+## Commit Conventions
+
+Use Conventional Commits:
+type(scope): short imperative description
+
+Common types: feat, fix, docs, test, refactor, chore, ci.
+
+Use a scope where helpful (data, db, research, backtest, web).
+
+Keep commits focused on one logical change.
+
+Do not commit or push unless explicitly instructed.
+
 ## Repository Boundaries
 
 The sibling crypto-trading-platform repository is historical

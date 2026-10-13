@@ -8,7 +8,7 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **1A — Market Data Feasibility and Design** | Complete; schema decisions refined in 1B.1 | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). Schema implemented in 1B.1; bounded monthly archives implemented in 1B.2. |
 | **1B.1 — Schema and Persistence** | Implemented; awaiting review | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests; ingestion added separately in 1B.2. |
 | **1B.2 — Bounded Archive Ingestion** | Implemented; awaiting review | Explicit monthly native 1h/4h CLI; bounded checksum/parser validation; atomic conflict-rejecting backfill; local raw evidence and manifests. January 2025 live 4h import: 186 candles per market, zero gaps/revisions. |
-| **1B.3 — Full Historical Coverage and Research Dataset** | Planned | Expand in bounded resumable increments to full available history for selected markets, not a permanent 2024 cutoff; verify completeness and export reproducible versioned datasets. |
+| **1B.3 — Full Historical Coverage and Research Dataset** | Implemented; full live coverage blocked | Explicit chronological native 4h backfill, verified initial boundary, stored-grid completeness and frozen multi-market CSVs from one read-only snapshot. Live stopped at invalid BTC September 2017; 641 current rows per market, no revisions, no full export. See [results](stage-01b3-full-history.md). |
 | **1C — Incremental Ingestion and Revisions** | Planned | Public REST tail, closed-candle eligibility, recent overlap refresh and explicit historical revalidation; valid corrections replace canonical values atomically without rewriting frozen datasets; focused quality and failure tests. |
 | **2 — Quantitative Research, ML and Backtesting** | Planned | Causal features, chronological train/validation/test splits and train-only preprocessing; reproducible baseline experiments; tested execution timing, fees and slippage; honest out-of-sample reporting. |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
@@ -36,6 +36,13 @@ are in the [design document](stage-01a-market-data-design.md). Stage 1B.1 implem
 the schema and persistence; later increments await implementation review.
 
 ## Stage 5 — Planned website design
+
+**Field Notes journal**
+
+The repository's [Field Notes](field-notes/README.md) journal holds curated
+engineering and research articles for this future website section. Entries begin
+as drafts and require editorial review before publication; they are not automatic
+development logs. Website presentation and publishing remain Stage 5 work.
 
 **Animated backtesting mascot**
 
@@ -103,3 +110,44 @@ plus Ruff lint and formatting. Each repeated live import returned 186 unchanged
 candles and no inserts or revisions; exact values and original provenance remained
 unchanged. Only confirmation watermarks advanced. The temporary test container was
 separate from the existing development database, which remained at revision 0001.
+
+## Stage 1B.3 implementation
+
+The [full-history guide](stage-01b3-full-history.md) records commands, restart
+semantics, initial-boundary evidence, actual backfill results and snapshot exports.
+The two-market source start is 2017-08-17 04:00 UTC; the requested exclusive end is
+2026-10-01 00:00 UTC. Completeness is checked against stored identities, with no
+interpolation or silent exclusion of gaps. Unchanged imports preserve accepted
+versions and provenance. Existing monthly ingestion and persistence are reused;
+no new schema or dependencies are introduced. Stage 1C remains unimplemented and
+requires review before work begins.
+
+Initial Stage 1B.3 verification: 247 tests passed (116 unit, 131 isolated PostgreSQL
+integration), with Ruff lint/format passing. Eight bounded imports passed, then
+full BTC backfill stopped at September 2017's invalid close boundary and missing
+16:00 UTC candle on September 6. Each market has 641 stored candles; January
+observations and provenance are preserved, with zero revisions. The declared
+full range remains incomplete and its export was refused. No validation was
+weakened, no later full-range imports were attempted after the blocker, and no
+partial live export was implicitly approved.
+
+
+### Stage 1B.3 historical-anomalies follow-up
+
+Implemented opt-in `backfill-history --allow-source-gaps`, preserving strict
+monthly defaults, economic/identity/checksum validation and atomic conflict
+rejection. Missing intervals and excluded irregular-close rows remain visible
+in coverage and export manifests; no timestamp normalization or replacement
+candles were added. Official September 2017 and June 2018 comparisons are retained
+as offline regression fixtures; interruption-sensitive research windows must
+explicitly handle gaps and cannot assume uninterrupted trading within native bars.
+
+Both full histories through September 2026 were acquired: **110 months and 19,955
+stored native 4h candles per market**, with **17 absent monthly-source intervals
+and 19 excluded rows per market** (36 stored gaps each). All 1,282 pre-existing
+rows were preserved; there were zero conflicts, stale changes, failures or
+revisions. Complete export remains correctly refused. Final checks: **268 tests
+passed (133 unit, 135 isolated PostgreSQL integration)**, plus Ruff lint/format.
+See the [full-history guide](stage-01b3-full-history.md) for exact identities,
+investigation, source disagreement, totals and remaining limits. Stage 1C remains
+unimplemented; stop here for review.

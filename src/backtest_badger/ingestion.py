@@ -46,14 +46,34 @@ def ingest_archive(
     settings=None,
     *,
     dry_run=False,
+    allow_source_gaps=False,
     artifacts=Path("artifacts"),
+    result=None,
 ) -> int:
-    """Return a CLI status. Safe diagnostics exclude raw network/driver exceptions."""
+    """Return CLI status; optionally copy the final evidence into result.
+
+    Safe diagnostics exclude raw network/driver exceptions. The range caller uses
+    the same manifest counts, never a second implementation of monthly ingestion.
+    """
     run_id = uuid4().hex
     manifest_path = artifacts / "manifests" / f"{run_id}.json"
     manifest = {
         "run_id": run_id,
-        "parser_version": "stage-1b2-v1",
+        "parser_version": "stage-1b3-gaps-v2",
+        "allow_source_gaps": allow_source_gaps,
+        "inspection_complete": False,
+        "candle_complete": False,
+        "accepted_count": 0,
+        "excluded_count": 0,
+        "excluded_observations": [],
+        "source_missing_intervals": [],
+        "coverage_start": request.coverage_start.isoformat(),
+        "coverage_end_exclusive": request.bounds[1].isoformat(),
+        "listing_boundary_evidence": (
+            "docs/stage-01a-market-data-design.md: REST/archive first-open agreement"
+            if request.coverage_start != request.bounds[0]
+            else None
+        ),
         "mode": "backfill",
         "started_at": datetime.now(UTC).isoformat(),
         "source_url": request.url,
@@ -109,11 +129,24 @@ def ingest_archive(
         manifest["validation_result"] = "in_progress"
         # Placeholder is for validation only; never written. Resolve the real market
         # identity after acquisition/parsing, and rebind every observation below.
-        observations = parse_archive(request, download, market_id=1)
-        manifest.update(validation_result="passed", actual_count=len(observations))
+        observations = parse_archive(
+            request,
+            download,
+            market_id=1,
+            allow_source_gaps=allow_source_gaps,
+            diagnostics=manifest,
+        )
+        manifest.update(
+            validation_result="passed"
+            if manifest["candle_complete"]
+            else "source_gaps",
+            rejected=manifest["excluded_count"],
+        )
         print(
-            f"Checksum and complete UTC grid passed: "
-            f"{len(observations)}/{len(request.grid)} candles."
+            f"Checksum verified; eligible={len(observations)}/{len(request.grid)}; "
+            f"source missing={len(manifest['source_missing_intervals'])}, "
+            f"excluded={manifest['excluded_count']}; "
+            f"candle_complete={manifest['candle_complete']}."
         )
         _write_manifest(manifest_path, manifest)
         if dry_run:
@@ -192,6 +225,11 @@ def ingest_archive(
             manifest["rejected"] = manifest["actual_count"]
         print(f"Ingestion failed during {phase}; sensitive error details suppressed.")
     manifest["finished_at"] = datetime.now(UTC).isoformat()
+    manifest["failed_observations"] = manifest["actual_count"] if status else 0
+    if manifest["database_write_outcome"] == "failed_or_unknown":
+        manifest["failed_observations"] = None
+    if result is not None:
+        result.update(manifest, manifest_path=str(manifest_path))
     try:
         _write_manifest(manifest_path, manifest)
     except OSError:
