@@ -33,6 +33,17 @@ market-data schema, Alembic migrations, provider ingestion and data-quality chec
 Later stages add causal features, chronological ML evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
+Stage 1A's [proposed market-data design](stage-01a-market-data-design.md), awaiting
+review, selects Binance Spot native UTC 4h candles for BTCUSDT and ETHUSDT: Vision
+archives for historical data and the public market-data-only REST API for the
+recent tail. Native 1h candles may be added independently when needed. Three
+planned application tables (`market`, `candle`, `candle_revision`) keep current
+values and superseded versions; exact repeat observations are no-ops and valid
+corrections replace current values atomically. Versioned dataset exports preserve
+research inputs. There are no planned derived-candle tables, parent invalidation
+machinery or generic provider abstractions. These are design decisions only;
+Stage 0 remains the entire implemented application.
+
 The eventual public dashboard must use read-only database access and clearly label
 research, forward predictions and simulated trading. AWS Lightsail on Ubuntu is a
 future deployment target; Stage 0 has no production access or deployment setup.

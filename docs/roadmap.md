@@ -5,7 +5,9 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | Stage | Status | Acceptance criteria |
 | --- | --- | --- |
 | **0 — Foundation** | Complete | Python 3.12 package installs from the uv lockfile; configuration and both CLI checks work; local PostgreSQL connectivity is demonstrated when Docker is available; pytest and Ruff pass; CI, license and concise documentation exist. |
-| **1 — Market Data Engine** | Planned | First real PostgreSQL schema and Alembic migrations; reproducible spot-market ingestion; idempotent writes; explicit timestamp, missing-data and provider-revision handling; meaningful data-quality tests. |
+| **1A — Market Data Feasibility and Design** | Complete; awaiting design review | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). No ingestion engine or schema implemented. |
+| **1B — Schema and Historical Ingestion** | Planned; follows 1A review | Three application tables and first Alembic migration; verified native 4h BTCUSDT/ETHUSDT archive backfill in bounded increments; idempotent version-preserving writes; explicit gap report and reproducible dataset export. |
+| **1C — Incremental Ingestion and Revisions** | Planned | Public REST tail, closed-candle eligibility, recent overlap refresh and explicit historical revalidation; valid corrections replace canonical values atomically without rewriting frozen datasets; focused quality and failure tests. |
 | **2 — Quantitative Research, ML and Backtesting** | Planned | Causal features, chronological train/validation/test splits and train-only preprocessing; reproducible baseline experiments; tested execution timing, fees and slippage; honest out-of-sample reporting. |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
@@ -13,6 +15,23 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
 
 Real-money trading is outside this roadmap and requires explicit approval.
+
+## Stage 1A findings and proposed direction
+
+On 2026-10-13, public Binance access from the Mac succeeded after the sandbox's
+initial DNS failure. Ten ZIP checksums and 998 archive rows passed validation;
+60 overlapping archive/REST candles matched exactly after timestamp normalization.
+Both markets' first returned 1h/4h candle was 2017-08-17 04:00 UTC. These bounded
+samples do not establish complete historical continuity. The October 12 daily
+archive was still unavailable at 00:44 UTC on October 13, so REST must cover the
+tail without assuming midnight archive publication.
+
+The proposed design uses native UTC 4h candles, independent native 1h only when
+needed, and three tables (`market`, `candle`, `candle_revision`). A 60-second
+settling delay and seven-day overlap are initial project defaults, not provider
+finality guarantees. Stage 1B/1C scopes, acceptance criteria and unresolved risks
+are in the [design document](stage-01a-market-data-design.md). Existing 26 tests
+and Ruff checks still pass; Stage 1 implementation awaits review.
 
 ## Stage 5 — Planned website design
 
