@@ -13,7 +13,7 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **1C.2 — Historical Revalidation** | Implemented; awaiting review | Explicit maximum-30-day REST review and approved exact-response replay; locked snapshot checks, atomic version history, invalid-page rejection and frozen export preservation. Live reviews: no economic revisions; zero-duration 2017 rows rejected for both markets. See [guide](stage-01c2-historical-revalidation.md). |
 | **2A — Reproducible Research Dataset and Causal Features** | Implemented; awaiting review | Pinned frozen-source verification, explicit incomplete acknowledgement, gap/anomaly-safe causal features and one 4h target; availability-based chronological splits and label purging; train-only no-skill references; deterministic 39,609-row artifact and untouched holdout. See [guide](stage-02a-research-dataset.md). |
 | **2B — Predictive Modelling** | Implemented; awaiting review | Pinned Stage 2A input validation; separate-market zero/mean, Ridge and shallow boosting comparisons; training-only preprocessing/fitting, 2024 validation metrics and untouched test outcomes. Two byte-identical runs. See [results](stage-02b-predictive-baselines.md). |
-| **2C — Backtesting** | Planned | Independently model execution after signal availability, fees and slippage; report honest out-of-sample simulated performance. Close-to-close research labels do not imply executable fills. |
+| **2C — Backtesting** | Implemented; awaiting review | Independent native 2024 1h references from 24 verified archives; offline pinned validation forecasts, delayed three-hour long/cash simulation, explicit two-sided costs and independent Decimal accounts. All trading accounts lose under base/stress assumptions; zero stays cash. Four byte-identical output files across two runs. See [results](stage-02c-execution-backtesting.md). |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
 | **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
@@ -198,4 +198,26 @@ All three experiment artifacts reproduce byte for byte, with unchanged source
 hashes and no test forecasts/scores. Verification: 274 tests passed, 173 database
 integration cases skipped without an isolated test DSN; Ruff lint/format and diff
 checks passed. See the [guide](stage-02b-predictive-baselines.md) for full comparisons,
-metric conventions and limitations. Stage 2C remains unimplemented.
+metric conventions and limitations. Stage 2C is recorded below.
+
+### Stage 2C execution-aware validation backtesting
+
+All 24 native Binance Spot 1h archives for 2024 passed official checksum and strict
+monthly-grid validation: 8,784 rows per market, zero missing/rejected observations.
+The frozen artifact is independent of the 4h research dataset and never enters
+the canonical database. Its retained sources are replayed before each offline run.
+
+The fixed policy trades forecasts above 1e-12: 12:01 availability, 13:00 entry and
+16:00 exit, with separate 10,000-USDT market/model/scenario accounts. Base and
+stress assumptions produce negative net results for every account that trades;
+base losses range from 87.36% to 99.63%. Frictionless gains do not establish
+executable profitability. Gross and net results, detailed costs, realised-equity
+drawdowns and the model-target/execution-return distinction remain explicit.
+
+All four outputs reproduce byte for byte; an independent cash-flow check agrees.
+Stage 2B hashes and Stage 2A metadata remain unchanged, and the research CSV and
+test labels were never opened. Verification: 343 tests passed, 173 PostgreSQL
+integration cases skipped without an isolated test DSN; Ruff lint/format and diff
+checks passed. See the [guide](stage-02c-execution-backtesting.md) for source/output
+hashes, complete results and limitations. Stop here for review: no Stage 2D,
+holdout evaluation, tuning, model promotion, live trading or deployment.

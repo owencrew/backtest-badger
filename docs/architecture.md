@@ -199,10 +199,41 @@ and output hashes, and a readable summary. Two actual runs reproduced all three
 files byte for byte. No model database, serving, signals or execution simulation
 is introduced. See the [Stage 2B guide](stage-02b-predictive-baselines.md).
 
+## Implemented in Stage 2C
+
+`badger prepare-execution-data` acquires exactly the 2024 native 1h monthly
+archives for BTCUSDT and ETHUSDT, validating January for both before proceeding.
+`execution_data.py` reuses strict archive acquisition/checksum/Decimal parsing and
+retains source ZIPs, official sidecars, acquisition evidence and a complete hourly
+opening-reference grid. These data never enter the canonical PostgreSQL tables.
+Offline loading reparses all retained archives and reproduces the CSV exactly.
+
+`forecast_data.py` verifies the pinned Stage 2B bytes, exact schema, identities,
+baseline constants, chronology and all 17,560 validation forecast rows. Stage 2A
+research CSV and holdout labels are not opened. Signal availability is source open
++ 4h + 60s; entry is the next hourly boundary and exit is source open + 8h. A
+12:01 signal therefore enters at 13:00 and exits at 16:00, using independent native
+1h opening references rather than the model's close-to-close target return.
+
+`backtest.py` uses ordinary sequential functions and separate 10,000-USDT accounts
+for each market/model/scenario. Forecast > 1e-12 enters long; otherwise cash.
+Explicit Decimal accounting applies adverse spread/slippage and two-sided fees,
+rounds quantity down for affordability, retains residual cash and verifies gross
+minus costs equals net equity change. No overlapping positions or leverage exist.
+All decisions are fixed before future prices are accessed for fill accounting.
+
+New immutable local outputs retain trades, endpoint realised equity, fixed
+frictionless/base/stress metrics, input/implementation hashes and a readable
+historical-simulation summary. All four files reproduced byte for byte. Drawdown
+observes only realised flat equity; no intrabar marks or Sharpe are invented.
+No broker framework, dependency, database, model fitting, forward trading or
+deployment was added. See the [Stage 2C guide](stage-02c-execution-backtesting.md)
+for acquisition hashes, negative net results, tests and scientific limitations.
+
 ## Intended direction (not implemented)
 
 Add modules only when a development stage needs them.
-Later stages add locked holdout evaluation, realistic backtests,
+Later stages add robustness research, locked holdout evaluation,
 forward predictions and separately accounted paper trading.
 
 Stage 1A's [market-data design](stage-01a-market-data-design.md)

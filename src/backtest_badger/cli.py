@@ -28,6 +28,16 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("health", help="Validate application configuration")
     commands.add_parser("db-health", help="Check PostgreSQL connectivity")
+    execution = commands.add_parser(
+        "prepare-execution-data", help="Freeze 2024 native 1h execution references"
+    )
+    execution.add_argument("--output", type=Path, required=True)
+    backtest = commands.add_parser(
+        "backtest-validation", help="Simulate frozen validation forecasts offline"
+    )
+    backtest.add_argument("--forecasts", type=Path, required=True)
+    backtest.add_argument("--execution", type=Path, required=True)
+    backtest.add_argument("--output", type=Path, required=True)
     evaluate = commands.add_parser(
         "evaluate-models", help="Evaluate fixed Stage 2B models on validation only"
     )
@@ -101,6 +111,27 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args(argv)
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    if args.command in ("prepare-execution-data", "backtest-validation"):
+        try:
+            if args.command == "prepare-execution-data":
+                from backtest_badger.execution_data import prepare_execution_data
+
+                prepare_execution_data(args.output)
+            else:
+                from backtest_badger.backtest import backtest_validation
+
+                backtest_validation(args.forecasts, args.execution, args.output)
+                print(f"Historical simulation summary: {args.output / 'summary.md'}")
+            print(f"Verified artifact manifest: {args.output / 'manifest.json'}")
+            return 0
+        except ValueError as error:
+            logger.error("Stage 2C failed: %s", error)
+        except FileExistsError:
+            logger.error("Output already exists; choose a new directory.")
+        except OSError:
+            logger.error("Stage 2C failed; check input/output file access.")
+        return 1
 
     if args.command == "evaluate-models":
         from backtest_badger.evaluation import evaluate_models
