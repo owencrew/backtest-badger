@@ -3,6 +3,7 @@
 import argparse
 import json
 import logging
+from datetime import datetime
 
 import psycopg
 
@@ -11,6 +12,7 @@ from backtest_badger.config import load_settings
 from backtest_badger.db import check_database, connect_database
 from backtest_badger.history import backfill_history, history_requests
 from backtest_badger.ingestion import ingest_archive
+from backtest_badger.recent import sync_recent
 from backtest_badger.research import coverage_report, export_dataset, selections
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,18 @@ def main(argv: list[str] | None = None) -> int:
     archive.add_argument("--interval", required=True, choices=("1h", "4h"))
     archive.add_argument("--month", required=True)
     archive.add_argument("--dry-run", action="store_true")
+    recent = commands.add_parser(
+        "sync-recent", help="Sync eligible native 4h REST candles"
+    )
+    recent.add_argument("--symbol", required=True, choices=("BTCUSDT", "ETHUSDT"))
+    recent.add_argument("--interval", required=True, choices=("4h",))
+    recent.add_argument(
+        "--start",
+        type=datetime.fromisoformat,
+        help="Explicit UTC 4h boundary, at most 180 days before cutoff",
+    )
+    recent.add_argument("--settling-seconds", type=int, default=60)
+    recent.add_argument("--dry-run", action="store_true")
     for name in ("backfill-history", "coverage-report", "export-dataset"):
         command = commands.add_parser(name)
         command.add_argument(
@@ -91,6 +105,17 @@ def main(argv: list[str] | None = None) -> int:
     logging.getLogger().setLevel(settings.log_level)
     if args.command == "ingest-archive":
         return ingest_archive(request, settings)
+    if args.command == "sync-recent":
+        try:
+            return sync_recent(
+                args.symbol,
+                settings,
+                start=args.start,
+                settling_seconds=args.settling_seconds,
+                dry_run=args.dry_run,
+            )
+        except ValueError as error:
+            parser.error(str(error))
     if args.command == "backfill-history":
         return backfill_history(
             args.symbol,

@@ -5,6 +5,10 @@ three-table schema and persistence policy; ingestion and exports remain planned.
 See the [persistence guide](stage-01b1-persistence.md) for the implemented API.
 Subsequent Stage 1B.2 adds [bounded monthly ingestion](stage-01b2-archive-ingestion.md);
 the feasibility results and forward-looking design below retain their original scope.
+Stage 1C.1 now implements the [REST tail and recent refresh](stage-01c1-rest-tail-and-refresh.md),
+including the clock check and original settling/overlap defaults. Operational bounds
+are 30 days for automatic catch-up and 180 days for explicit recovery; revision
+authority stays within seven days. Deliberate historical revalidation remains planned.
 
 ## 1. Recommendation
 

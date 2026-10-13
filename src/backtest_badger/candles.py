@@ -129,31 +129,51 @@ def save_candle(
 
 
 class BatchConflict(ValueError):
-    """Backfill rejected atomically, with conflicting and stale identities."""
+    """Batch rejected atomically, with conflicting and stale identities."""
 
     def __init__(self, conflicts, stale):
         self.conflicts = conflicts
         self.stale = stale
         super().__init__(
-            f"Backfill rolled back: {len(conflicts)} conflicting, {len(stale)} stale."
+            f"Batch rolled back: {len(conflicts)} conflicting, {len(stale)} stale."
         )
 
 
 def save_candles(
-    connection: Connection, observations, mode="backfill"
+    connection: Connection,
+    observations,
+    mode="backfill",
+    *,
+    refresh_start=None,
+    refresh_end=None,
+    differences=None,
 ) -> dict[str, int]:
-    """Validate first, then atomically fill holes without accepting revisions.
+    """Validate first, then atomically write one batch through shared row locks.
 
+    Backfill never revises. Explicit recent-refresh permits revisions only inside
+    its seven-day authority, and reports locked old/new rows in differences.
     Uses the same locked selection as save_candle. Any conflict, stale changed
     observation or database error rolls back every insert and watermark update.
     Sorting identities gives overlapping batches a consistent lock order.
     """
-    if mode != "backfill":
-        raise ValueError("Only backfill batch mode is supported.")
+    if mode not in ("backfill", "recent-refresh"):
+        raise ValueError("Unsupported batch mode.")
+    if mode == "recent-refresh":
+        refresh_start, refresh_end = _utc(refresh_start), _utc(refresh_end)
+        if not timedelta(0) < refresh_end - refresh_start <= timedelta(days=7):
+            raise ValueError("Recent revision authority must span at most seven days.")
     observations = list(observations)
+    if mode == "recent-refresh" and len(observations) > 1000:
+        raise ValueError("Recent refresh batches are limited to 1000 observations.")
     identities = set()
     for observation in observations:
         validate_observation(observation)
+        if mode == "recent-refresh" and (
+            observation.source_kind != "rest"
+            or observation.interval_seconds != 14400
+            or observation.open_time >= refresh_end
+        ):
+            raise ValueError("Recent refresh requires eligible native 4h REST rows.")
         identity = (
             observation.market_id,
             observation.interval_seconds,
@@ -168,13 +188,24 @@ def save_candles(
     ):
         raise ValueError("save_candles requires an idle autocommit connection.")
     counts = {"inserted": 0, "unchanged": 0}
+    if mode == "recent-refresh":
+        counts["revised"] = 0
     conflicts, stale = [], []
     with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
         _prepare_write(cursor)
         for observation in sorted(
             observations, key=lambda o: (o.market_id, o.interval_seconds, o.open_time)
         ):
-            result = _save_candle(cursor, observation, backfill=True)
+            try:
+                result = _save_candle(
+                    cursor,
+                    observation,
+                    backfill=mode == "backfill"
+                    or observation.open_time < refresh_start,
+                    differences=differences,
+                )
+            except ObservationConflict:
+                result = "conflict"
             identity = {
                 "market_id": observation.market_id,
                 "interval_seconds": observation.interval_seconds,
@@ -196,7 +227,7 @@ def _prepare_write(cursor):
     cursor.execute("SET LOCAL TIME ZONE 'UTC'")
 
 
-def _save_candle(cursor, observation, *, backfill=False):
+def _save_candle(cursor, observation, *, backfill=False, differences=None):
     """Shared write logic; caller owns validation and the transaction."""
     values = asdict(observation)
     columns = ", ".join(values)
@@ -229,6 +260,8 @@ def _save_candle(cursor, observation, *, backfill=False):
                 values,
             )
         return "unchanged"
+    if differences is not None:
+        differences.append({"old": current, "new": values.copy()})
     if observation.observed_at < current["last_observed_at"]:
         return "stale"
     if backfill:

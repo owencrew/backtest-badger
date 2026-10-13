@@ -108,10 +108,32 @@ coverage refuses export unless explicitly acknowledged. No schema migration,
 provider framework or dependency was added. See the
 [full-history guide](stage-01b3-full-history.md) for actual live results and limits.
 
+## Implemented in Stage 1C.1
+
+`rest.py` acquires public native 4h Binance klines with bounded HTTP retries, pacing,
+response sizes and page counts. A fixed UTC cutoff, configurable 60-second settling
+delay and provider clock check exclude ineligible candles. Strict millisecond/Decimal
+parsing retains response bytes before validation. `recent.py` plans seven-day overlap
+plus up to 30 days of automatic catch-up; explicit recovery is limited to 180 days.
+
+`badger sync-recent` resolves one market and uses one atomic transaction per page,
+reusing the locked persistence SQL. Explicit recent-refresh batch mode permits
+revisions only in the fixed seven-day window; older observations can fill holes or
+confirm identical values, but cannot replace accepted history. Old/new values and
+provenance remain visible for every disagreement, with warnings for archive/REST,
+large-price or widespread changes. Dry runs read coverage without database writes.
+
+Response-grid diagnostics and PostgreSQL stored-grid checks remain independent;
+a fresh tail does not imply an unbroken range. Raw bodies and run/page evidence live
+under ignored `artifacts/rest/`. Historical source diagnostics and frozen exports
+remain untouched. Live validation added 75 candles per market through the October
+13 12:00 UTC cutoff, with 42 unchanged confirmations per repeat and zero revisions.
+See the [REST tail and refresh guide](stage-01c1-rest-tail-and-refresh.md).
+
 ## Intended direction (not implemented)
 
-Add modules only when a development stage needs them. Incremental REST ingestion
-and deliberate historical revalidation remain planned.
+Add modules only when a development stage needs them. Deliberate historical
+revalidation remains planned for Stage 1C.2.
 Later stages add causal features, chronological ML evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
@@ -123,11 +145,11 @@ implemented application tables (`market`, `candle`, `candle_revision`) keep curr
 values and superseded versions. Frozen versioned dataset exports can preserve
 research inputs. Stage 1B.3 processes explicit historical ranges in bounded resumable
 increments; actual completeness is reported from stored data, not assumed.
-Stage 1C retains initial defaults of a
+Stage 1C.1 implements initial defaults of a
 60-second settling delay and seven-day refresh overlap. Raw artifacts/manifests
 now live in ignored `artifacts/`, with durable retention addressed as
-research and deployment progress. No REST ingestion, derived-candle tables, parent
-invalidation machinery or generic provider abstractions exist.
+research and deployment progress. No historical revalidation, derived-candle tables,
+parent invalidation machinery or generic provider abstractions exist.
 
 The eventual public dashboard must use read-only database access and clearly label
 research, forward predictions and simulated trading. AWS Lightsail on Ubuntu is a

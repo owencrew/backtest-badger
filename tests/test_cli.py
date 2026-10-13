@@ -59,3 +59,38 @@ def test_invalid_command(args, capsys):
         cli.main(args)
     assert error.value.code == 2
     assert "usage:" in capsys.readouterr().err
+
+
+def test_recent_cli_forwards_explicit_policy(monkeypatch):
+    from datetime import UTC, datetime
+
+    received = {}
+
+    def sync(symbol, settings, **kwargs):
+        received.update(symbol=symbol, **kwargs)
+        return 1
+
+    monkeypatch.setattr(cli, "sync_recent", sync)
+    assert (
+        cli.main(
+            [
+                "sync-recent",
+                "--symbol",
+                "BTCUSDT",
+                "--interval",
+                "4h",
+                "--start",
+                "2026-10-01T00:00:00Z",
+                "--dry-run",
+                "--settling-seconds",
+                "120",
+            ]
+        )
+        == 1
+    )
+    assert received == dict(
+        symbol="BTCUSDT",
+        start=datetime(2026, 10, 1, tzinfo=UTC),
+        settling_seconds=120,
+        dry_run=True,
+    )
