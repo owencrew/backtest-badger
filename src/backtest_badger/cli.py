@@ -4,6 +4,7 @@ import argparse
 import json
 import logging
 from datetime import datetime
+from pathlib import Path
 
 import psycopg
 
@@ -14,6 +15,7 @@ from backtest_badger.history import backfill_history, history_requests
 from backtest_badger.ingestion import ingest_archive
 from backtest_badger.recent import sync_recent
 from backtest_badger.research import coverage_report, export_dataset, selections
+from backtest_badger.revalidation import apply_revalidation, review_history
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     recent.add_argument("--settling-seconds", type=int, default=60)
     recent.add_argument("--dry-run", action="store_true")
+    review = commands.add_parser(
+        "revalidate-history", help="Review up to 30 historical days; no DB writes"
+    )
+    review.add_argument("--symbol", required=True, choices=("BTCUSDT", "ETHUSDT"))
+    review.add_argument("--interval", required=True, choices=("4h",))
+    review.add_argument("--start", required=True, type=datetime.fromisoformat)
+    review.add_argument("--end", required=True, type=datetime.fromisoformat)
+    apply = commands.add_parser(
+        "apply-revalidation", help="Apply an explicitly approved retained review"
+    )
+    apply.add_argument("--plan", required=True, type=Path)
+    apply.add_argument("--approve-changes", action="store_true")
     for name in ("backfill-history", "coverage-report", "export-dataset"):
         command = commands.add_parser(name)
         command.add_argument(
@@ -103,6 +117,20 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     logging.getLogger().setLevel(settings.log_level)
+    if args.command in ("revalidate-history", "apply-revalidation"):
+        try:
+            if args.command == "revalidate-history":
+                return review_history(
+                    args.symbol, settings, start=args.start, end=args.end
+                )
+            return apply_revalidation(
+                args.plan, settings, approve_changes=args.approve_changes
+            )
+        except ValueError as error:
+            logger.error("Revalidation failed: %s", error)
+        except (psycopg.Error, OSError, RuntimeError):
+            logger.error("Revalidation failed; database/file details suppressed.")
+        return 1
     if args.command == "ingest-archive":
         return ingest_archive(request, settings)
     if args.command == "sync-recent":

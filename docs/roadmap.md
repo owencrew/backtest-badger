@@ -10,7 +10,7 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **1B.2 — Bounded Archive Ingestion** | Implemented; awaiting review | Explicit monthly native 1h/4h CLI; bounded checksum/parser validation; atomic conflict-rejecting backfill; local raw evidence and manifests. January 2025 live 4h import: 186 candles per market, zero gaps/revisions. |
 | **1B.3 — Full Historical Coverage and Research Dataset** | Implemented; acquired with known gaps | All 220 market-months through September 2026 inspected and committed; 19,955 candles and 36 disclosed gaps per market. Frozen 39,910-row export is explicitly incomplete. See [results](stage-01b3-full-history.md). |
 | **1C.1 — REST Tail and Recent Refresh** | Implemented; awaiting review | Fixed eligible cutoff, strict native 4h REST, seven-day refresh, bounded catch-up, atomic page revisions and stored-grid diagnostics. Live: 75 new candles per market, 20,030 total each; zero recent gaps/revisions, historical gaps and frozen export preserved. See [guide](stage-01c1-rest-tail-and-refresh.md). |
-| **1C.2 — Historical Revalidation** | Planned | Deliberate bounded source/range selection, older revision review and provenance reporting; frozen datasets remain unchanged. |
+| **1C.2 — Historical Revalidation** | Implemented; awaiting review | Explicit maximum-30-day REST review and approved exact-response replay; locked snapshot checks, atomic version history, invalid-page rejection and frozen export preservation. Live reviews: no economic revisions; zero-duration 2017 rows rejected for both markets. See [guide](stage-01c2-historical-revalidation.md). |
 | **2 — Quantitative Research, ML and Backtesting** | Planned | Causal features, chronological train/validation/test splits and train-only preprocessing; reproducible baseline experiments; tested execution timing, fees and slippage; honest out-of-sample reporting. |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
@@ -152,3 +152,15 @@ passed (133 unit, 135 isolated PostgreSQL integration)**, plus Ruff lint/format.
 See the [full-history guide](stage-01b3-full-history.md) for exact identities,
 investigation, source disagreement, totals and remaining limits. Stage 1C remains
 unimplemented; stop here for review.
+
+
+### Stage 1C.2 controlled historical revalidation
+
+Separate review/apply commands now retain bounded historical evidence, require
+explicit whole-plan approval and reject changed database state or altered source
+bytes. Tests cover exact comparisons, concurrency, stale/equal-time selection,
+atomic rollback, missing valid insertions, anomaly retention and frozen exports.
+Both markets' two-day September 2026 reviews are identical; September 6, 2017 plans
+are blocked by zero-duration 16:00 observations. No live apply was executed.
+The final audit preserves 20,030 current rows and 36 historical gaps per market,
+zero revisions and the original frozen export hash. Stage 2 remains unimplemented.

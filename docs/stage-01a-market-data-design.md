@@ -8,7 +8,10 @@ the feasibility results and forward-looking design below retain their original s
 Stage 1C.1 now implements the [REST tail and recent refresh](stage-01c1-rest-tail-and-refresh.md),
 including the clock check and original settling/overlap defaults. Operational bounds
 are 30 days for automatic catch-up and 180 days for explicit recovery; revision
-authority stays within seven days. Deliberate historical revalidation remains planned.
+authority stays within seven days. Stage 1C.2 adds separate
+[controlled historical review and apply](stage-01c2-historical-revalidation.md)
+for explicit ranges of at most 30 days; the original feasibility/design below is
+retained as historical context.
 
 ## 1. Recommendation
 

@@ -139,6 +139,17 @@ class BatchConflict(ValueError):
         )
 
 
+class ReviewConflict(ValueError):
+    """The locked canonical row no longer matches the reviewed snapshot."""
+
+    def __init__(self, observation):
+        self.open_time = observation.open_time.isoformat()
+        super().__init__(f"Database state changed at {self.open_time}; review again.")
+
+
+_UNREVIEWED = object()
+
+
 def save_candles(
     connection: Connection,
     observations,
@@ -147,27 +158,53 @@ def save_candles(
     refresh_start=None,
     refresh_end=None,
     differences=None,
+    reviewed_rows=None,
+    revalidation_start=None,
+    revalidation_end=None,
 ) -> dict[str, int]:
     """Validate first, then atomically write one batch through shared row locks.
 
     Backfill never revises. Explicit recent-refresh permits revisions only inside
     its seven-day authority, and reports locked old/new rows in differences.
+    Historical revalidation requires a reviewed state for every selected row,
+    verifies that full state under lock, and uses the same watermark policy.
     Uses the same locked selection as save_candle. Any conflict, stale changed
     observation or database error rolls back every insert and watermark update.
     Sorting identities gives overlapping batches a consistent lock order.
     """
-    if mode not in ("backfill", "recent-refresh"):
+    if mode not in ("backfill", "recent-refresh", "historical-revalidation"):
         raise ValueError("Unsupported batch mode.")
     if mode == "recent-refresh":
         refresh_start, refresh_end = _utc(refresh_start), _utc(refresh_end)
         if not timedelta(0) < refresh_end - refresh_start <= timedelta(days=7):
             raise ValueError("Recent revision authority must span at most seven days.")
     observations = list(observations)
+    historical = mode == "historical-revalidation"
+    if historical:
+        revalidation_start = _utc(revalidation_start)
+        revalidation_end = _utc(revalidation_end)
+        if (
+            not timedelta(0)
+            < revalidation_end - revalidation_start
+            <= timedelta(days=30)
+            or not 1 <= len(observations) <= 180
+            or len({o.market_id for o in observations}) != 1
+            or not isinstance(reviewed_rows, dict)
+        ):
+            raise ValueError("Historical authority requires a bounded reviewed range.")
     if mode == "recent-refresh" and len(observations) > 1000:
         raise ValueError("Recent refresh batches are limited to 1000 observations.")
     identities = set()
     for observation in observations:
         validate_observation(observation)
+        if historical and (
+            observation.source_kind != "rest"
+            or observation.interval_seconds != 14400
+            or not revalidation_start <= observation.open_time < revalidation_end
+        ):
+            raise ValueError(
+                "Historical authority requires in-range native 4h REST rows."
+            )
         if mode == "recent-refresh" and (
             observation.source_kind != "rest"
             or observation.interval_seconds != 14400
@@ -182,13 +219,17 @@ def save_candles(
         if identity in identities:
             raise ValueError("Duplicate candle identity in batch.")
         identities.add(identity)
+    if historical and set(reviewed_rows) != identities:
+        raise ValueError(
+            "Every selected identity must have an explicit reviewed state."
+        )
     if (
         not connection.autocommit
         or connection.info.transaction_status != TransactionStatus.IDLE
     ):
         raise ValueError("save_candles requires an idle autocommit connection.")
     counts = {"inserted": 0, "unchanged": 0}
-    if mode == "recent-refresh":
+    if mode != "backfill":
         counts["revised"] = 0
     conflicts, stale = [], []
     with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
@@ -201,8 +242,20 @@ def save_candles(
                     cursor,
                     observation,
                     backfill=mode == "backfill"
-                    or observation.open_time < refresh_start,
+                    or (
+                        mode == "recent-refresh"
+                        and observation.open_time < refresh_start
+                    ),
                     differences=differences,
+                    expected=reviewed_rows[
+                        (
+                            observation.market_id,
+                            observation.interval_seconds,
+                            observation.open_time,
+                        )
+                    ]
+                    if historical
+                    else _UNREVIEWED,
                 )
             except ObservationConflict:
                 result = "conflict"
@@ -227,7 +280,9 @@ def _prepare_write(cursor):
     cursor.execute("SET LOCAL TIME ZONE 'UTC'")
 
 
-def _save_candle(cursor, observation, *, backfill=False, differences=None):
+def _save_candle(
+    cursor, observation, *, backfill=False, differences=None, expected=_UNREVIEWED
+):
     """Shared write logic; caller owns validation and the transaction."""
     values = asdict(observation)
     columns = ", ".join(values)
@@ -242,12 +297,16 @@ def _save_candle(cursor, observation, *, backfill=False, differences=None):
         values,
     )
     if cursor.fetchone() is not None:
+        if expected is not _UNREVIEWED and expected is not None:
+            raise ReviewConflict(observation)
         return "inserted"
     cursor.execute(f"SELECT * FROM candle WHERE {IDENTITY} FOR UPDATE", values)
     current = cursor.fetchone()
     if current is None:
         # Concurrent administrative deletion is outside the writer protocol.
         raise RuntimeError("Candle disappeared during selection; retry the write.")
+    if expected is not _UNREVIEWED and current != expected:
+        raise ReviewConflict(observation)
     cursor.execute("SELECT clock_timestamp() AS now")
     recorded_at = cursor.fetchone()["now"]
     if observation.observed_at > recorded_at:

@@ -99,3 +99,44 @@ def archive_download(archive_rows):
         )
 
     return make
+
+
+@pytest.fixture
+def historical_payload():
+    """Encode synthetic observations as exact millisecond REST payloads."""
+    import json
+
+    from backtest_badger.rest import EPOCH, MILLISECOND, STEP, Response, kline_url
+
+    def make(observations, *, observed_at=None, mutate=None, start=None, end=None):
+        start = start or observations[0].open_time
+        end = end or observations[-1].open_time + STEP
+        rows = []
+        for o in observations:
+            stamp = (o.open_time - EPOCH) // MILLISECOND
+            rows.append(
+                [
+                    stamp,
+                    *(
+                        str(getattr(o, f))
+                        for f in ("open", "high", "low", "close", "base_volume")
+                    ),
+                    stamp + STEP // MILLISECOND - 1,
+                    str(o.quote_volume),
+                    o.trade_count,
+                    str(o.taker_buy_base_volume),
+                    str(o.taker_buy_quote_volume),
+                    "0",
+                ]
+            )
+        if mutate:
+            mutate(rows)
+        return Response(
+            json.dumps(rows).encode(),
+            kline_url("BTCUSDT", start, end),
+            observed_at or datetime.now(UTC),
+            200,
+            {},
+        )
+
+    return make

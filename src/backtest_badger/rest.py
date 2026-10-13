@@ -19,6 +19,7 @@ BASE = "https://data-api.binance.vision/api/v3/"
 STEP = timedelta(hours=4)
 MILLISECOND = timedelta(milliseconds=1)
 MAX_BODY = 2 * 1024 * 1024
+PARSER_VERSION = "stage-1c1-v1"
 
 
 class RestError(ValueError):
@@ -191,6 +192,30 @@ def check_clock(response, started):
 
 def parse_page(response, *, market_id, start, end):
     """Reject the whole page on any anomaly; raw bytes have already been retained."""
+    observations, invalid, identities = inspect_page(
+        response, market_id=market_id, start=start, end=end
+    )
+    if invalid:
+        first = invalid[0]
+        raise RestError(
+            "row",
+            "Invalid REST candle; entire page rejected.",
+            invalid_row=first["row"],
+            rejected_identity=first["open_time"],
+            rejected_identities=identities,
+            reason=first["reason"],
+        )
+    if not observations:
+        raise RestError("empty_page", "Empty page leaves requested range unresolved.")
+    return observations
+
+
+def inspect_page(response, *, market_id, start, end):
+    """Inspect every row for review evidence; invalid pages are never writable.
+
+    Shares all parsing rules with parse_page. Valid neighbours are diagnostic
+    candidates only: the caller must reject the whole page if invalid is nonempty.
+    """
     if not response.complete or len(response.body) > MAX_BODY:
         raise RestError("download", "Cannot parse an incomplete or oversized response.")
     try:
@@ -209,6 +234,7 @@ def parse_page(response, *, market_id, start, end):
                 pass
         identities.append({"row": index + 1, "open_time": opened})
     observations = []
+    invalid = []
     previous = None
     digest = response.sha256
     for index, row in enumerate(rows):
@@ -227,6 +253,7 @@ def parse_page(response, *, market_id, start, end):
                 )
             if previous is not None and opened <= previous:
                 raise ValueError("Duplicate, non-advancing or out-of-order identity.")
+            previous = opened
             if row[6] != row[0] + STEP // MILLISECOND - 1:
                 raise ValueError("Incorrect inclusive millisecond close boundary.")
             for i in (1, 2, 3, 4, 5, 7, 9, 10):
@@ -251,16 +278,14 @@ def parse_page(response, *, market_id, start, end):
             )
             validate_observation(observation)
         except (ValueError, OverflowError) as error:
-            raise RestError(
-                "row",
-                "Invalid REST candle; entire page rejected.",
-                invalid_row=index + 1,
-                rejected_identity=opened.isoformat() if opened else None,
-                rejected_identities=identities,
-                reason=str(error),
-            ) from None
+            invalid.append(
+                dict(
+                    row=index + 1,
+                    open_time=opened.isoformat() if opened else None,
+                    reason=str(error),
+                )
+            )
+            continue
         observations.append(observation)
         previous = opened
-    if not observations:
-        raise RestError("empty_page", "Empty page leaves requested range unresolved.")
-    return observations
+    return observations, invalid, identities

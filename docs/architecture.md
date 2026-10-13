@@ -130,10 +130,33 @@ remain untouched. Live validation added 75 candles per market through the Octobe
 13 12:00 UTC cutoff, with 42 unchanged confirmations per repeat and zero revisions.
 See the [REST tail and refresh guide](stage-01c1-rest-tail-and-refresh.md).
 
+## Implemented in Stage 1C.2
+
+`revalidation.py` provides separate review and explicitly approved apply commands
+for one selected native 4h market and at most 30 historical days. Review reuses
+public REST acquisition and strict parsing, retains all raw/invalid evidence and
+compares every expected identity against one read-only PostgreSQL snapshot. Plans
+and human-readable summaries live under ignored `artifacts/revalidation/`.
+
+Apply verifies the plan fingerprint, implementation, original response bytes/hashes,
+acquisition times and complete selected grid before database access. It never
+fetches replacement observations. Explicit historical batch mode reuses the existing
+SQL and deterministic row-lock order, checking full reviewed rows (including
+versions, provenance and watermarks) or reviewed absences under concurrency. Any
+mismatch, stale/equal-time conflict or write failure aborts the bounded transaction.
+Changed observations preserve history; identical confirmations retain provenance
+and only advance a newer watermark, as in existing writers. Ordinary backfill and
+seven-day recent authority remain unchanged.
+
+Malformed or partial responses block the whole plan; no synthetic repair, timestamp
+normalization or automatic deletion of anomaly diagnostics occurs. Existing frozen
+exports remain untouched. Four live review ranges found no economic revisions;
+September 2017 zero-duration rows were rejected for both markets. See the
+[historical revalidation guide](stage-01c2-historical-revalidation.md).
+
 ## Intended direction (not implemented)
 
-Add modules only when a development stage needs them. Deliberate historical
-revalidation remains planned for Stage 1C.2.
+Add modules only when a development stage needs them.
 Later stages add causal features, chronological ML evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
@@ -148,8 +171,9 @@ increments; actual completeness is reported from stored data, not assumed.
 Stage 1C.1 implements initial defaults of a
 60-second settling delay and seven-day refresh overlap. Raw artifacts/manifests
 now live in ignored `artifacts/`, with durable retention addressed as
-research and deployment progress. No historical revalidation, derived-candle tables,
-parent invalidation machinery or generic provider abstractions exist.
+research and deployment progress. Explicit historical review/apply is implemented;
+no automated historical scans, derived-candle tables, parent invalidation machinery
+or generic provider abstractions exist.
 
 The eventual public dashboard must use read-only database access and clearly label
 research, forward predictions and simulated trading. AWS Lightsail on Ubuntu is a

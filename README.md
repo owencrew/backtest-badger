@@ -21,8 +21,9 @@ and tested persistence of exact, versioned market candles. Validation and future
 acceptance criteria are in the [roadmap](docs/roadmap.md).
 
 Historical archive ingestion, incomplete frozen research exports and
-[recent REST synchronization](docs/stage-01c1-rest-tail-and-refresh.md) are implemented.
-Historical revalidation, features, ML, backtesting, live predictions, paper trading
+[recent REST synchronization](docs/stage-01c1-rest-tail-and-refresh.md) and
+[controlled historical revalidation](docs/stage-01c2-historical-revalidation.md)
+are implemented. Features, ML, backtesting, live predictions, paper trading
 and the public dashboard remain **planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 
