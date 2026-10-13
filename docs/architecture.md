@@ -154,10 +154,34 @@ exports remain untouched. Four live review ranges found no economic revisions;
 September 2017 zero-duration rows were rejected for both markets. See the
 [historical revalidation guide](stage-01c2-historical-revalidation.md).
 
+## Implemented in Stage 2A
+
+`badger prepare-research` operates entirely on the frozen Stage 1B.3 files, without
+configuration, database connections or provider requests. `frozen.py` verifies
+pinned CSV and manifest hashes, exact schema, Decimal economics, market/UTC
+identities, ordering and the full recorded gap/exclusion grid before passing any
+rows to `features.py`. Incomplete-source acknowledgement is mandatory.
+
+Five causal features use at most seven consecutive completed candles. One next-4h
+close-to-close log-return label requires the next exact identity. Missing intervals
+and registered source anomalies invalidate spanning windows; nothing is filled or
+repaired. Feature and label availability explicitly include the settling delay.
+Calendar train/validation/test boundaries share one availability clock across both
+markets, with labels crossing partition ends purged. There is no fitted
+preprocessing; zero and train-only mean references provide future comparisons.
+Test distributions and scores remain withheld.
+
+New local research directories retain deterministic CSVs and manifests with source
+and implementation hashes, definitions, counts, split boundaries and exclusion
+audits. The standard library suffices; no dependency or database change was needed.
+The initial output has 39,609 eligible rows. This is predictive research, not an
+execution model or a reconstruction of historical provider availability. See the
+[Stage 2A guide](stage-02a-research-dataset.md) for exact timing, results and limits.
+
 ## Intended direction (not implemented)
 
 Add modules only when a development stage needs them.
-Later stages add causal features, chronological ML evaluation, realistic backtests,
+Later stages add chronological ML evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
 Stage 1A's [market-data design](stage-01a-market-data-design.md)

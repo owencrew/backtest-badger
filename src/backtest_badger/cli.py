@@ -11,6 +11,7 @@ import psycopg
 from backtest_badger.archives import ArchiveRequest
 from backtest_badger.config import load_settings
 from backtest_badger.db import check_database, connect_database
+from backtest_badger.features import prepare_dataset
 from backtest_badger.history import backfill_history, history_requests
 from backtest_badger.ingestion import ingest_archive
 from backtest_badger.recent import sync_recent
@@ -27,6 +28,18 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("health", help="Validate application configuration")
     commands.add_parser("db-health", help="Check PostgreSQL connectivity")
+    prepare = commands.add_parser(
+        "prepare-research",
+        help="Build Stage 2A from the verified frozen export offline",
+    )
+    prepare.add_argument(
+        "--source",
+        type=Path,
+        default=Path("artifacts/exports/binance-4h-history-v1"),
+    )
+    prepare.add_argument("--output", type=Path, required=True)
+    prepare.add_argument("--acknowledge-incomplete", action="store_true")
+    prepare.add_argument("--settling-seconds", type=int, default=60)
     archive = commands.add_parser(
         "ingest-archive", help="Validate and backfill one monthly archive"
     )
@@ -81,6 +94,40 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args(argv)
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    if args.command == "prepare-research":
+        try:
+            report = prepare_dataset(
+                args.source,
+                args.output,
+                acknowledge_incomplete=args.acknowledge_incomplete,
+                settling_seconds=args.settling_seconds,
+            )
+            print(f"Research manifest: {args.output / 'manifest.json'}")
+            print(
+                json.dumps(
+                    {
+                        k: report[k]
+                        for k in (
+                            "counts",
+                            "total_eligible_rows",
+                            "sha256",
+                            "target_summaries",
+                        )
+                    },
+                    indent=2,
+                )
+            )
+            return 0
+        except ValueError as error:
+            logger.error("Research preparation failed: %s", error)
+        except FileExistsError:
+            logger.error("Research output already exists; choose a new directory.")
+        except OSError:
+            logger.error(
+                "Research preparation failed; check source/output file access."
+            )
+        return 1
 
     if args.command == "ingest-archive":
         try:

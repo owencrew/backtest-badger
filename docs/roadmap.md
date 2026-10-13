@@ -11,7 +11,9 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **1B.3 — Full Historical Coverage and Research Dataset** | Implemented; acquired with known gaps | All 220 market-months through September 2026 inspected and committed; 19,955 candles and 36 disclosed gaps per market. Frozen 39,910-row export is explicitly incomplete. See [results](stage-01b3-full-history.md). |
 | **1C.1 — REST Tail and Recent Refresh** | Implemented; awaiting review | Fixed eligible cutoff, strict native 4h REST, seven-day refresh, bounded catch-up, atomic page revisions and stored-grid diagnostics. Live: 75 new candles per market, 20,030 total each; zero recent gaps/revisions, historical gaps and frozen export preserved. See [guide](stage-01c1-rest-tail-and-refresh.md). |
 | **1C.2 — Historical Revalidation** | Implemented; awaiting review | Explicit maximum-30-day REST review and approved exact-response replay; locked snapshot checks, atomic version history, invalid-page rejection and frozen export preservation. Live reviews: no economic revisions; zero-duration 2017 rows rejected for both markets. See [guide](stage-01c2-historical-revalidation.md). |
-| **2 — Quantitative Research, ML and Backtesting** | Planned | Causal features, chronological train/validation/test splits and train-only preprocessing; reproducible baseline experiments; tested execution timing, fees and slippage; honest out-of-sample reporting. |
+| **2A — Reproducible Research Dataset and Causal Features** | Implemented; awaiting review | Pinned frozen-source verification, explicit incomplete acknowledgement, gap/anomaly-safe causal features and one 4h target; availability-based chronological splits and label purging; train-only no-skill references; deterministic 39,609-row artifact and untouched holdout. See [guide](stage-02a-research-dataset.md). |
+| **2B — Predictive Modelling** | Planned | Chronological ML evaluation, train-only preprocessing and reproducible baseline comparisons; preserve the test holdout until final evaluation. |
+| **2C — Backtesting** | Planned | Independently model execution after signal availability, fees and slippage; report honest out-of-sample simulated performance. Close-to-close research labels do not imply executable fills. |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
 | **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
@@ -163,4 +165,22 @@ atomic rollback, missing valid insertions, anomaly retention and frozen exports.
 Both markets' two-day September 2026 reviews are identical; September 6, 2017 plans
 are blocked by zero-duration 16:00 observations. No live apply was executed.
 The final audit preserves 20,030 current rows and 36 historical gaps per market,
-zero revisions and the original frozen export hash. Stage 2 remains unimplemented.
+zero revisions and the original frozen export hash. Stage 2 was not begun in that
+increment; Stage 2A is recorded below.
+
+### Stage 2A research foundation
+
+Offline preparation verifies the frozen 39,910-row export and its manifest against
+reviewed hashes, preserving all original artifacts and the market-data database.
+The resulting 39,609 eligible observations retain exact source prices and explicit
+UTC signal/label availability. Every feature/target window requires uninterrupted
+4h identities and excludes recorded anomalies. The prior BTC partial-trading
+observation receives an explicit retained-candle exclusion.
+
+Train/validation/test counts are 13,782 / 2,195 / 3,827 for BTC and
+13,783 / 2,195 / 3,827 for ETH. Test target summaries and performance remain
+withheld. Zero and training-mean reference predictions are retained without model
+training or strategy optimisation. Full verification: 405 tests passed, including
+173 isolated PostgreSQL integration cases, plus Ruff lint/format checks.
+See the [guide](stage-02a-research-dataset.md) for definitions, exclusions, hashes,
+reproduction and scientific limitations. Stop after Stage 2A for review.

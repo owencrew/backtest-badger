@@ -23,8 +23,10 @@ acceptance criteria are in the [roadmap](docs/roadmap.md).
 Historical archive ingestion, incomplete frozen research exports and
 [recent REST synchronization](docs/stage-01c1-rest-tail-and-refresh.md) and
 [controlled historical revalidation](docs/stage-01c2-historical-revalidation.md)
-are implemented. Features, ML, backtesting, live predictions, paper trading
-and the public dashboard remain **planned, not implemented**. The future product sections are
+are implemented. [Stage 2A](docs/stage-02a-research-dataset.md) adds verified frozen
+inputs, causal features, a 4h research target and chronological splits. ML,
+backtesting, live predictions, paper trading and the public dashboard remain
+**planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 
 ## Local setup
@@ -72,6 +74,22 @@ to stderr without printing credentials or driver diagnostics.
 ```sh
 docker compose down  # stops local PostgreSQL; retains its data volume
 ```
+
+## Offline research preparation
+
+Use the existing frozen export, without database configuration or network access:
+
+```sh
+uv run --locked badger prepare-research \
+  --output artifacts/research/stage-2a-v1 \
+  --acknowledge-incomplete
+```
+
+Each run requires a new output directory. The source is explicitly incomplete;
+gap-spanning windows are excluded. Feature availability includes a 60-second
+settling delay, and the close-to-close target is not an executable trading return.
+See the [Stage 2A guide](docs/stage-02a-research-dataset.md) for definitions,
+reproduction, split counts and holdout policy.
 
 ## Development
 
