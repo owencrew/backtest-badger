@@ -28,6 +28,13 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("health", help="Validate application configuration")
     commands.add_parser("db-health", help="Check PostgreSQL connectivity")
+    evaluate = commands.add_parser(
+        "evaluate-models", help="Evaluate fixed Stage 2B models on validation only"
+    )
+    evaluate.add_argument(
+        "--source", type=Path, default=Path("artifacts/research/stage-2a-v1")
+    )
+    evaluate.add_argument("--output", type=Path, required=True)
     prepare = commands.add_parser(
         "prepare-research",
         help="Build Stage 2A from the verified frozen export offline",
@@ -94,6 +101,22 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args(argv)
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    if args.command == "evaluate-models":
+        from backtest_badger.evaluation import evaluate_models
+
+        try:
+            evaluate_models(args.source, args.output)
+            print(f"Validation summary: {args.output / 'summary.md'}")
+            print(f"Experiment manifest: {args.output / 'manifest.json'}")
+            return 0
+        except ValueError as error:
+            logger.error("Model evaluation failed: %s", error)
+        except FileExistsError:
+            logger.error("Experiment output already exists; choose a new directory.")
+        except OSError:
+            logger.error("Model evaluation failed; check source/output file access.")
+        return 1
 
     if args.command == "prepare-research":
         try:

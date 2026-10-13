@@ -178,10 +178,31 @@ The initial output has 39,609 eligible rows. This is predictive research, not an
 execution model or a reconstruction of historical provider availability. See the
 [Stage 2A guide](stage-02a-research-dataset.md) for exact timing, results and limits.
 
+## Implemented in Stage 2B
+
+`badger evaluate-models` verifies the pinned Stage 2A CSV and manifest entirely
+offline. `model_data.py` enforces schema/order, identities, availability-based
+partitions, label purging, finite model inputs, counts and recorded gap/anomaly
+policy. It returns only training and validation rows; test outcomes are never
+converted or passed to modelling. Source artifacts remain unchanged.
+
+`evaluation.py` fits separate market models using NumPy and scikit-learn: zero,
+training mean, a training-standardised Ridge Pipeline and fixed shallow gradient
+boosting with early stopping disabled. Validation-only MAE, RMSE, both baseline
+comparisons, training-mean-relative skill, correlation and direction/coverage are
+reported with explicit undefined cases. No model search or pooled significance
+claim is made. Model fitting and preparation are separate responsibilities.
+
+Exclusively new gitignored experiment directories contain deterministic validation
+forecasts without realised targets, a manifest with parameters/runtime/provenance
+and output hashes, and a readable summary. Two actual runs reproduced all three
+files byte for byte. No model database, serving, signals or execution simulation
+is introduced. See the [Stage 2B guide](stage-02b-predictive-baselines.md).
+
 ## Intended direction (not implemented)
 
 Add modules only when a development stage needs them.
-Later stages add chronological ML evaluation, realistic backtests,
+Later stages add locked holdout evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
 Stage 1A's [market-data design](stage-01a-market-data-design.md)

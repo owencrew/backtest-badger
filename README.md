@@ -24,8 +24,10 @@ Historical archive ingestion, incomplete frozen research exports and
 [recent REST synchronization](docs/stage-01c1-rest-tail-and-refresh.md) and
 [controlled historical revalidation](docs/stage-01c2-historical-revalidation.md)
 are implemented. [Stage 2A](docs/stage-02a-research-dataset.md) adds verified frozen
-inputs, causal features, a 4h research target and chronological splits. ML,
-backtesting, live predictions, paper trading and the public dashboard remain
+inputs, causal features, a 4h research target and chronological splits.
+[Stage 2B](docs/stage-02b-predictive-baselines.md) adds fixed Ridge and gradient
+boosting experiments with train-only fitting and validation-only baseline comparisons.
+Backtesting, live predictions, paper trading and the public dashboard remain
 **planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 
@@ -90,6 +92,18 @@ gap-spanning windows are excluded. Feature availability includes a 60-second
 settling delay, and the close-to-close target is not an executable trading return.
 See the [Stage 2A guide](docs/stage-02a-research-dataset.md) for definitions,
 reproduction, split counts and holdout policy.
+
+Evaluate the fixed models on 2024 validation data, preserving the test holdout:
+
+```sh
+uv run --locked badger evaluate-models \
+  --source artifacts/research/stage-2a-v1 \
+  --output artifacts/experiments/stage-2b-v1
+```
+
+Use a new output directory each time. The [Stage 2B guide](docs/stage-02b-predictive-baselines.md)
+records actual results, metrics, hashes and limitations. Small forecast error
+reductions do not establish trading profitability.
 
 ## Development
 

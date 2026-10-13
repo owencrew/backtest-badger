@@ -12,7 +12,7 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **1C.1 — REST Tail and Recent Refresh** | Implemented; awaiting review | Fixed eligible cutoff, strict native 4h REST, seven-day refresh, bounded catch-up, atomic page revisions and stored-grid diagnostics. Live: 75 new candles per market, 20,030 total each; zero recent gaps/revisions, historical gaps and frozen export preserved. See [guide](stage-01c1-rest-tail-and-refresh.md). |
 | **1C.2 — Historical Revalidation** | Implemented; awaiting review | Explicit maximum-30-day REST review and approved exact-response replay; locked snapshot checks, atomic version history, invalid-page rejection and frozen export preservation. Live reviews: no economic revisions; zero-duration 2017 rows rejected for both markets. See [guide](stage-01c2-historical-revalidation.md). |
 | **2A — Reproducible Research Dataset and Causal Features** | Implemented; awaiting review | Pinned frozen-source verification, explicit incomplete acknowledgement, gap/anomaly-safe causal features and one 4h target; availability-based chronological splits and label purging; train-only no-skill references; deterministic 39,609-row artifact and untouched holdout. See [guide](stage-02a-research-dataset.md). |
-| **2B — Predictive Modelling** | Planned | Chronological ML evaluation, train-only preprocessing and reproducible baseline comparisons; preserve the test holdout until final evaluation. |
+| **2B — Predictive Modelling** | Implemented; awaiting review | Pinned Stage 2A input validation; separate-market zero/mean, Ridge and shallow boosting comparisons; training-only preprocessing/fitting, 2024 validation metrics and untouched test outcomes. Two byte-identical runs. See [results](stage-02b-predictive-baselines.md). |
 | **2C — Backtesting** | Planned | Independently model execution after signal availability, fees and slippage; report honest out-of-sample simulated performance. Close-to-close research labels do not imply executable fills. |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
@@ -184,3 +184,18 @@ training or strategy optimisation. Full verification: 405 tests passed, includin
 173 isolated PostgreSQL integration cases, plus Ruff lint/format checks.
 See the [guide](stage-02a-research-dataset.md) for definitions, exclusions, hashes,
 reproduction and scientific limitations. Stop after Stage 2A for review.
+
+### Stage 2B predictive baselines
+
+The fixed five features and original splits now feed independent BTC/ETH Ridge
+and shallow gradient boosting fits. Each market has 2,195 validation observations;
+training counts are 13,782 and 13,783. Ridge reduces RMSE versus the training mean
+by 0.141% (BTC) and 0.151% (ETH). Boosting reduces ETH RMSE by 0.725% but achieves
+only 47.517% directional accuracy; BTC boosting worsens MAE. These small and mixed
+validation improvements establish neither statistical significance nor profitability.
+
+All three experiment artifacts reproduce byte for byte, with unchanged source
+hashes and no test forecasts/scores. Verification: 274 tests passed, 173 database
+integration cases skipped without an isolated test DSN; Ruff lint/format and diff
+checks passed. See the [guide](stage-02b-predictive-baselines.md) for full comparisons,
+metric conventions and limitations. Stage 2C remains unimplemented.
