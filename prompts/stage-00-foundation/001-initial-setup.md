@@ -4,7 +4,6 @@ You are acting as a senior Python software engineer and quantitative research ar
 
 We are building **Backtest Badger**, an open-source quantitative research platform.
 
-- **Tagline:** Digging for Alpha.
 - **Website:** https://backtestbadger.com
 - **GitHub:** https://github.com/owencrew/backtest-badger
 - **Local repository:** `~/Code/backtest-badger`

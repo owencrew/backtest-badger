@@ -1,7 +1,8 @@
 # Stage 1A — Binance data feasibility and design
 
-Status: feasibility verified on 2026-10-13; design proposed for review. Nothing in
-this document's schema or ingestion plan is implemented.
+Status: feasibility verified on 2026-10-13. Stage 1B.1 implements and tests the
+three-table schema and persistence policy; ingestion and exports remain planned.
+See the [persistence guide](stage-01b1-persistence.md) for the implemented API.
 
 ## 1. Recommendation
 
@@ -19,8 +20,9 @@ These are project defaults, not Binance guarantees of finality.
 
 Stage 0 was inspected: Python 3.12, uv, argparse, environment-loaded immutable
 settings, Psycopg with bounded connection/statement timeouts, and local PostgreSQL
-17 in Compose. The only database operation is `SELECT 1`; there are no application
-tables or migrations. Preserve these commands and configuration conventions.
+17 in Compose. At the time of the Stage 1A inspection, the only database operation was `SELECT 1`.
+Stage 1B.1 preserves these commands and configuration conventions while adding
+explicit migrations and versioned candle persistence.
 
 ## 2. Official provider documentation
 
@@ -176,11 +178,16 @@ available subsequent price and model delay, costs and slippage explicitly.
    clock against local UTC (initial tolerance 5 seconds); fail the incremental
    run clearly on excessive skew rather than accept uncertain closure.
 2. **Identical values:** compare normalized economic fields exactly. Keep current
-   version and history unchanged, including the version's first observation time.
-   Record repeat-fetch evidence in the run manifest, not another candle row.
+   version and original provenance unchanged, including the version's first
+   observation time. Stage 1B.1 advances only a `last_observed_at` watermark on a
+   later confirmation, preventing an older conflicting observation from replacing
+   it. Exact retries change nothing. Future run manifests record repeat-fetch
+   evidence, not additional candle versions.
 3. **Changed valid values:** copy the previous current row into history and replace
    current atomically, incrementing the version. Retain source URL, body hash and
-   fetch/write times for both versions. Treat this as an accepted provider revision,
+   fetch/write times for both versions. Accept only observation timestamps strictly
+   newer than the current watermark: older changed observations return `stale`;
+   equal-time conflicts raise explicitly. Treat an accepted change as a provider revision,
    not an unresolved vote. A later A→B→A change is a new version; do not impose a
    unique constraint on values or their hash.
 4. **Refresh bounds:** every incremental run re-fetches the last seven days of
@@ -216,7 +223,7 @@ Missing input in a required window blocks that specific calculation; unrelated
 historical warnings do not create a global readiness failure. Structural validity
 is necessary, not sufficient proof that a price is economically accurate.
 
-## 6. Proposed PostgreSQL schema — three application tables
+## 6. Implemented PostgreSQL schema — three application tables
 
 Canonical-plus-history has one straightforward research query and copies rows
 only on change. Immutable observations plus a current-selection table requires
@@ -233,15 +240,16 @@ not historical precision rules.
 | Table | Columns and keys |
 | --- | --- |
 | `market` | `market_id smallint generated always as identity` PK; `venue text` (`binance`), `market_type text` (`spot`), `symbol text`, `base_asset text`, `quote_asset text`; UNIQUE `(venue, market_type, symbol)`. Seed BTCUSDT and ETHUSDT; no generic provider objects or symbol registry service. |
-| `candle` | PK `(market_id, interval_seconds, open_time)`; `market_id` FK → market; `interval_seconds integer` in (3600, 14400); `open_time timestamptz`; `open`, `high`, `low`, `close`, `base_volume`, `quote_volume`, `taker_buy_base_volume`, `taker_buy_quote_volume` numeric; `trade_count bigint`; `version integer` starting at 1; `observed_at timestamptz`, `recorded_at timestamptz`; `source_kind text` in (`archive`, `rest`), `source_url text`, `source_sha256 text`. |
+| `candle` | PK `(market_id, interval_seconds, open_time)`; `market_id` FK → market; `interval_seconds integer` in (3600, 14400); `open_time timestamptz`; `open`, `high`, `low`, `close`, `base_volume`, `quote_volume`, `taker_buy_base_volume`, `taker_buy_quote_volume` numeric; `trade_count bigint`; `version integer` starting at 1; `observed_at timestamptz`, `recorded_at timestamptz`, `last_observed_at timestamptz`; `source_kind text` in (`archive`, `rest`), `source_url text`, `source_sha256 text`. |
 | `candle_revision` | Full copy of the prior candle columns, plus `superseded_at timestamptz`. PK `(market_id, interval_seconds, open_time, version)`; composite FK on candle identity → `candle`, with deletion restricted. Only superseded versions live here; current is always in `candle`. |
 
 `source_sha256` is the SHA-256 of exact fetched ZIP/REST body bytes, checked as
 64 lowercase hexadecimal characters. It is provenance, not the equality key.
 `source_url` contains the full public URL/query, never credentials. Retain request
 headers (including timestamp unit) and parser version in the external run manifest.
-Raw evidence is stored by body hash in an ignored local artifact directory, with
-documented retention/backups, not in Git. No ingestion-run table is needed yet:
+Raw evidence and manifests can initially be stored by body hash in ignored local
+`artifacts/`, not in Git. Durable retention/backups will be addressed as research
+and deployment progress; local storage alone is not a durability guarantee. No ingestion-run table is needed yet:
 structured JSON manifests contain run UUID, range/mode, source hashes, times,
 insert/unchanged/revised/rejected counts, gaps and errors. Database revisions remain
 auditable if a manifest is lost, but raw evidence would be incomplete; retain both.
@@ -253,7 +261,8 @@ Important constraints, on both candle tables where applicable:
 - Finite OHLC, `0 < low ≤ high`, open/close within bounds; finite non-negative
   volumes, non-negative trades, taker volumes ≤ corresponding total volumes.
 - `observed_at ≥ open_time + interval` and `recorded_at ≥ observed_at`;
-  history `superseded_at ≥ recorded_at`. Apply the settling delay in application
+  `last_observed_at ≥ observed_at`; history `superseded_at ≥ recorded_at` and
+  `superseded_at ≥ last_observed_at`. Apply the settling delay in application
   logic, keeping configurable clock policy out of schema constraints.
 - Market identity fields nonempty; no cascading deletes of canonical/history data.
 
@@ -264,18 +273,24 @@ interval over an ordered date range, latest candle, and versions of an identity.
 The market unique key handles symbol resolution. No extra hash/time indexes,
 partitions or TimescaleDB are justified at this scale.
 
-**Idempotent transaction:** validate an entire page/file before writing. Hold a
-session-level PostgreSQL advisory lock per market from before fetching until that
-unit's write completes; all ingestion commands follow this single-writer rule.
-Inside one short transaction per validated page/file, insert missing identities
-with version 1; lock/read existing rows, compare values, and either do nothing or
-insert the old row in history and update current to version+1. Use one shared
-write timestamp for replacement `recorded_at` and old `superseded_at`. Roll back
-both changes on failure. A retry after commit is unchanged; a retry after rollback
-performs exactly one replacement. Reject stale cached replay as a refresh. Never
-use an unconditional `ON CONFLICT DO UPDATE` that destroys the old version.
-Advisory locking avoids competing fetches being selected in reverse completion
-order; acquire multiple market locks only in a fixed order if ever needed.
+**Implemented idempotent transaction:** validate one observation before writing.
+The API requires an idle autocommit Psycopg connection and owns a short READ
+COMMITTED transaction. Insert missing identities with version 1 using
+`ON CONFLICT DO NOTHING`; if another writer wins, a separate statement obtains a
+fresh snapshot and locks the existing row with `SELECT ... FOR UPDATE`. Compare
+all economic fields exactly. Identical values keep the version and provenance,
+advancing only the observation watermark when necessary. Older changed writes
+are explicitly stale; equal-time conflicts raise. A strictly newer changed write
+copies the old row to history and updates current to version+1. One server
+`clock_timestamp()` sampled after locking supplies replacement `recorded_at` and
+old `superseded_at`. Failure rolls both changes back. Row UPDATE/DELETE of history
+is rejected by a trigger; owners still have administrative powers.
+
+No database locks are held during network requests, and no advisory locks are
+needed. Concurrent absent-row insertions and revisions are tested against real
+PostgreSQL. Source acquisition, whole-page/file validation and any batch-level
+transaction requirements belong to Stage 1B.2. Replays must retain original
+observation times; a new database write is not a new provider observation.
 
 **Three different clocks:** `open_time`/derived end are market time.
 `observed_at` is local response-received time, not Binance's undocumented original
@@ -298,11 +313,12 @@ are designed here.
 ## 7. Ingestion plan
 
 Historical commands require explicit symbol, interval, start and exclusive end;
-use native 4h by default. Propose an initial **2024-01-01 through 2026-10-01 UTC**
-research range for both markets (6,024 expected 4h rows each before gaps), delivered
-in bounded months. First prove a single month, then expand only within the stated
-range. Older history is available from the observed 2017 start but is not needed
-to prove ingestion. Research sufficiency remains a later scientific decision.
+use native 4h by default. A **2024-01-01 through 2026-10-01 UTC** range can be an intermediate validation
+milestone (6,024 expected 4h rows each before gaps), not a permanent restriction.
+First prove a single month. Stage 1B.3 ultimately targets **full available historical
+coverage** for the selected markets, from their observed 2017 start through a
+declared cutoff, in bounded resumable increments. Verify actual coverage rather
+than assuming continuity. Research sufficiency remains a later scientific decision.
 
 Prefer monthly ZIPs for complete available months, daily ZIPs for uncovered closed
 days, and REST for the remaining tail. Verify checksums before CSV parsing; cap
@@ -330,9 +346,9 @@ failed/partial diagnostic; freshness remains visible.
 
 | Increment | Scope and deliverables | Tests and objective acceptance | Dependencies / risks |
 | --- | --- | --- | --- |
-| **1B.1 — schema** | First Alembic migration for the three tables and two markets; Psycopg write functions and canonical/history semantics. Alembic and its required migration dependencies only. | Disposable PostgreSQL tests: constraints, unique keys, exact Decimal round trips, A→B→A, identical repeat, atomic rollback, competing writers. Fresh migration succeeds; Stage 0 CLI/tests still work; one changed value leaves exactly one current and one historical version. | Review this design first; local Docker required for integration tests. No production migration. |
+| **1B.1 — schema (implemented)** | First Alembic migration for the three tables and two markets; Psycopg write functions and canonical/history semantics. Alembic and its required migration dependencies only. | Disposable PostgreSQL tests: constraints, unique keys, exact Decimal round trips, A→B→A, identical repeat, atomic rollback, competing writers. Fresh migration succeeds; Stage 0 CLI/tests still work; one changed value leaves exactly one current and one historical version. | Implemented and tested with disposable PostgreSQL 17; see the persistence guide. No production migration. |
 | **1B.2 — bounded archive ingestion** | Explicit-range CLI, checksum/parser/UTC validation, manifests/raw artifact retention, one-month native 4h backfill for both markets. | Fixtures across 2024/2025, malformed ZIP/CSV/checksum, nonzero ignored column, duplicates, gaps and partial listing month. Real bounded month yields expected grid or explicit gap report; second run adds no rows/revisions; invalid file has no partial commit. | Provider availability; transport success is not data completeness. Do not impose current precision filters on history. |
-| **1B.3 — usable research dataset** | Expand month by month over the proposed range; ordered versioned export plus content hash and documented completeness report. | Export read consistently during a concurrent correction; frozen file/hash remains unchanged after revalidation. Every expected identity is present or a named gap; default “complete” export fails on gaps. A partial export requires explicit acknowledgement and gap manifest. | Builds on 1B.1–2; use bounded resumable commands, not a general orchestration framework. |
+| **1B.3 — usable research dataset** | Expand month by month to full available historical coverage; ordered versioned export plus content hash and documented completeness report. | Export read consistently during a concurrent correction; frozen file/hash remains unchanged after revalidation. Every expected identity is present or a named gap; default “complete” export fails on gaps. A partial export requires explicit acknowledgement and gap manifest. | Builds on 1B.1–2; use bounded resumable commands, not a general orchestration framework. |
 | **1C.1 — REST tail and refresh** | UTC paginated fetching, closure/settling cutoff, seven-day overlap, catch-up, freshness and gap diagnostics; same write path as 1B. | Empty/non-advancing pages, exact boundary pagination, current candle exclusion, clock skew, 429/418 Retry-After, transient failure and restart. Small archive/REST overlap compares exact identities/values; second identical run is a no-op. | REST availability and delayed database updates; one failed run must not corrupt canonical data. |
 | **1C.2 — historical revalidation** | Explicit range/source revalidation, revision report and old/new provenance; bounded optional 1h/4h comparison without persisted aggregation. | Changed old candle accepted outside seven days; equal fetch creates no history; A→B→A preserved; failure between history insert/update rolls back. Frozen exports survive correction; a query of a disjoint recent window remains usable. No prediction engine is built to test this. | Older changes are only discovered when revalidated; cross-source disagreement may require investigation, not a voting system. |
 
@@ -342,20 +358,23 @@ tables, separate observation lifecycle, scheduler or extra diagnostics database.
 
 ## 9. Readiness, limitations and review decisions
 
-Stage 1B is ready to implement **after design review**. Public connectivity,
-historical starting samples, both timeframes, units, checksums and recent overlap
-were actually tested. The proposed three-table implementation, locking,
-revalidation, export and error handling remain unimplemented and untested.
+Stage 1B.1 implements and tests the three-table schema, version selection,
+concurrency and atomic failure handling. Public connectivity, historical starting
+samples, both timeframes, units, checksums and recent overlap were tested in
+Stage 1A. Stop for implementation review before Stage 1B.2: ingestion, revalidation
+commands and exports remain unimplemented.
 
-- Accept or adjust the proposed initial range, 60-second delay and seven-day
-  overlap during review; none is a provider finality promise.
+- Full available historical coverage is the eventual Stage 1B.3 objective. Retain
+  the initial 60-second settling delay and seven-day overlap for Stage 1C; neither
+  is a provider finality promise.
 - Complete historical continuity, revision frequency and exact publication lag
   remain unmeasured. Fetching now does not recover historical availability times.
 - Latest archive 404s require retries/REST coverage. Public access from this Mac
   does not establish future Ubuntu/Lightsail availability; test that only when
   deployment access is explicitly authorised.
-- Decide artifact retention/backup location when Stage 1B is implemented; preserving
-  versioned rows and exported values is essential for reproducibility.
+- Ignored local artifact/manifest storage is sufficient initially. Address durable
+  retention as research and deployment progress; preserving versioned rows, raw
+  evidence and exported values is essential for reproducibility.
 - Review dataset/API terms before future public redistribution; this stage only
   read public data and does not establish redistribution rights.
 

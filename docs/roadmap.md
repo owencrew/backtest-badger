@@ -5,8 +5,10 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | Stage | Status | Acceptance criteria |
 | --- | --- | --- |
 | **0 — Foundation** | Complete | Python 3.12 package installs from the uv lockfile; configuration and both CLI checks work; local PostgreSQL connectivity is demonstrated when Docker is available; pytest and Ruff pass; CI, license and concise documentation exist. |
-| **1A — Market Data Feasibility and Design** | Complete; awaiting design review | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). No ingestion engine or schema implemented. |
-| **1B — Schema and Historical Ingestion** | Planned; follows 1A review | Three application tables and first Alembic migration; verified native 4h BTCUSDT/ETHUSDT archive backfill in bounded increments; idempotent version-preserving writes; explicit gap report and reproducible dataset export. |
+| **1A — Market Data Feasibility and Design** | Complete; schema decisions refined in 1B.1 | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). Provider ingestion remains unimplemented; schema implemented in 1B.1. |
+| **1B.1 — Schema and Persistence** | Implemented; awaiting review | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests. No ingestion. |
+| **1B.2 — Bounded Archive Ingestion** | Planned; follows 1B.1 review | Explicit-range native 4h BTCUSDT/ETHUSDT archive parsing and checksum validation; one-month backfill; manifests, raw artifacts and explicit gap reports. |
+| **1B.3 — Full Historical Coverage and Research Dataset** | Planned | Expand in bounded resumable increments to full available history for selected markets, not a permanent 2024 cutoff; verify completeness and export reproducible versioned datasets. |
 | **1C — Incremental Ingestion and Revisions** | Planned | Public REST tail, closed-candle eligibility, recent overlap refresh and explicit historical revalidation; valid corrections replace canonical values atomically without rewriting frozen datasets; focused quality and failure tests. |
 | **2 — Quantitative Research, ML and Backtesting** | Planned | Causal features, chronological train/validation/test splits and train-only preprocessing; reproducible baseline experiments; tested execution timing, fees and slippage; honest out-of-sample reporting. |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
@@ -26,12 +28,12 @@ samples do not establish complete historical continuity. The October 12 daily
 archive was still unavailable at 00:44 UTC on October 13, so REST must cover the
 tail without assuming midnight archive publication.
 
-The proposed design uses native UTC 4h candles, independent native 1h only when
+The selected design uses native UTC 4h candles, independent native 1h only when
 needed, and three tables (`market`, `candle`, `candle_revision`). A 60-second
 settling delay and seven-day overlap are initial project defaults, not provider
 finality guarantees. Stage 1B/1C scopes, acceptance criteria and unresolved risks
-are in the [design document](stage-01a-market-data-design.md). Existing 26 tests
-and Ruff checks still pass; Stage 1 implementation awaits review.
+are in the [design document](stage-01a-market-data-design.md). Stage 1B.1 implements
+the schema and persistence; later increments await implementation review.
 
 ## Stage 5 — Planned website design
 
@@ -58,3 +60,29 @@ passed, Ruff lint and formatting passed, source/wheel builds and isolated wheel
 installation succeeded, and both CLI checks passed against local PostgreSQL.
 CLI error exit codes and credential redaction were also checked. The GitHub
 Actions workflow is configured but has not run remotely; no commit or push was made.
+
+## Stage 1B.1 implementation
+
+The [persistence guide](stage-01b1-persistence.md) documents the schema, API,
+revision policy, migrations, inspection queries and isolated test setup. Runtime
+uses Psycopg; SQLAlchemy is limited to Alembic. Only three application tables and
+required PK/unique indexes exist. Concurrent writes use short transactions and
+row locks, with no advisory locks around network requests. Immutable superseded
+versions retain original provenance; identical confirmations advance only a
+last-observed watermark to reject delayed conflicting writes.
+
+Raw data and manifests can initially use ignored local `artifacts/`; durable
+retention follows as research and deployment progress. Stage 1C retains the
+60-second settling-delay and seven-day refresh-overlap defaults. No downloading,
+archive parsing, REST updates, scheduling, research or dashboard work is included.
+Local migration verification uses only disposable databases. Review this increment
+before starting Stage 1B.2. No commit, push or deployment is part of this stage.
+
+Local verification on 2026-10-13: **169 pytest tests passed**, including **118 real
+PostgreSQL integration cases** on PostgreSQL **17.11** and all 26 Stage 0 tests.
+Without a test DSN, 51 unit tests pass and 118 integration cases skip explicitly.
+Ruff lint and formatting pass. Fresh/repeated upgrades, populated downgrade,
+re-upgrade, offline SQL and the normal environment-configured migration CLI were
+verified. An unrelated table and database timezone survived migration cycling.
+The prompt archive matches the supplied prompt byte for byte. GitHub Actions is
+configured for the full suite but has not been run remotely.

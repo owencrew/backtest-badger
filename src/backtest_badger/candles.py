@@ -1,0 +1,226 @@
+"""Exact, version-preserving persistence of already obtained candle observations.
+
+No provider I/O belongs here. Writers use an idle autocommit Psycopg connection
+and own one short READ COMMITTED transaction per observation.
+"""
+
+import re
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
+from typing import Literal
+
+from psycopg import Connection
+from psycopg.pq import TransactionStatus
+from psycopg.rows import dict_row
+
+PRICES = ("open", "high", "low", "close")
+VOLUMES = (
+    "base_volume",
+    "quote_volume",
+    "taker_buy_base_volume",
+    "taker_buy_quote_volume",
+)
+ECONOMIC_FIELDS = (*PRICES, *VOLUMES, "trade_count")
+IDENTITY = "market_id = %(market_id)s AND interval_seconds = %(interval_seconds)s "
+IDENTITY += "AND open_time = %(open_time)s"
+
+
+@dataclass(frozen=True)
+class CandleObservation:
+    market_id: int
+    interval_seconds: int
+    open_time: datetime
+    open: Decimal
+    high: Decimal
+    low: Decimal
+    close: Decimal
+    base_volume: Decimal
+    quote_volume: Decimal
+    trade_count: int
+    taker_buy_base_volume: Decimal
+    taker_buy_quote_volume: Decimal
+    observed_at: datetime
+    source_kind: str
+    source_url: str
+    source_sha256: str
+
+
+class ObservationConflict(ValueError):
+    """Different economic values have the same observation timestamp."""
+
+
+def _utc(value: datetime) -> datetime:
+    if not isinstance(value, datetime) or value.utcoffset() is None:
+        raise ValueError("Timestamps must be timezone-aware.")
+    return value.astimezone(UTC)
+
+
+def validate_observation(observation: CandleObservation) -> None:
+    """Validate without rounding, converting floats or consulting a provider."""
+    if (
+        type(observation.market_id) is not int
+        or not 1 <= observation.market_id <= 32767
+    ):
+        raise ValueError("market_id must be a positive smallint.")
+    seconds = observation.interval_seconds
+    if type(seconds) is not int or seconds not in (3600, 14400):
+        raise ValueError("Only native 1h and 4h intervals are supported.")
+    opened = _utc(observation.open_time)
+    observed = _utc(observation.observed_at)
+    if (opened - datetime(1970, 1, 1, tzinfo=UTC)) % timedelta(
+        seconds=observation.interval_seconds
+    ):
+        raise ValueError("open_time must align exactly to the UTC interval grid.")
+    if observed < opened + timedelta(seconds=observation.interval_seconds):
+        raise ValueError("An observation must be of a closed candle.")
+    for name in (*PRICES, *VOLUMES):
+        value = getattr(observation, name)
+        if not isinstance(value, Decimal) or not value.is_finite():
+            raise ValueError(f"{name} must be a finite Decimal.")
+        if value < 0 or (name in PRICES and value == 0):
+            raise ValueError(f"{name} is outside its allowed range.")
+    if not (
+        observation.low <= observation.open <= observation.high
+        and observation.low <= observation.close <= observation.high
+    ):
+        raise ValueError("OHLC bounds are inconsistent.")
+    if (
+        observation.taker_buy_base_volume > observation.base_volume
+        or observation.taker_buy_quote_volume > observation.quote_volume
+    ):
+        raise ValueError("Taker-buy volumes cannot exceed total volumes.")
+    if type(observation.trade_count) is not int or not (
+        0 <= observation.trade_count <= 2**63 - 1
+    ):
+        raise ValueError("trade_count must be a non-negative bigint.")
+    if observation.source_kind not in ("archive", "rest"):
+        raise ValueError("source_kind must be archive or rest.")
+    if (
+        not isinstance(observation.source_url, str)
+        or not observation.source_url.strip()
+    ):
+        raise ValueError("source_url must be non-blank.")
+    if not isinstance(observation.source_sha256, str) or not re.fullmatch(
+        "[0-9a-f]{64}", observation.source_sha256
+    ):
+        raise ValueError("source_sha256 must contain 64 lowercase hexadecimal digits.")
+
+
+def save_candle(
+    connection: Connection, observation: CandleObservation
+) -> Literal["inserted", "unchanged", "revised", "stale"]:
+    """Select newer observations; preserve every accepted economic change.
+
+    Identical values keep the version, original provenance and recording time.
+    Only their last_observed_at watermark may advance. Conflicting equal-time
+    observations raise ObservationConflict; older changed observations return
+    'stale'. Neither changes stored data. Exceptions roll back this entire write.
+    """
+    validate_observation(observation)
+    if (
+        not connection.autocommit
+        or connection.info.transaction_status != TransactionStatus.IDLE
+    ):
+        raise ValueError("save_candle requires an idle autocommit connection.")
+    values = asdict(observation)
+    columns = ", ".join(values)
+    placeholders = ", ".join(f"%({name})s" for name in values)
+    with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
+        cursor.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
+        cursor.execute("SET LOCAL TIME ZONE 'UTC'")
+        # DO NOTHING serializes an absent-row race through the unique index.
+        # A separate SELECT then sees the winner using a new statement snapshot.
+        cursor.execute(
+            f"""INSERT INTO candle ({columns}, version, recorded_at, last_observed_at)
+                VALUES ({placeholders}, 1, clock_timestamp(), %(observed_at)s)
+                ON CONFLICT (market_id, interval_seconds, open_time) DO NOTHING
+                RETURNING version""",
+            values,
+        )
+        if cursor.fetchone() is not None:
+            return "inserted"
+        cursor.execute(f"SELECT * FROM candle WHERE {IDENTITY} FOR UPDATE", values)
+        current = cursor.fetchone()
+        if current is None:
+            # Concurrent administrative deletion is outside the writer protocol.
+            raise RuntimeError("Candle disappeared during selection; retry the write.")
+        cursor.execute("SELECT clock_timestamp() AS now")
+        recorded_at = cursor.fetchone()["now"]
+        if observation.observed_at > recorded_at:
+            raise ValueError("observed_at cannot be in the database clock's future.")
+        if all(current[name] == values[name] for name in ECONOMIC_FIELDS):
+            if observation.observed_at > current["last_observed_at"]:
+                cursor.execute(
+                    "UPDATE candle SET last_observed_at = %(observed_at)s "
+                    f"WHERE {IDENTITY}",
+                    values,
+                )
+            return "unchanged"
+        if observation.observed_at < current["last_observed_at"]:
+            return "stale"
+        if observation.observed_at == current["last_observed_at"]:
+            raise ObservationConflict(
+                "Conflicting values share an observation timestamp."
+            )
+        # One timestamp after locking, shared by the old and new versions. Never
+        # use transaction_timestamp(): the transaction may have waited for a lock.
+        values["recorded_at"] = recorded_at
+        cursor.execute(
+            f"""INSERT INTO candle_revision
+                SELECT candle.*, %(recorded_at)s FROM candle WHERE {IDENTITY}""",
+            values,
+        )
+        assignments = ", ".join(
+            f"{name} = %({name})s"
+            for name in values
+            if name not in ("market_id", "interval_seconds", "open_time")
+        )
+        cursor.execute(
+            f"""UPDATE candle SET {assignments}, version = version + 1,
+                last_observed_at = %(observed_at)s WHERE {IDENTITY}""",
+            values,
+        )
+        return "revised"
+
+
+def get_candles(
+    connection: Connection,
+    market_id: int,
+    interval_seconds: int,
+    start: datetime,
+    end: datetime,
+) -> list[dict]:
+    """Return current candles in ascending open order within [start, end)."""
+    start, end = _utc(start), _utc(end)
+    if start >= end:
+        raise ValueError("A nonempty bounded time range is required.")
+    with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
+        cursor.execute("SET LOCAL TIME ZONE 'UTC'")
+        cursor.execute(
+            """SELECT * FROM candle WHERE market_id = %s AND interval_seconds = %s
+               AND open_time >= %s AND open_time < %s ORDER BY open_time""",
+            (market_id, interval_seconds, start, end),
+        )
+        return cursor.fetchall()
+
+
+def get_candle_history(
+    connection: Connection, market_id: int, interval_seconds: int, open_time: datetime
+) -> list[dict]:
+    """Return superseded and current versions, ordered, in one MVCC snapshot."""
+    identity = {
+        "market_id": market_id,
+        "interval_seconds": interval_seconds,
+        "open_time": _utc(open_time),
+    }
+    with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
+        cursor.execute("SET LOCAL TIME ZONE 'UTC'")
+        cursor.execute(
+            f"""SELECT candle.*, NULL::timestamptz AS superseded_at
+                FROM candle WHERE {IDENTITY}
+                UNION ALL SELECT * FROM candle_revision WHERE {IDENTITY}
+                ORDER BY version""",
+            identity,
+        )
+        return cursor.fetchall()
