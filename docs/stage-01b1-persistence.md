@@ -1,7 +1,10 @@
 # Stage 1B.1 — Market candle persistence
 
-Schema and persistence only. No provider requests, ingestion commands, scheduler,
-indicators or research pipeline are implemented. Observations in tests are synthetic.
+This guide records the Stage 1B.1 schema and persistence implementation. Stage 1B.2
+subsequently adds [bounded archive ingestion](stage-01b2-archive-ingestion.md) and
+`save_candles(..., mode="backfill")`: one atomic batch that rejects changed or stale
+conflicting observations. The `save_candle()` API below retains its behaviour.
+Observations in automated tests remain synthetic.
 
 ## Migrations
 
@@ -106,9 +109,9 @@ Recording time is a server clock sample, not a commit-visibility timestamp. Futu
 observation timestamps fail rather than poisoning selection. The eventual fetcher
 must check clock skew, preserve original observation times on replay, validate
 whole pages/files before writes and choose its intended source/revalidation mode.
-Per-file all-or-nothing persistence is not part of this per-candle API and must be
-decided in Stage 1B.2. The configurable 60-second settling delay is a Stage 1C
-eligibility rule; this schema requires only a closed candle. Observation ordering
+Per-file all-or-nothing persistence is now provided separately by Stage 1B.2
+`save_candles()`; the per-candle API still owns its individual transaction. The
+configurable 60-second settling delay is a Stage 1C eligibility rule; this schema requires only a closed candle. Observation ordering
 does not prove which of two conflicting providers' payloads is economically true.
 
 The schema rejects numeric NaN/Infinity explicitly, including in history. This is
@@ -141,7 +144,8 @@ ORDER BY c.open_time;
 
 For full provenance and historical values use `get_candle_history` above or
 union the matching rows from `candle` and `candle_revision`, ordered by version.
-An empty candle table after migration is expected: there is no downloader.
+An empty candle table immediately after migration is expected; Stage 1B.2
+ingestion is a separate explicit command.
 
 ## Isolated integration tests
 

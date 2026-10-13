@@ -3,6 +3,8 @@
 Status: feasibility verified on 2026-10-13. Stage 1B.1 implements and tests the
 three-table schema and persistence policy; ingestion and exports remain planned.
 See the [persistence guide](stage-01b1-persistence.md) for the implemented API.
+Subsequent Stage 1B.2 adds [bounded monthly ingestion](stage-01b2-archive-ingestion.md);
+the feasibility results and forward-looking design below retain their original scope.
 
 ## 1. Recommendation
 

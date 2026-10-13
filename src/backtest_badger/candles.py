@@ -1,7 +1,7 @@
 """Exact, version-preserving persistence of already obtained candle observations.
 
 No provider I/O belongs here. Writers use an idle autocommit Psycopg connection
-and own one short READ COMMITTED transaction per observation.
+and own one short READ COMMITTED transaction per observation or batch.
 """
 
 import re
@@ -123,65 +123,137 @@ def save_candle(
         or connection.info.transaction_status != TransactionStatus.IDLE
     ):
         raise ValueError("save_candle requires an idle autocommit connection.")
+    with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
+        _prepare_write(cursor)
+        return _save_candle(cursor, observation)
+
+
+class BatchConflict(ValueError):
+    """Backfill rejected atomically, with conflicting and stale identities."""
+
+    def __init__(self, conflicts, stale):
+        self.conflicts = conflicts
+        self.stale = stale
+        super().__init__(
+            f"Backfill rolled back: {len(conflicts)} conflicting, {len(stale)} stale."
+        )
+
+
+def save_candles(
+    connection: Connection, observations, mode="backfill"
+) -> dict[str, int]:
+    """Validate first, then atomically fill holes without accepting revisions.
+
+    Uses the same locked selection as save_candle. Any conflict, stale changed
+    observation or database error rolls back every insert and watermark update.
+    Sorting identities gives overlapping batches a consistent lock order.
+    """
+    if mode != "backfill":
+        raise ValueError("Only backfill batch mode is supported.")
+    observations = list(observations)
+    identities = set()
+    for observation in observations:
+        validate_observation(observation)
+        identity = (
+            observation.market_id,
+            observation.interval_seconds,
+            observation.open_time,
+        )
+        if identity in identities:
+            raise ValueError("Duplicate candle identity in batch.")
+        identities.add(identity)
+    if (
+        not connection.autocommit
+        or connection.info.transaction_status != TransactionStatus.IDLE
+    ):
+        raise ValueError("save_candles requires an idle autocommit connection.")
+    counts = {"inserted": 0, "unchanged": 0}
+    conflicts, stale = [], []
+    with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
+        _prepare_write(cursor)
+        for observation in sorted(
+            observations, key=lambda o: (o.market_id, o.interval_seconds, o.open_time)
+        ):
+            result = _save_candle(cursor, observation, backfill=True)
+            identity = {
+                "market_id": observation.market_id,
+                "interval_seconds": observation.interval_seconds,
+                "open_time": observation.open_time.isoformat(),
+            }
+            if result == "conflict":
+                conflicts.append(identity)
+            elif result == "stale":
+                stale.append(identity)
+            else:
+                counts[result] += 1
+        if conflicts or stale:
+            raise BatchConflict(conflicts, stale)
+    return counts
+
+
+def _prepare_write(cursor):
+    cursor.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
+    cursor.execute("SET LOCAL TIME ZONE 'UTC'")
+
+
+def _save_candle(cursor, observation, *, backfill=False):
+    """Shared write logic; caller owns validation and the transaction."""
     values = asdict(observation)
     columns = ", ".join(values)
     placeholders = ", ".join(f"%({name})s" for name in values)
-    with connection.transaction(), connection.cursor(row_factory=dict_row) as cursor:
-        cursor.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
-        cursor.execute("SET LOCAL TIME ZONE 'UTC'")
-        # DO NOTHING serializes an absent-row race through the unique index.
-        # A separate SELECT then sees the winner using a new statement snapshot.
-        cursor.execute(
-            f"""INSERT INTO candle ({columns}, version, recorded_at, last_observed_at)
-                VALUES ({placeholders}, 1, clock_timestamp(), %(observed_at)s)
-                ON CONFLICT (market_id, interval_seconds, open_time) DO NOTHING
-                RETURNING version""",
-            values,
-        )
-        if cursor.fetchone() is not None:
-            return "inserted"
-        cursor.execute(f"SELECT * FROM candle WHERE {IDENTITY} FOR UPDATE", values)
-        current = cursor.fetchone()
-        if current is None:
-            # Concurrent administrative deletion is outside the writer protocol.
-            raise RuntimeError("Candle disappeared during selection; retry the write.")
-        cursor.execute("SELECT clock_timestamp() AS now")
-        recorded_at = cursor.fetchone()["now"]
-        if observation.observed_at > recorded_at:
-            raise ValueError("observed_at cannot be in the database clock's future.")
-        if all(current[name] == values[name] for name in ECONOMIC_FIELDS):
-            if observation.observed_at > current["last_observed_at"]:
-                cursor.execute(
-                    "UPDATE candle SET last_observed_at = %(observed_at)s "
-                    f"WHERE {IDENTITY}",
-                    values,
-                )
-            return "unchanged"
-        if observation.observed_at < current["last_observed_at"]:
-            return "stale"
-        if observation.observed_at == current["last_observed_at"]:
-            raise ObservationConflict(
-                "Conflicting values share an observation timestamp."
+    # DO NOTHING serializes an absent-row race through the unique index.
+    # A separate SELECT then sees the winner using a new statement snapshot.
+    cursor.execute(
+        f"""INSERT INTO candle ({columns}, version, recorded_at, last_observed_at)
+            VALUES ({placeholders}, 1, clock_timestamp(), %(observed_at)s)
+            ON CONFLICT (market_id, interval_seconds, open_time) DO NOTHING
+            RETURNING version""",
+        values,
+    )
+    if cursor.fetchone() is not None:
+        return "inserted"
+    cursor.execute(f"SELECT * FROM candle WHERE {IDENTITY} FOR UPDATE", values)
+    current = cursor.fetchone()
+    if current is None:
+        # Concurrent administrative deletion is outside the writer protocol.
+        raise RuntimeError("Candle disappeared during selection; retry the write.")
+    cursor.execute("SELECT clock_timestamp() AS now")
+    recorded_at = cursor.fetchone()["now"]
+    if observation.observed_at > recorded_at:
+        raise ValueError("observed_at cannot be in the database clock's future.")
+    if all(current[name] == values[name] for name in ECONOMIC_FIELDS):
+        if observation.observed_at > current["last_observed_at"]:
+            cursor.execute(
+                "UPDATE candle SET last_observed_at = %(observed_at)s "
+                f"WHERE {IDENTITY}",
+                values,
             )
-        # One timestamp after locking, shared by the old and new versions. Never
-        # use transaction_timestamp(): the transaction may have waited for a lock.
-        values["recorded_at"] = recorded_at
-        cursor.execute(
-            f"""INSERT INTO candle_revision
-                SELECT candle.*, %(recorded_at)s FROM candle WHERE {IDENTITY}""",
-            values,
-        )
-        assignments = ", ".join(
-            f"{name} = %({name})s"
-            for name in values
-            if name not in ("market_id", "interval_seconds", "open_time")
-        )
-        cursor.execute(
-            f"""UPDATE candle SET {assignments}, version = version + 1,
-                last_observed_at = %(observed_at)s WHERE {IDENTITY}""",
-            values,
-        )
-        return "revised"
+        return "unchanged"
+    if observation.observed_at < current["last_observed_at"]:
+        return "stale"
+    if backfill:
+        return "conflict"
+    if observation.observed_at == current["last_observed_at"]:
+        raise ObservationConflict("Conflicting values share an observation timestamp.")
+    # One timestamp after locking, shared by the old and new versions. Never
+    # use transaction_timestamp(): the transaction may have waited for a lock.
+    values["recorded_at"] = recorded_at
+    cursor.execute(
+        f"""INSERT INTO candle_revision
+            SELECT candle.*, %(recorded_at)s FROM candle WHERE {IDENTITY}""",
+        values,
+    )
+    assignments = ", ".join(
+        f"{name} = %({name})s"
+        for name in values
+        if name not in ("market_id", "interval_seconds", "open_time")
+    )
+    cursor.execute(
+        f"""UPDATE candle SET {assignments}, version = version + 1,
+            last_observed_at = %(observed_at)s WHERE {IDENTITY}""",
+        values,
+    )
+    return "revised"
 
 
 def get_candles(

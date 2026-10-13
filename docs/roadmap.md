@@ -5,9 +5,9 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | Stage | Status | Acceptance criteria |
 | --- | --- | --- |
 | **0 — Foundation** | Complete | Python 3.12 package installs from the uv lockfile; configuration and both CLI checks work; local PostgreSQL connectivity is demonstrated when Docker is available; pytest and Ruff pass; CI, license and concise documentation exist. |
-| **1A — Market Data Feasibility and Design** | Complete; schema decisions refined in 1B.1 | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). Provider ingestion remains unimplemented; schema implemented in 1B.1. |
-| **1B.1 — Schema and Persistence** | Implemented; awaiting review | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests. No ingestion. |
-| **1B.2 — Bounded Archive Ingestion** | Planned; follows 1B.1 review | Explicit-range native 4h BTCUSDT/ETHUSDT archive parsing and checksum validation; one-month backfill; manifests, raw artifacts and explicit gap reports. |
+| **1A — Market Data Feasibility and Design** | Complete; schema decisions refined in 1B.1 | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). Schema implemented in 1B.1; bounded monthly archives implemented in 1B.2. |
+| **1B.1 — Schema and Persistence** | Implemented; awaiting review | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests; ingestion added separately in 1B.2. |
+| **1B.2 — Bounded Archive Ingestion** | Implemented; awaiting review | Explicit monthly native 1h/4h CLI; bounded checksum/parser validation; atomic conflict-rejecting backfill; local raw evidence and manifests. January 2025 live 4h import: 186 candles per market, zero gaps/revisions. |
 | **1B.3 — Full Historical Coverage and Research Dataset** | Planned | Expand in bounded resumable increments to full available history for selected markets, not a permanent 2024 cutoff; verify completeness and export reproducible versioned datasets. |
 | **1C — Incremental Ingestion and Revisions** | Planned | Public REST tail, closed-candle eligibility, recent overlap refresh and explicit historical revalidation; valid corrections replace canonical values atomically without rewriting frozen datasets; focused quality and failure tests. |
 | **2 — Quantitative Research, ML and Backtesting** | Planned | Causal features, chronological train/validation/test splits and train-only preprocessing; reproducible baseline experiments; tested execution timing, fees and slippage; honest out-of-sample reporting. |
@@ -73,10 +73,11 @@ last-observed watermark to reject delayed conflicting writes.
 
 Raw data and manifests can initially use ignored local `artifacts/`; durable
 retention follows as research and deployment progress. Stage 1C retains the
-60-second settling-delay and seven-day refresh-overlap defaults. No downloading,
-archive parsing, REST updates, scheduling, research or dashboard work is included.
-Local migration verification uses only disposable databases. Review this increment
-before starting Stage 1B.2. No commit, push or deployment is part of this stage.
+60-second settling-delay and seven-day refresh-overlap defaults. That persistence
+increment included no downloading, archive parsing, REST updates, scheduling,
+research or dashboard work.
+Local migration verification uses only disposable databases. Stage 1B.2 is
+documented separately below. No commit, push or deployment is part of this stage.
 
 Local verification on 2026-10-13: **169 pytest tests passed**, including **118 real
 PostgreSQL integration cases** on PostgreSQL **17.11** and all 26 Stage 0 tests.
@@ -86,3 +87,19 @@ re-upgrade, offline SQL and the normal environment-configured migration CLI were
 verified. An unrelated table and database timezone survived migration cycling.
 The prompt archive matches the supplied prompt byte for byte. GitHub Actions is
 configured for the full suite but has not been run remotely.
+
+## Stage 1B.2 implementation
+
+The [archive ingestion guide](stage-01b2-archive-ingestion.md) documents explicit
+single-month commands, full-grid validation, atomic backfill conflict handling,
+provenance and ignored local artifacts. Standard-library acquisition adds no
+dependencies or schema migration. Live January 2025 native 4h ingestion yielded
+372 candles, zero gaps and zero revisions across BTCUSDT and ETHUSDT. Stage 1B.3
+coverage expansion and exports remain deferred until review; no automatic extra
+months, REST ingestion, scheduling or historical revalidation were added.
+
+Local final verification: 227 tests passed (101 unit, 126 PostgreSQL integration),
+plus Ruff lint and formatting. Each repeated live import returned 186 unchanged
+candles and no inserts or revisions; exact values and original provenance remained
+unchanged. Only confirmation watermarks advanced. The temporary test container was
+separate from the existing development database, which remained at revision 0001.

@@ -65,10 +65,27 @@ A → B → A retains versions 1, 2, 3 even when A's content hash repeats. Histo
 union current and superseded rows in one PostgreSQL snapshot. Range reads are
 ordered and half-open. See the [persistence guide](stage-01b1-persistence.md).
 
+## Implemented in Stage 1B.2
+
+`badger ingest-archive` selects one explicit month, seeded Binance Spot symbol and
+native 1h/4h interval. Plain functions in `archives.py` perform bounded HTTPS
+acquisition, exact ZIP checksum verification, Decimal/UTC parsing and complete
+monthly-grid validation. `ingestion.py` retains ignored local raw evidence and
+JSON manifests before invoking persistence; dry runs need no database connection.
+
+`save_candles(..., mode="backfill")` reuses the single-row locked write path within
+one archive transaction. Missing rows insert; identical rows retain versions and
+original provenance, advancing only a newer observation watermark. Changed or stale
+conflicting rows fail the whole batch without overwriting accepted history.
+`save_candle()` retains Stage 1B.1 revision behaviour. No schema changes or new
+runtime dependencies were needed. January 2025 4h validation imported 186 candles
+per market, with zero gaps and zero revisions. See the
+[archive ingestion guide](stage-01b2-archive-ingestion.md) for operations and results.
+
 ## Intended direction (not implemented)
 
-Add modules only when a development stage needs them. Stage 1 will introduce the
-provider ingestion and ingestion-specific data-quality checks.
+Add modules only when a development stage needs them. Full historical coverage,
+versioned dataset exports and incremental REST ingestion remain planned.
 Later stages add causal features, chronological ML evaluation, realistic backtests,
 forward predictions and separately accounted paper trading.
 
@@ -81,8 +98,8 @@ values and superseded versions. Future versioned dataset exports will preserve
 research inputs. Stage 1B.3 aims for full available history in bounded resumable
 increments, not a permanent 2024 cutoff. Stage 1C retains initial defaults of a
 60-second settling delay and seven-day refresh overlap. Raw artifacts/manifests
-can initially live in ignored `artifacts/`, with durable retention addressed as
-research and deployment progress. No ingestion, derived-candle tables, parent
+now live in ignored `artifacts/`, with durable retention addressed as
+research and deployment progress. No REST ingestion, derived-candle tables, parent
 invalidation machinery or generic provider abstractions exist.
 
 The eventual public dashboard must use read-only database access and clearly label
