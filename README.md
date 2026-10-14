@@ -35,7 +35,9 @@ postmortem of those fixed simulations, including monthly results and cost budget
 recording with strict freshness/timing checks, immutable input evidence and offline
 verification. [Stage 3B](docs/stage-03b-automated-forward-collection.md) adds
 reliable collection cycles, operational history and an opt-in macOS scheduler.
-Predictions remain unscored observations; no model has demonstrated economic
+[Stage 3C](docs/stage-03c-forward-evaluation.md) adds a preregistered manual
+outcome scorer and offline prospective accuracy reports. Genuine outcomes have
+not been scored during implementation; no model has demonstrated economic
 viability. Paper trading and the public dashboard remain **planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 
@@ -146,6 +148,29 @@ reported as missed. The [Stage 3B guide](docs/stage-03b-automated-forward-collec
 covers failure evidence, backups and the opt-in five-minute macOS LaunchAgent.
 The scheduler is not installed automatically, and a development Mac does not provide
 24/7 availability. Predictions remain unscored observations, separate from trading.
+
+## Prospective forecast evaluation
+
+Stage 3C is ready for protocol review; genuine scoring has not been run.
+Read the [frozen protocol](docs/stage-03c-forward-evaluation-protocol.md) before
+manually scoring a forecast. The [evaluation guide](docs/stage-03c-forward-evaluation.md)
+contains exact future scoring commands, statuses, provenance safeguards and tests.
+The standalone module leaves the existing collector and its fingerprints unchanged:
+
+```sh
+# Future manual use after review; never downloads or synchronises data.
+uv run --locked --env-file .env python -m backtest_badger.forward_evaluation score \
+  --record artifacts/forward-predictions/RECORD.json
+
+# Offline evidence report; no database configuration needed.
+uv run --locked python -m backtest_badger.forward_evaluation report
+```
+
+Replace `RECORD.json` with an existing original filename. Timely automated and late
+manual observations stay separate. Outcomes use the original retained source close
+and the exact next native 4h target, captured no earlier than close + 60 seconds.
+These are forecast errors in log-return units, not executable trading returns.
+There is no scoring scheduler, model promotion or paper trading.
 
 ## Development
 

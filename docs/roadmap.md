@@ -17,7 +17,7 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **2D — Economic Diagnostics and Robustness** | Implemented; awaiting review | Read-only postmortem of pinned Stage 2C accounts: scenario-specific costs, all twelve months, geometric cost budgets and existing baseline comparisons. Annual and monthly reconciliation, deterministic artifacts and untouched holdout. See [results](stage-02d-economic-diagnostics.md). |
 | **3A — Forward Prediction Recording** | Implemented; awaiting review | Manual current-horizon forecasts from seven validated native 4h candles; fixed pre-2024 fits, strict live UTC checks, immutable shared evidence and offline replay. First genuine BTC/ETH records were subsequently issued on 2026-10-14 and verified. See [guide](stage-03a-forward-predictions.md). |
 | **3B — Automated Forward Collection** | Implemented; awaiting review | Independent idempotent BTC/ETH cycles, strict 15-minute promptness, exclusive publication, offline status and missed-horizon evidence; opt-in uninstalled macOS LaunchAgent and backup guidance. See [guide](stage-03b-automated-forward-collection.md). |
-| **3 — Further Forward Observation** | Unscoped | Outcome evaluation requires separate authorisation; forward collection does not demonstrate economic viability. |
+| **3C — Prospective Forecast Evaluation** | Implemented; protocol review and genuine scoring pending | Frozen protocol, standalone manual scorer with read-only exact-target snapshots, immutable outcome evidence and matched offline metrics; separate timely automated/late manual cohorts, missingness and sample warnings. Synthetic validation only; no genuine outcomes inspected or scored. See [guide](stage-03c-forward-evaluation.md). |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
 | **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
@@ -270,3 +270,19 @@ are preserved; no new genuine observation was produced during this implementatio
 See the [guide](stage-03b-automated-forward-collection.md) for status, recovery,
 installation, off-machine backups and development-machine reliability limits.
 Stop after Stage 3B; outcome evaluation and paper trading remain unscoped.
+
+### Stage 3C prospective forecast evaluation
+
+The [protocol](stage-03c-forward-evaluation-protocol.md) was frozen before any
+outcome access. A separate module scores the saved four forecasts against the
+exact next native 4h close using the original retained source close. Timely
+automated observations require matching Stage 3B provenance; late manual and
+timely unattributed records remain separate. Atomic exclusive outcome publication
+freezes the first captured target version and cohort. Offline reports disclose
+missingness, matched counts, benchmark errors and preliminary-sample limitations.
+
+The user reports the Stage 3B LaunchAgent is now installed and collecting locally;
+Stage 3C leaves it and its fingerprinted code unchanged. No development-database
+queries, genuine outcome inspection/scoring, holdout access, new jobs, trading or
+deployment were performed. Review the protocol and [test results](stage-03c-forward-evaluation.md)
+before manually running genuine scoring. Stage 4 remains unstarted.
