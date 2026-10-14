@@ -7,6 +7,17 @@ active collection/scoring host until the explicit D2 cutover gate is satisfied.
 Use the [foundation guide](lightsail-foundation.md) for paths, templates, private
 configuration and worker constraints.
 
+## D2A / D2B execution boundary
+
+The [D2A rehearsal checklist](lightsail-d2a-rehearsal.md) supplies guarded tooling
+for this runbook's online rehearsal only. It uses a separate staging tree, Compose
+project, volume and port, and leaves both Mac schedulers running. Its online copy
+is explicitly nonauthoritative. D2A does **not** authorise the production volume/
+database commands in section 5, the final pause/activation in section 6, or rollback
+scheduler changes. Those remain separately authorised D2B operations. The D1
+installation and synthetic timings now reported by the operator are recorded in
+the D2A guide; no remote execution is claimed by the D2A implementation.
+
 ## 1. Establish scope, inventories and acceptance gates
 
 Record the operator, approved maintenance window, source Mac, target `Ubuntu-1`,

@@ -196,15 +196,22 @@ predictions, outcomes, collection operations and scoring operations together.
 persistent artifact paths, private loopback PostgreSQL 17 Compose, independent
 systemd workers/timers, deployment validation and a full-size synthetic benchmark.
 The guide includes exact initial installation commands and optional swap setup.
-These are **prepared templates, not an installed deployment**. Both Mac LaunchAgents
-continue running; server timers remain disabled and no real database/evidence is
-created, restored or migrated during D1.
+The operator reports D1 installed at commit
+`556e3a9b80066b2d83cf1e1e4ee5795fc6ec290f`. Both Mac LaunchAgents continue running;
+server workers remain disabled and the server has no migrated research database
+or evidence. These operational facts were supplied by the operator.
 
 The separate [D2 migration runbook](docs/deployment/lightsail-migration-runbook.md)
 covers coherent backups, checksums, restore rehearsal, Mac/Linux replay limitations,
 server performance gates, exactly one collector at cutover and recovery. Original
 forecasts/outcomes and frozen scientific code remain unchanged. D2 requires separate
 authorisation; no website or trading service is deployed.
+
+[Stage D2A rehearsal tooling](docs/deployment/lightsail-d2a-rehearsal.md) prepares
+read-only online exports, complete checksummed evidence/source archives, isolated
+PG17 restoration and offline validation. An online copy is explicitly
+nonauthoritative; no remote rehearsal or final cutover was executed during this
+implementation. D2B requires a quiescent final checkpoint and separate approval.
 
 ## Development
 

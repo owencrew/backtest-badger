@@ -395,3 +395,23 @@ records on Linux; retained originals and original-runtime verification remain pa
 of the migration plan. See the [foundation](deployment/lightsail-foundation.md) and
 [D2 runbook](deployment/lightsail-migration-runbook.md). No server installation,
 database migration, scheduler switch or scientific change was performed in D1.
+
+
+## Prepared in Stage D2A — isolated migration rehearsal
+
+The operator reports D1 installed at `556e3a9b80066b2d83cf1e1e4ee5795fc6ec290f`;
+this updates the historical D1 implementation status above. D2A adds operator-only
+helpers under `ops/lightsail/`, separate from all frozen scientific modules. A
+read-only exported PostgreSQL snapshot synchronises the custom logical dump and
+exact data/schema audit. Complete PAX artifact/source archives retain path/byte/
+mode/timestamp manifests, Git source and runtime identity. Online file changes are
+reported; no online DB/artifact copy is called a coherent final checkpoint.
+
+A unique `/var/lib/backtest-badger-rehearsals/<id>` tree, separate Compose project,
+labelled external volume and loopback port 55437 isolate the rehearsal. Guards
+reject production paths, hosts/DB identities, existing volumes and nonempty
+restore targets. Production worker gates must remain absent and units inactive.
+Restored data/schema/sequence comparisons and the existing offline evidence reports
+retain failures and Mac/Linux replay limitations. No cleanup or cutover command is
+provided. See the [D2A checklist](deployment/lightsail-d2a-rehearsal.md); real server
+execution, runtime/load gates and a separately approved quiescent D2B remain pending.
