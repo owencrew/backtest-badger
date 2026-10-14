@@ -1,0 +1,44 @@
+[Unit]
+Description=Backtest Badger independent outcome scoring (Stage 3D)
+Wants=network-online.target time-sync.target
+Requires=docker.service
+After=network-online.target time-sync.target docker.service
+ConditionPathExists=/etc/backtest-badger/workers-approved
+StartLimitIntervalSec=300
+StartLimitBurst=2
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/backtest-badger/current
+EnvironmentFile=/etc/backtest-badger/worker.env
+Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ExecStartPre=/opt/backtest-badger/current/.venv/bin/python ops/lightsail/validate.py runtime --worker scoring
+ExecStartPre=/opt/backtest-badger/current/.venv/bin/badger db-health
+ExecStart=/opt/backtest-badger/current/.venv/bin/python -m backtest_badger.forward_scoring_operations cycle
+TimeoutStartSec=270
+TimeoutStopSec=15
+KillMode=control-group
+Restart=no
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/backtest-badger/artifacts/forward-outcomes /var/lib/backtest-badger/artifacts/forward-scoring-operations
+MemoryHigh=384M
+MemoryMax=512M
+MemorySwapMax=256M
+CPUQuota=50%
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=badger-scoring

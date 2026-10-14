@@ -1,0 +1,13 @@
+[Unit]
+Description=Check pending forward outcomes independently every five minutes UTC
+ConditionPathExists=/etc/backtest-badger/workers-approved
+
+[Timer]
+OnCalendar=*-*-* *:02/5:00 UTC
+AccuracySec=1s
+RandomizedDelaySec=0
+Persistent=false
+Unit=backtest-badger-scoring.service
+
+[Install]
+WantedBy=timers.target

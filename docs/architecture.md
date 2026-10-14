@@ -277,7 +277,8 @@ or generic provider abstractions exist.
 
 The eventual public dashboard must use read-only database access and clearly label
 research, forward predictions and simulated trading. AWS Lightsail on Ubuntu is a
-future deployment target; Stage 0 has no production access or deployment setup.
+deployment target; Stage D1 prepares templates without accessing or installing on
+the server (see below).
 The historical `crypto-trading-platform` repository is outside this project's
 implementation boundary and is not required by any component.
 
@@ -361,8 +362,36 @@ Checksummed, atomic per-cycle operational snapshots and queue state live under
 ignored `artifacts/forward-scoring-operations/`; they do not duplicate scientific
 outcomes. Offline status validates evidence, shows current pending/mature work and
 retains historical failures, partial files and interrupted cycles. The independent
-five-minute macOS LaunchAgent example is opt-in and uninstalled. The existing live
+five-minute macOS LaunchAgent example was supplied opt-in; the operator now reports
+both Mac workers running. The existing live
 collector, its scheduler, frozen code fingerprints and original files are unchanged.
 See the [Stage 3D guide](stage-03d-automated-outcome-scoring.md) for operational limits
 and the four-directory backup procedure. No provider access, DB writes, new model,
 metric, dependency, trading, migration or hosted infrastructure is introduced.
+
+## Prepared in Stage D1 — Lightsail foundation
+
+Python remains on the host and PostgreSQL 17 remains in Docker. New deployment
+templates under `ops/lightsail/` use immutable Git release directories with locked
+Python 3.12.15 environments. Each release links `artifacts` to the same private
+`/var/lib/backtest-badger/artifacts` tree, preserving relative paths and source,
+protocol and dependency fingerprints. A release record captures runtime, commit
+and hashes. Replacing source never replaces research evidence.
+
+The dedicated Compose project uses a deliberately created external volume, a
+reviewed PG17 image digest, loopback-only port 5432, health checks and bounded
+resources. Private root-managed env files separate bootstrap/admin and worker
+credentials. Non-root systemd oneshots use explicit working directories, read-only
+source/training, narrowly allowed artifact writes, bounded execution and journal
+logging. The two UTC five-minute timers retain independent app locks and timing:
+collection uses the unchanged 15-minute window; scoring can remain pending if the
+target has not arrived. Timers are disabled and a separate D2 approval file is absent.
+
+Validation covers deployment contracts without real prediction issuance. A bounded
+temporary synthetic dataset exercises full-size recording and replay for both
+markets, preserving all model parameters and validation. Mac timing is not server
+capacity proof. Exact platform/Python fingerprints limit replay of original Mac
+records on Linux; retained originals and original-runtime verification remain part
+of the migration plan. See the [foundation](deployment/lightsail-foundation.md) and
+[D2 runbook](deployment/lightsail-migration-runbook.md). No server installation,
+database migration, scheduler switch or scientific change was performed in D1.

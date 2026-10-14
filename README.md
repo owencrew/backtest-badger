@@ -184,11 +184,27 @@ uv run --locked python -m backtest_badger.forward_scoring_operations status
 
 Existing outcomes are validated offline; unexpired and missing targets remain
 pending. A rotating queue retries older work after downtime without creating
-forecasts. The separate five-minute LaunchAgent is supplied **but not installed
-or enabled**. The running prediction collector remains unchanged. See the
+forecasts. The separate five-minute LaunchAgent was supplied opt-in; the operator
+now reports both collection and scoring LaunchAgents running on the Mac. See the
 [Stage 3D guide](docs/stage-03d-automated-outcome-scoring.md) for installation,
 failure diagnostics, stopping, recovery and backups. Future backups must preserve
 predictions, outcomes, collection operations and scoring operations together.
+
+## Lightsail deployment preparation
+
+[Stage D1](docs/deployment/lightsail-foundation.md) supplies pinned host releases,
+persistent artifact paths, private loopback PostgreSQL 17 Compose, independent
+systemd workers/timers, deployment validation and a full-size synthetic benchmark.
+The guide includes exact initial installation commands and optional swap setup.
+These are **prepared templates, not an installed deployment**. Both Mac LaunchAgents
+continue running; server timers remain disabled and no real database/evidence is
+created, restored or migrated during D1.
+
+The separate [D2 migration runbook](docs/deployment/lightsail-migration-runbook.md)
+covers coherent backups, checksums, restore rehearsal, Mac/Linux replay limitations,
+server performance gates, exactly one collector at cutover and recovery. Original
+forecasts/outcomes and frozen scientific code remain unchanged. D2 requires separate
+authorisation; no website or trading service is deployed.
 
 ## Development
 

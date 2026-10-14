@@ -1,0 +1,40 @@
+name: backtest-badger-lightsail
+
+services:
+  postgres:
+    # Set a reviewed PostgreSQL 17 digest; never resolve a floating tag at startup.
+    image: ${POSTGRES_IMAGE:?Set a reviewed postgres:17@sha256 digest}
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in the private postgres.env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in the private postgres.env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD privately}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    mem_limit: 1g
+    memswap_limit: 1g
+    cpus: 1.0
+    shm_size: 128m
+    pids_limit: 128
+    command: ["postgres", "-c", "shared_buffers=256MB", "-c", "max_connections=30", "-c", "work_mem=4MB", "-c", "maintenance_work_mem=64MB"]
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
+    # External means a typo/new project cannot silently initialise a fresh volume.
+    external: true
+    name: backtest-badger-pg17
