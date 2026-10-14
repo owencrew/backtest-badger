@@ -28,6 +28,15 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("health", help="Validate application configuration")
     commands.add_parser("db-health", help="Check PostgreSQL connectivity")
+    forward = commands.add_parser(
+        "record-forward",
+        help="Record four unscored forecasts for the current 4h horizon",
+    )
+    forward.add_argument("--symbol", required=True, choices=("BTCUSDT", "ETHUSDT"))
+    verify = commands.add_parser(
+        "verify-forward", help="Verify a forward record offline from retained evidence"
+    )
+    verify.add_argument("--record", type=Path, required=True)
     execution = commands.add_parser(
         "prepare-execution-data", help="Freeze 2024 native 1h execution references"
     )
@@ -116,6 +125,20 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args(argv)
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    if args.command == "verify-forward":
+        from backtest_badger.forward import verify_forward
+
+        try:
+            print(json.dumps(verify_forward(args.record), indent=2))
+            return 0
+        except ValueError as error:
+            logger.error("Forward verification failed: %s", error)
+        except OSError:
+            logger.error(
+                "Forward verification failed; check record/training file access."
+            )
+        return 1
 
     if args.command == "analyse-economics":
         from backtest_badger.economics import analyse_economics
@@ -239,6 +262,30 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     logging.getLogger().setLevel(settings.log_level)
+    if args.command == "record-forward":
+        from backtest_badger.forward import record_forward
+
+        try:
+            with connect_database(settings) as connection:
+                path, record = record_forward(connection, args.symbol)
+            print(f"Unscored forward observations: {path}")
+            print(
+                f"Issued: {record['issued_at']}; "
+                f"target: {record['target_close_boundary']}"
+            )
+            for prediction in record["predictions"]:
+                print(
+                    f"{prediction['prediction_id']}: "
+                    f"{prediction['predicted_log_return_4h']:.17g}"
+                )
+            return 0
+        except FileExistsError as error:
+            logger.error("Already recorded; original retained: %s", error)
+        except (ValueError, RuntimeError) as error:
+            logger.error("Forward recording failed: %s", error)
+        except (psycopg.Error, OSError):
+            logger.error("Forward recording failed; database/file details suppressed.")
+        return 1
     if args.command in ("revalidate-history", "apply-revalidation"):
         try:
             if args.command == "revalidate-history":

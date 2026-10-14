@@ -31,7 +31,10 @@ boosting experiments with train-only fitting and validation-only baseline compar
 backtesting with independent hourly references and explicit transaction costs.
 [Stage 2D](docs/stage-02d-economic-diagnostics.md) adds a reproducible economic
 postmortem of those fixed simulations, including monthly results and cost budgets.
-Live predictions, paper trading and the public dashboard remain
+[Stage 3A](docs/stage-03a-forward-predictions.md) adds manual forward prediction
+recording with strict freshness/timing checks, immutable input evidence and offline
+verification. Predictions remain unscored observations; no model has demonstrated
+economic viability. Scheduling, paper trading and the public dashboard remain
 **planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 
@@ -108,6 +111,24 @@ uv run --locked badger evaluate-models \
 Use a new output directory each time. The [Stage 2B guide](docs/stage-02b-predictive-baselines.md)
 records actual results, metrics, hashes and limitations. Small forecast error
 reductions do not establish trading profitability.
+
+## Manual forward observations
+
+Refresh local data separately, then record all four fixed model predictions for
+the current eligible horizon:
+
+```sh
+uv run --locked --env-file .env badger sync-recent --symbol BTCUSDT --interval 4h
+uv run --locked --env-file .env badger record-forward --symbol BTCUSDT
+# Use ETHUSDT in both commands for Ether.
+uv run --locked badger verify-forward --record artifacts/forward-predictions/RECORD.json
+```
+
+Replace `RECORD.json` with the printed path. Recording fails on stale or incomplete
+data, expired horizons and duplicates; it never refreshes data automatically.
+The [Stage 3A guide](docs/stage-03a-forward-predictions.md) documents retained
+provenance, deterministic training-only refits, local-clock limitations and the
+actual stale-database check. These observations are not trading recommendations.
 
 ## Development
 

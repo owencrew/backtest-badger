@@ -38,11 +38,13 @@ def sha256(body):
     return hashlib.sha256(body).hexdigest()
 
 
-def select_rows(rows, manifest):
+def select_rows(rows, manifest, *, training_only=False):
     """Inspect identities/timing, but never retrieve a test outcome or baseline.
 
     CSV tokenisation and whole-file hashing necessarily read holdout bytes. Test
     outcomes are never converted, returned, summarised, predicted or scored.
+    With training_only, both held-out partitions skip numerical access entirely;
+    identity, timing, split, gap and count checks still cover every row.
     """
     selected = {s: {"train": [], "validation": []} for s in SYMBOLS}
     counts = {s: Counter() for s in SYMBOLS}
@@ -91,6 +93,9 @@ def select_rows(rows, manifest):
         if min(window) < start or max(window) >= end or window & forbidden[symbol]:
             raise ValueError("Research window crosses source boundary, gap or anomaly.")
         counts[symbol][split] += 1
+        # Forward inference has no use for either held-out partition's numerics.
+        if training_only and split != "train":
+            continue
         # Validate feature numerics without using any holdout outcome.
         features = [float(row[name]) for name in FEATURES]
         if not all(math.isfinite(v) for v in features):
@@ -120,6 +125,7 @@ def load_model_data(
     expected_csv_sha256=CSV_SHA256,
     expected_manifest_sha256=MANIFEST_SHA256,
     expected_counts=COUNTS,
+    training_only=False,
 ):
     """Pins may be overridden by synthetic tests only; CLI has no overrides."""
     manifest_bytes = (directory / "manifest.json").read_bytes()
@@ -164,7 +170,7 @@ def load_model_data(
         reader = csv.DictReader(io.StringIO(csv_bytes.decode("utf-8"), newline=""))
         if reader.fieldnames != list(OUTPUT_COLUMNS):
             raise ValueError("Incompatible research CSV schema or feature order.")
-        selected = select_rows(reader, manifest)
+        selected = select_rows(reader, manifest, training_only=training_only)
     except (KeyError, TypeError, IndexError) as error:
         raise ValueError("Malformed research metadata or row.") from error
     # Return only metadata needed by evaluation, excluding source target summaries.

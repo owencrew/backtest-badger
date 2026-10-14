@@ -15,7 +15,8 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **2B — Predictive Modelling** | Implemented; awaiting review | Pinned Stage 2A input validation; separate-market zero/mean, Ridge and shallow boosting comparisons; training-only preprocessing/fitting, 2024 validation metrics and untouched test outcomes. Two byte-identical runs. See [results](stage-02b-predictive-baselines.md). |
 | **2C — Backtesting** | Implemented; awaiting review | Independent native 2024 1h references from 24 verified archives; offline pinned validation forecasts, delayed three-hour long/cash simulation, explicit two-sided costs and independent Decimal accounts. All trading accounts lose under base/stress assumptions; zero stays cash. Four byte-identical output files across two runs. See [results](stage-02c-execution-backtesting.md). |
 | **2D — Economic Diagnostics and Robustness** | Implemented; awaiting review | Read-only postmortem of pinned Stage 2C accounts: scenario-specific costs, all twelve months, geometric cost budgets and existing baseline comparisons. Annual and monthly reconciliation, deterministic artifacts and untouched holdout. See [results](stage-02d-economic-diagnostics.md). |
-| **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
+| **3A — Forward Prediction Recording** | Implemented; awaiting review | Manual current-horizon forecasts from seven validated native 4h candles; fixed pre-2024 fits, strict live UTC checks, immutable shared evidence and offline replay. Local source was stale, so no genuine record was fabricated. See [guide](stage-03a-forward-predictions.md). |
+| **3 — Further Forward Observation** | Unscoped | Scheduling and outcome evaluation require separate authorisation; Stage 3A does not demonstrate economic viability. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
 | **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
@@ -240,3 +241,18 @@ See the [guide](stage-02d-economic-diagnostics.md) for annual/monthly results,
 hashes, cost calculations and interpretation limits. Review these findings before
 separately scoping Stage 3 as forward observation, with no profitability promotion.
 Stop after Stage 2D: no Stage 3 implementation, tuning, test evaluation or trading.
+
+### Stage 3A forward observations
+
+Manual recording and offline verification now retain the original five features
+and all four fixed models, deterministically fitted only on pinned pre-2024 rows.
+Current-horizon checks reject stale/incomplete inputs, clock reversals and expired
+outcomes; read-only snapshots preserve exact versioned source evidence. One
+exclusive atomic JSON publication protects all four model identities together.
+
+The local eligibility inspection on 2026-10-14 found both markets stale, with six
+of seven required candles missing; no live forecast was recorded. No automatic
+refresh, historical replay, scoring or strategy promotion occurred. Training-only
+reproduction checks and synthetic/offline/database tests are documented in the
+[guide](stage-03a-forward-predictions.md). Stop after Stage 3A; scheduling, forward
+outcome evaluation and paper trading remain separately scoped future work.

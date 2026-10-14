@@ -280,3 +280,33 @@ research, forward predictions and simulated trading. AWS Lightsail on Ubuntu is 
 future deployment target; Stage 0 has no production access or deployment setup.
 The historical `crypto-trading-platform` repository is outside this project's
 implementation boundary and is not required by any component.
+
+## Implemented in Stage 3A
+
+`badger record-forward --symbol BTCUSDT|ETHUSDT` uses the existing local PostgreSQL
+settings and one READ ONLY, REPEATABLE READ snapshot. `forward.py` determines the
+current horizon from the actual UTC clock using Stage 1C.1's 60-second eligibility
+policy, requests only seven exact native 4h candles, and validates market identity,
+economics, versions, provenance and observation timestamps. Stale/incomplete data
+fails; ingestion is a separate operator action.
+
+`features.causal_features` supplies the original five ordered features without a
+future target. A training-only mode in `model_data.py` verifies the pinned Stage 2A
+artifact and skips both held-out partitions before numeric access. Existing
+Stage 2B fit/predict helpers deterministically refit the fixed per-market zero,
+mean, Ridge and shallow boosting definitions on pre-2024 training only. No fitted
+model serialization or new dependencies are introduced.
+
+One complete JSON document retains all four unscored forecasts, source versions
+and exact Decimal economics, UTC evidence, ordered features and model/training/
+implementation/runtime fingerprints. A synced private staging file, final live
+clock check and exclusive atomic hard link publish a stable market/candle identity
+under `artifacts/forward-predictions/`. Duplicates and later source revisions cannot
+replace it. A directory-sync failure after publication is explicitly uncertain.
+
+`badger verify-forward --record PATH` works offline: checksum/schema/timing checks,
+retained-input feature replay and pinned training-only deterministic model replay.
+It never substitutes current canonical candles. Local hashes and timestamps are
+not independent historical-publication proof or durable backup. See the
+[Stage 3A guide](stage-03a-forward-predictions.md). Scheduling, outcome evaluation,
+paper trading and deployment remain outside this implementation.
