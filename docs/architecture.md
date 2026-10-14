@@ -230,6 +230,30 @@ No broker framework, dependency, database, model fitting, forward trading or
 deployment was added. See the [Stage 2C guide](stage-02c-execution-backtesting.md)
 for acquisition hashes, negative net results, tests and scientific limitations.
 
+## Implemented in Stage 2D
+
+`badger analyse-economics` reads only the pinned Stage 2C manifest, trades,
+realised equity and summary. `economics.py` verifies hashes, schemas, the fixed
+2024 account grids and cross-scenario trade schedules, then reconciles retained
+cash flows and annual metrics without rerunning the engine. No forecast or research
+files, native hourly sources, network or database are needed; upstream provenance
+is carried from the verified manifest.
+
+Scenario-specific quantities determine gross P&L and cost decomposition. UTC exit
+timestamps assign whole round trips to all twelve calendar months; realised
+balances carry forward and monthly return factors multiply to annual growth.
+Fixed-sequence reference-price ratios provide analytical frictionless growth and
+break-even round-trip log-cost budgets. The numerical quantity-floor difference
+is measured separately. Zero and training-mean policies provide benchmark context
+with explicit exposure/turnover differences; no strategy or cost search occurs.
+
+New gitignored directories retain deterministic monthly and annual diagnostics
+CSVs, a manifest with source/output/implementation hashes, and a readable summary.
+Existing destinations are refused. Standard-library arithmetic and existing
+serialization/validation helpers suffice; no dependency or architecture refactor
+was introduced. See the [Stage 2D guide](stage-02d-economic-diagnostics.md) for
+results, reconciliation, reproduction and scientific limits.
+
 ## Intended direction (not implemented)
 
 Add modules only when a development stage needs them.

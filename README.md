@@ -27,7 +27,11 @@ are implemented. [Stage 2A](docs/stage-02a-research-dataset.md) adds verified fr
 inputs, causal features, a 4h research target and chronological splits.
 [Stage 2B](docs/stage-02b-predictive-baselines.md) adds fixed Ridge and gradient
 boosting experiments with train-only fitting and validation-only baseline comparisons.
-Backtesting, live predictions, paper trading and the public dashboard remain
+[Stage 2C](docs/stage-02c-execution-backtesting.md) implements historical validation
+backtesting with independent hourly references and explicit transaction costs.
+[Stage 2D](docs/stage-02d-economic-diagnostics.md) adds a reproducible economic
+postmortem of those fixed simulations, including monthly results and cost budgets.
+Live predictions, paper trading and the public dashboard remain
 **planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 

@@ -38,6 +38,11 @@ def main(argv: list[str] | None = None) -> int:
     backtest.add_argument("--forecasts", type=Path, required=True)
     backtest.add_argument("--execution", type=Path, required=True)
     backtest.add_argument("--output", type=Path, required=True)
+    economics = commands.add_parser(
+        "analyse-economics", help="Analyse fixed Stage 2C economics offline"
+    )
+    economics.add_argument("--backtest", type=Path, required=True)
+    economics.add_argument("--output", type=Path, required=True)
     evaluate = commands.add_parser(
         "evaluate-models", help="Evaluate fixed Stage 2B models on validation only"
     )
@@ -111,6 +116,22 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args(argv)
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    if args.command == "analyse-economics":
+        from backtest_badger.economics import analyse_economics
+
+        try:
+            analyse_economics(args.backtest, args.output)
+            print(f"Economic diagnostics: {args.output / 'summary.md'}")
+            print(f"Analysis manifest: {args.output / 'manifest.json'}")
+            return 0
+        except ValueError as error:
+            logger.error("Economic analysis failed: %s", error)
+        except FileExistsError:
+            logger.error("Output already exists; choose a new directory.")
+        except OSError:
+            logger.error("Economic analysis failed; check input/output file access.")
+        return 1
 
     if args.command in ("prepare-execution-data", "backtest-validation"):
         try:

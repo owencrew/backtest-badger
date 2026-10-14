@@ -14,6 +14,7 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **2A — Reproducible Research Dataset and Causal Features** | Implemented; awaiting review | Pinned frozen-source verification, explicit incomplete acknowledgement, gap/anomaly-safe causal features and one 4h target; availability-based chronological splits and label purging; train-only no-skill references; deterministic 39,609-row artifact and untouched holdout. See [guide](stage-02a-research-dataset.md). |
 | **2B — Predictive Modelling** | Implemented; awaiting review | Pinned Stage 2A input validation; separate-market zero/mean, Ridge and shallow boosting comparisons; training-only preprocessing/fitting, 2024 validation metrics and untouched test outcomes. Two byte-identical runs. See [results](stage-02b-predictive-baselines.md). |
 | **2C — Backtesting** | Implemented; awaiting review | Independent native 2024 1h references from 24 verified archives; offline pinned validation forecasts, delayed three-hour long/cash simulation, explicit two-sided costs and independent Decimal accounts. All trading accounts lose under base/stress assumptions; zero stays cash. Four byte-identical output files across two runs. See [results](stage-02c-execution-backtesting.md). |
+| **2D — Economic Diagnostics and Robustness** | Implemented; awaiting review | Read-only postmortem of pinned Stage 2C accounts: scenario-specific costs, all twelve months, geometric cost budgets and existing baseline comparisons. Annual and monthly reconciliation, deterministic artifacts and untouched holdout. See [results](stage-02d-economic-diagnostics.md). |
 | **3 — Live Predictions** | Planned | Forward predictions saved with timestamps and model/data provenance; reproducible inference and freshness checks; clear separation from backtest results. |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
 | **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
@@ -219,5 +220,23 @@ Stage 2B hashes and Stage 2A metadata remain unchanged, and the research CSV and
 test labels were never opened. Verification: 343 tests passed, 173 PostgreSQL
 integration cases skipped without an isolated test DSN; Ruff lint/format and diff
 checks passed. See the [guide](stage-02c-execution-backtesting.md) for source/output
-hashes, complete results and limitations. Stop here for review: no Stage 2D,
+hashes, complete results and limitations. That increment stopped before Stage 2D,
 holdout evaluation, tuning, model promotion, live trading or deployment.
+
+### Stage 2D economic postmortem
+
+The audited Stage 2C manifest and retained CSV/summary hashes match; all 24 accounts
+reconcile without rerunning or altering trades. The new offline analysis retains
+288 calendar-month account rows, actual scenario cost decomposition, exposure,
+turnover and analytical fixed-sequence cost budgets. BTC Ridge has a 6.33-bps
+round-trip log-cost budget, versus 26.00/46.00 bps base/stress drag; ETH boosting
+loses frictionlessly and has no nonnegative budget. Positive frictionless results
+do not establish alpha over the always-positive training-mean baseline.
+
+All four outputs reproduce byte for byte. Verification: 382 tests passed, 173
+PostgreSQL integration cases skipped without an isolated test DSN; Ruff lint and
+format checks passed. Existing frozen inputs and the holdout remain untouched.
+See the [guide](stage-02d-economic-diagnostics.md) for annual/monthly results,
+hashes, cost calculations and interpretation limits. Review these findings before
+separately scoping Stage 3 as forward observation, with no profitability promotion.
+Stop after Stage 2D: no Stage 3 implementation, tuning, test evaluation or trading.
