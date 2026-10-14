@@ -285,7 +285,11 @@ def check_timing(opened, captured, calculated, issued, final):
         raise ValueError("Prediction no longer concerns the current eligible horizon.")
 
 
-def publish(record, destination, clock):
+class PublicationDeadlineExceeded(ValueError):
+    """The optional unattended publication window has elapsed."""
+
+
+def publish(record, destination, clock, *, publication_deadline=None):
     """Fsync a private staging file; final clock check then exclusive atomic link.
 
     A crash can leave a .partial file; it is never a published record and does not
@@ -306,6 +310,10 @@ def publish(record, destination, clock):
             os.fchmod(handle.fileno(), 0o444)
             os.fsync(handle.fileno())
         final = checked_clock(clock)
+        if publication_deadline is not None and final >= publication_deadline:
+            raise PublicationDeadlineExceeded(
+                "Unattended publication deadline elapsed."
+            )
         check_timing(
             grid_time(record["source_open_time"]),
             utc_time(record["captured_at"]),
@@ -333,7 +341,13 @@ def publish(record, destination, clock):
 
 
 def record_forward(
-    connection, symbol, *, source=TRAINING, destination=RECORDS, clock=utc_now
+    connection,
+    symbol,
+    *,
+    source=TRAINING,
+    destination=RECORDS,
+    clock=utc_now,
+    publication_deadline=None,
 ):
     started = checked_clock(clock)
     opened = current_open(started)
@@ -360,7 +374,7 @@ def record_forward(
     record = evidence(
         market, candles, features, predictions, recipe, captured, calculated, issued
     )
-    publish(record, path, clock)
+    publish(record, path, clock, publication_deadline=publication_deadline)
     return path, record
 
 

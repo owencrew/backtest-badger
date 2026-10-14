@@ -310,3 +310,33 @@ It never substitutes current canonical candles. Local hashes and timestamps are
 not independent historical-publication proof or durable backup. See the
 [Stage 3A guide](stage-03a-forward-predictions.md). Scheduling, outcome evaluation,
 paper trading and deployment remain outside this implementation.
+
+
+## Implemented in Stage 3B
+
+`forward_operations.py` coordinates `badger forward-cycle` using the existing
+bounded `sync_recent`, `record_forward` and `verify_forward` functions. A stable
+filesystem `flock` prevents overlapping cycles before database, provider or model
+work. Markets are handled independently, and existing record identities receive
+cheap integrity checks without fitting or provider access. New forecasts require
+successful complete/fresh refresh evidence and the original seven-candle validation.
+
+Actual UTC selects one native horizon. The collector's promptness window ends
+15 minutes after the existing 60-second settling delay. An optional deadline guard
+in Stage 3A's exclusive atomic publisher prevents late unattended publication while
+preserving manual semantics. Misses are operational evidence, never backdated
+forecasts. HTTP throttling pauses provider work across markets and restarts.
+
+Small atomic per-cycle journals under ignored `artifacts/forward-operations/`
+retain statuses, sanitized error categories, record hashes and issuance latency.
+`forward-status` reads local evidence, distinguishes full replay from integrity
+checks, and detects expired missing horizons since monitoring began, including
+whole intervals lost to downtime. Partial journals do not reserve forecast identities.
+The existing schema, models, training pins and frozen evidence remain unchanged.
+
+An uninstalled LaunchAgent example provides a 300-second interval, explicit uv and
+project paths, `.env` loading, local logs and normal next-interval recovery. No
+framework, schema migration, dependency or hosted service is added. See the
+[Stage 3B guide](stage-03b-automated-forward-collection.md) for installation, backup,
+recovery and macOS availability limits. Outcome scoring and paper trading remain
+outside this stage.

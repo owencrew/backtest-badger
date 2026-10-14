@@ -28,6 +28,10 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("health", help="Validate application configuration")
     commands.add_parser("db-health", help="Check PostgreSQL connectivity")
+    commands.add_parser("forward-cycle", help="Collect both current forward horizons")
+    commands.add_parser(
+        "forward-status", help="Inspect local forward operational history"
+    )
     forward = commands.add_parser(
         "record-forward",
         help="Record four unscored forecasts for the current 4h horizon",
@@ -125,6 +129,18 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args(argv)
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    if args.command in ("forward-cycle", "forward-status"):
+        from backtest_badger.forward_operations import run_cycle, status_report
+
+        try:
+            if args.command == "forward-cycle":
+                return run_cycle()
+            print(json.dumps(status_report(), indent=2))
+            return 0
+        except Exception:
+            logger.error("Forward operations failed; sensitive details suppressed.")
+            return 1
 
     if args.command == "verify-forward":
         from backtest_badger.forward import verify_forward

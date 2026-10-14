@@ -33,9 +33,10 @@ backtesting with independent hourly references and explicit transaction costs.
 postmortem of those fixed simulations, including monthly results and cost budgets.
 [Stage 3A](docs/stage-03a-forward-predictions.md) adds manual forward prediction
 recording with strict freshness/timing checks, immutable input evidence and offline
-verification. Predictions remain unscored observations; no model has demonstrated
-economic viability. Scheduling, paper trading and the public dashboard remain
-**planned, not implemented**. The future product sections are
+verification. [Stage 3B](docs/stage-03b-automated-forward-collection.md) adds
+reliable collection cycles, operational history and an opt-in macOS scheduler.
+Predictions remain unscored observations; no model has demonstrated economic
+viability. Paper trading and the public dashboard remain **planned, not implemented**. The future product sections are
 The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
 
 ## Local setup
@@ -129,6 +130,22 @@ data, expired horizons and duplicates; it never refreshes data automatically.
 The [Stage 3A guide](docs/stage-03a-forward-predictions.md) documents retained
 provenance, deterministic training-only refits, local-clock limitations and the
 actual stale-database check. These observations are not trading recommendations.
+
+## Automated forward collection
+
+Stage 3B adds an idempotent two-market collection cycle and offline status report:
+
+```sh
+uv run --locked --env-file .env badger forward-cycle
+uv run --locked badger forward-status
+```
+
+New forecasts require complete, fresh observations and publication within 15 minutes
+of candle-close-plus-60-seconds. Existing records are skipped; expired windows are
+reported as missed. The [Stage 3B guide](docs/stage-03b-automated-forward-collection.md)
+covers failure evidence, backups and the opt-in five-minute macOS LaunchAgent.
+The scheduler is not installed automatically, and a development Mac does not provide
+24/7 availability. Predictions remain unscored observations, separate from trading.
 
 ## Development
 
