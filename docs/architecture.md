@@ -340,3 +340,29 @@ framework, schema migration, dependency or hosted service is added. See the
 [Stage 3B guide](stage-03b-automated-forward-collection.md) for installation, backup,
 recovery and macOS availability limits. Outcome scoring and paper trading remain
 outside this stage.
+
+
+## Implemented in Stages 3C and 3D
+
+The frozen Stage 3C evaluator validates original forward evidence without refits,
+uses the retained source close and exact next native 4h target in a READ ONLY,
+REPEATABLE READ snapshot, and publishes immutable outcomes by exclusive hard link.
+Target maturity, captured version, cohort attribution, metrics and offline reports
+remain wholly owned by `forward_evaluation.py` and its pinned protocol.
+
+Stage 3D's independent `forward_scoring_operations.py` calls that existing `score()`
+API. A separate nonblocking process lock, 100-record batch and 240-second processing
+alarm bound local cycles. A durable filename cursor advances before each attempt
+and wraps, so pending, failed and interrupted records cannot strand later work.
+Existing outcomes and unexpired targets require no database connection. Genuine
+older predictions can be scored after downtime without retrospective issuance.
+
+Checksummed, atomic per-cycle operational snapshots and queue state live under
+ignored `artifacts/forward-scoring-operations/`; they do not duplicate scientific
+outcomes. Offline status validates evidence, shows current pending/mature work and
+retains historical failures, partial files and interrupted cycles. The independent
+five-minute macOS LaunchAgent example is opt-in and uninstalled. The existing live
+collector, its scheduler, frozen code fingerprints and original files are unchanged.
+See the [Stage 3D guide](stage-03d-automated-outcome-scoring.md) for operational limits
+and the four-directory backup procedure. No provider access, DB writes, new model,
+metric, dependency, trading, migration or hosted infrastructure is introduced.

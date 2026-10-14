@@ -151,14 +151,14 @@ The scheduler is not installed automatically, and a development Mac does not pro
 
 ## Prospective forecast evaluation
 
-Stage 3C is ready for protocol review; genuine scoring has not been run.
+Stage 3C is implemented; the first four genuine observations have been scored.
 Read the [frozen protocol](docs/stage-03c-forward-evaluation-protocol.md) before
 manually scoring a forecast. The [evaluation guide](docs/stage-03c-forward-evaluation.md)
-contains exact future scoring commands, statuses, provenance safeguards and tests.
+contains manual scoring commands, statuses, provenance safeguards and tests.
 The standalone module leaves the existing collector and its fingerprints unchanged:
 
 ```sh
-# Future manual use after review; never downloads or synchronises data.
+# Manual scoring of an existing genuine record; never downloads or synchronises data.
 uv run --locked --env-file .env python -m backtest_badger.forward_evaluation score \
   --record artifacts/forward-predictions/RECORD.json
 
@@ -170,7 +170,25 @@ Replace `RECORD.json` with an existing original filename. Timely automated and l
 manual observations stay separate. Outcomes use the original retained source close
 and the exact next native 4h target, captured no earlier than close + 60 seconds.
 These are forecast errors in log-return units, not executable trading returns.
-There is no scoring scheduler, model promotion or paper trading.
+Stage 3D adds opt-in scoring automation below. No model promotion or paper trading
+is implemented.
+
+## Automated forward outcome scoring
+
+Stage 3D calls the unchanged Stage 3C scorer in bounded, process-locked cycles:
+
+```sh
+uv run --locked --env-file .env python -m backtest_badger.forward_scoring_operations cycle
+uv run --locked python -m backtest_badger.forward_scoring_operations status
+```
+
+Existing outcomes are validated offline; unexpired and missing targets remain
+pending. A rotating queue retries older work after downtime without creating
+forecasts. The separate five-minute LaunchAgent is supplied **but not installed
+or enabled**. The running prediction collector remains unchanged. See the
+[Stage 3D guide](docs/stage-03d-automated-outcome-scoring.md) for installation,
+failure diagnostics, stopping, recovery and backups. Future backups must preserve
+predictions, outcomes, collection operations and scoring operations together.
 
 ## Development
 

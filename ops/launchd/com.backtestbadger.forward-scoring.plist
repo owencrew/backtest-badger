@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.backtestbadger.forward-scoring</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/uv</string>
+        <string>run</string>
+        <string>--locked</string>
+        <string>--no-sync</string>
+        <string>--offline</string>
+        <string>--env-file</string>
+        <string>/Users/owencrew/Code/backtest-badger/.env</string>
+        <string>python</string>
+        <string>-m</string>
+        <string>backtest_badger.forward_scoring_operations</string>
+        <string>cycle</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/owencrew/Code/backtest-badger</string>
+    <key>StartInterval</key>
+    <integer>300</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>Umask</key>
+    <integer>63</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/owencrew/Code/backtest-badger/artifacts/forward-scoring-operations/logs/stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/owencrew/Code/backtest-badger/artifacts/forward-scoring-operations/logs/stderr.log</string>
+</dict>
+</plist>

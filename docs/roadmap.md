@@ -16,8 +16,9 @@ Each stage is scoped independently. Planned capabilities are not current feature
 | **2C — Backtesting** | Implemented; awaiting review | Independent native 2024 1h references from 24 verified archives; offline pinned validation forecasts, delayed three-hour long/cash simulation, explicit two-sided costs and independent Decimal accounts. All trading accounts lose under base/stress assumptions; zero stays cash. Four byte-identical output files across two runs. See [results](stage-02c-execution-backtesting.md). |
 | **2D — Economic Diagnostics and Robustness** | Implemented; awaiting review | Read-only postmortem of pinned Stage 2C accounts: scenario-specific costs, all twelve months, geometric cost budgets and existing baseline comparisons. Annual and monthly reconciliation, deterministic artifacts and untouched holdout. See [results](stage-02d-economic-diagnostics.md). |
 | **3A — Forward Prediction Recording** | Implemented; awaiting review | Manual current-horizon forecasts from seven validated native 4h candles; fixed pre-2024 fits, strict live UTC checks, immutable shared evidence and offline replay. First genuine BTC/ETH records were subsequently issued on 2026-10-14 and verified. See [guide](stage-03a-forward-predictions.md). |
-| **3B — Automated Forward Collection** | Implemented; awaiting review | Independent idempotent BTC/ETH cycles, strict 15-minute promptness, exclusive publication, offline status and missed-horizon evidence; opt-in uninstalled macOS LaunchAgent and backup guidance. See [guide](stage-03b-automated-forward-collection.md). |
-| **3C — Prospective Forecast Evaluation** | Implemented; protocol review and genuine scoring pending | Frozen protocol, standalone manual scorer with read-only exact-target snapshots, immutable outcome evidence and matched offline metrics; separate timely automated/late manual cohorts, missingness and sample warnings. Synthetic validation only; no genuine outcomes inspected or scored. See [guide](stage-03c-forward-evaluation.md). |
+| **3B — Automated Forward Collection** | Implemented; local collector running | Independent idempotent BTC/ETH cycles, strict 15-minute promptness, exclusive publication, offline status and missed-horizon evidence; separately installed macOS LaunchAgent and backup guidance. See [guide](stage-03b-automated-forward-collection.md). |
+| **3C — Prospective Forecast Evaluation** | Implemented; first four genuine observations scored | Frozen protocol, standalone manual scorer with read-only exact-target snapshots, immutable outcome evidence and matched offline metrics; separate timely automated/late manual cohorts, missingness and sample warnings. Original implementation validated synthetically; subsequent manual scoring verified four genuine observations. See [guide](stage-03c-forward-evaluation.md). |
+| **3D — Automated Forward Outcome Scoring** | Implemented; scheduler opt-in and uninstalled | Independent bounded cycles reuse the frozen scorer; no-DB pending/existing checks, fair retry cursor, exclusive publication, operational history and offline status. Existing collector/evidence preserved. See [guide](stage-03d-automated-outcome-scoring.md). |
 | **4 — Paper Trading and Performance** | Planned | Simulated orders, fills, costs and portfolio accounting are tested and auditable; performance is clearly labelled paper trading and separate from backtests and predictions. |
 | **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
@@ -286,3 +287,16 @@ Stage 3C leaves it and its fingerprinted code unchanged. No development-database
 queries, genuine outcome inspection/scoring, holdout access, new jobs, trading or
 deployment were performed. Review the protocol and [test results](stage-03c-forward-evaluation.md)
 before manually running genuine scoring. Stage 4 remains unstarted.
+
+
+### Stage 3D automated outcome scoring
+
+An independent orchestration module now scores eligible genuine forecasts through
+the unchanged Stage 3C API, with per-record failure isolation, no-DB validation of
+existing outcomes, pending retries and a durable rotating backlog cursor. Bounded,
+process-locked cycles and offline diagnostics retain incomplete and invalid evidence.
+A separate five-minute LaunchAgent is supplied without installation or enablement.
+The original live prediction collector remains unchanged and operational.
+The [guide](stage-03d-automated-outcome-scoring.md) covers commands, tests, recovery,
+limitations and backups including both outcomes and scoring operations. Stop after
+Stage 3D; Stage 4 paper trading remains unstarted.
