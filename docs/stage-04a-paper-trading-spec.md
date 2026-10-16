@@ -11,7 +11,7 @@
 
 Build a **strategy-independent, spot-only, long/cash prospective paper-trading engine** consuming original, genuine Stage 3 forward-prediction artifacts. Orders and fills are **modelled**, never sent to Binance. Provide event-level auditability, exact financial accounting, conservative outage recovery, repeatable equity curves and honest comparisons to separately labelled historical experiments.
 
-**Provisionally agreed direction:** Ridge Sign v1 reference strategy; BTCUSDT and ETHUSDT in separate portfolios; 10,000 USDT initial funding **per portfolio per market**; continuous holdings; publicly observed prospective bid/ask; 10 bps fee per side; 2 bps adverse slippage; all-or-nothing simulated market fills; weighted-average cost basis; five PostgreSQL tables; append-only monetary ledger; persistent sticky exit obligations; versioned immutable valuation observations.
+**Approved Stage 4A direction:** Ridge Sign v1 reference strategy; BTCUSDT and ETHUSDT in separate portfolios; 10,000 USDT initial funding **per portfolio per market**; continuous holdings; publicly observed prospective bid/ask; 10 bps fee per side; 2 bps adverse slippage; all-or-nothing simulated market fills; weighted-average cost basis; five PostgreSQL tables; append-only monetary ledger; persistent sticky exit obligations; versioned immutable valuation observations.
 
 Not in scope: live-money API keys/orders, leverage, shorts, margin, borrowing, transfers, deposits after inception, partial fills, intra-order order-book simulation, generic brokerage frameworks, portfolio-optimisation research, production changes, or public website development.
 
@@ -78,7 +78,7 @@ All recorded instants are timezone-aware UTC (`timestamptz`), with independently
 
 ### 4.1 Missing horizons and risk-off policy
 
-At each expected 4h source-close cycle, accept only a validated qualifying timely automated forecast. After the 16-minute publication deadline, a missing/ineligible forecast is a **missed horizon**, detected and recorded **at the actual check time**, not falsely at the missed deadline. Two **consecutive** missed horizons constitute the provisional v1 safety trigger, even if discovered upon recovery. A qualifying eligible forecast resets the missed-horizon streak. When safety condition is detected and the portfolio holds base units, create one `RISK_EXIT` decision **now**, and maintain its sticky obligation. When flat, stay in cash. An outage during which the system cannot check must not be represented as decisions taken in the past.
+At each expected 4h source-close cycle, accept only a validated qualifying timely automated forecast. After the 16-minute publication deadline, a missing/ineligible forecast is a **missed horizon**, detected and recorded **at the actual check time**, not falsely at the missed deadline. Two **consecutive** missed horizons constitute the approved v1 safety trigger, even if discovered upon recovery. A qualifying eligible forecast resets the missed-horizon streak. When safety condition is detected and the portfolio holds base units, create one `RISK_EXIT` decision **now**, and maintain its sticky obligation. When flat, stay in cash. An outage during which the system cannot check must not be represented as decisions taken in the past.
 
 A single missing horizon: no new buy or model-derived sell; retain the current exposure but mark `SIGNAL_STALE`. Two consecutive misses: create `RISK_EXIT` if exposed. Missing signals do not count as negative Ridge forecasts. The exact expected-grid/account activation rules prevent counting periods before portfolio inception.
 
@@ -336,7 +336,7 @@ Before deploying or activating Stage 4:
 
 ## 13. Decisions resolved, implementation choices to verify, and version freeze
 
-**Resolved provisionally by product owner:** Ridge Sign v1; two independent 10,000-USDT portfolios; long/cash persistent holdings; observed bid/ask; 10 bps fees and 2 bps adverse slippage; all-or-nothing fills; weighted-average cost; five tables with `paper_market_event`; sticky exit; financial atomicity; immutable quote/valuation evidence; historical logic parity but not execution-price parity.
+**Approved by product owner (16 October 2026):** Ridge Sign v1; two independent 10,000-USDT portfolios; long/cash persistent holdings; observed bid/ask; 10 bps fees and 2 bps adverse slippage; all-or-nothing fills; weighted-average cost; five tables with `paper_market_event`; sticky exit; financial atomicity; immutable quote/valuation evidence; historical logic parity but not execution-price parity.
 
 **Approved Stage 4A defaults (verify mechanically before activation):** two consecutive missed horizons trigger safety exit; five-minute paper worker cadence; 30-second order expiry; 2-second quote RTT / 1-second processing freshness; 1-hour filter cache age; quote-size-cap policy; 1e-8 USDT fee rounding up; four-hour scheduled marks at +10 minutes within 5-minute window; stop/retry semantics for failed buy versus outstanding sell; above exact terminal types, constraints and temporal windows; restriction of accepted trade signals to qualifying timely automated Stage 3B records. Source REST endpoint reachability and real response characteristics remain a pre-deployment validation gate.
 
