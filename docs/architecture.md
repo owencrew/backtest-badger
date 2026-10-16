@@ -443,3 +443,22 @@ No frozen Stage 2/3 module, approved protocol, source artifact, database, schedu
 CLI, provider integration or production configuration was changed. Stage 4B.2
 historical validation, Stage 4C persistence and Stage 4D service integration remain
 separately scoped work.
+
+
+## Implemented in Stage 4B.2A — synthetic historical replay
+
+`paper_historical.py` accepts supplied in-memory Ridge forecasts and native hourly
+opening references, with distinct historical evidence types. It reuses the
+unchanged strategy evaluator and exact Stage 4B.1 financial primitives. Independent
+10,000-USDT accounts hold continuously, trade at the strictly next hour, then mark
+the resulting ledger prefix using the same original opening reference. Fixed
+10/1/2-bps costs and a versioned hypothetical quantity step are research assumptions;
+prospective quote/automation evidence is never fabricated. Missing required inputs
+fail closed; explicit synthetic miss fixtures test discovery-time risk-off only.
+
+There is no loader, CLI, database, publication or worker addition. The
+[engine guide](stage-04b2a-historical-replay-engine.md) records synthetic verification;
+the [historical protocol](stage-04b2-historical-validation-protocol-DRAFT.md) remains
+DRAFT / NOT YET APPROVED FOR 2024 EXECUTION. Stage 4B.2B must obtain separate approval
+before opening actual pinned inputs, integrating existing loaders or calculating
+real 2024 results. Prospective Stage 4C–4E gates remain unchanged.

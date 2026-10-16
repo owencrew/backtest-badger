@@ -3,11 +3,11 @@
 **Last updated:** 2026-10-16 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Review Stage 4B.1 deterministic primitives; then separately scope Stage 4B.2 historical continuous-holding validation, Stage 4C–4E and Stage 5.
+**Next priority:** Review Stage 4B.2A synthetic historical replay and its draft protocol; Stage 4B.2B real input access/execution requires separate approval. Stage 4C–4E and Stage 5 remain later work.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
-**Stage 4A approved (16 October 2026, design only):** [`stage-04a-paper-trading-spec.md`](stage-04a-paper-trading-spec.md) and [`stage-04a-prospective-evaluation-protocol.md`](stage-04a-prospective-evaluation-protocol.md) freeze the Ridge Sign v1 reference policy, independent USDT portfolios, continuous holdings, sticky exit obligations, five-table future schema, prospective quote simulation and versioned valuation evidence. **This documentary approval alone did not authorise application implementation or production changes.** Stage 4B.1 has subsequently been implemented locally under a separate instruction; see the [implementation guide](stage-04b1-deterministic-paper-primitives.md). No paper database migration, worker, activation or production change was made. For all Stage 4B+ planning, the two approved documents supersede provisional suggestions below.
+**Stage 4A approved (16 October 2026, design only):** [`stage-04a-paper-trading-spec.md`](stage-04a-paper-trading-spec.md) and [`stage-04a-prospective-evaluation-protocol.md`](stage-04a-prospective-evaluation-protocol.md) freeze the Ridge Sign v1 reference policy, independent USDT portfolios, continuous holdings, sticky exit obligations, five-table future schema, prospective quote simulation and versioned valuation evidence. **This documentary approval alone did not authorise application implementation or production changes.** Stage 4B.1 has subsequently been implemented locally under a separate instruction; see the [implementation guide](stage-04b1-deterministic-paper-primitives.md). Stage 4B.2A now adds a synthetic-only historical replay; see its [guide](stage-04b2a-historical-replay-engine.md). No paper database migration, worker, activation or production change was made. For all Stage 4B+ planning, the two approved documents supersede provisional suggestions below.
 
 ## 1. Resume here
 
@@ -52,6 +52,7 @@ Preferred collaboration workflow: inspect first; propose narrowly scoped changes
 | Forward evidence | Stage 3A genuine immutable live predictions; Stage 3B idempotent collection operations |
 | Scoring | Stage 3C prospective outcomes and Stage 3D automated scoring with separate evidence |
 | Paper primitives | Stage 4B.1 pure strategy transitions, synthetic order execution, Decimal accounting/replay and immutable-mark valuation; locally tested, awaiting review |
+| Historical replay | Stage 4B.2A supplied-input continuous-holding engine; synthetic tests only, real 2024 evaluation not authorised |
 | Hosting | Operator-verified Lightsail PostgreSQL and collection/scoring systemd workers plus reliable backup/monitoring stack |
 
 There is **no verified implementation yet** of a complete order/fill/portfolio paper-trading engine, public application API or launched dashboard. Do not claim otherwise merely because the README describes the product vision.
@@ -88,32 +89,36 @@ As of this handoff, **the first unattended runs using the final configurations h
 
 Record observed unattended results as they arrive, distinguishing success from mere timer activation.
 
-## 6. Stage 4B.1 implemented locally; review before Stage 4B.2
+## 6. Stage 4B.2A implemented locally; review before real input access
 
 Read the approved [Stage 4A specification](stage-04a-paper-trading-spec.md),
-[prospective protocol](stage-04a-prospective-evaluation-protocol.md) and new
-[Stage 4B.1 guide](stage-04b1-deterministic-paper-primitives.md).
+[prospective protocol](stage-04a-prospective-evaluation-protocol.md),
+[Stage 4B.1 guide](stage-04b1-deterministic-paper-primitives.md),
+[new replay guide](stage-04b2a-historical-replay-engine.md) and
+[historical protocol DRAFT](stage-04b2-historical-validation-protocol-DRAFT.md).
 
-Working baseline: clean `main` at `50add18c17c8f6e6074bdeb1f636a78e73bb9caf`.
-Four new `paper_*.py` modules implement frozen contracts, versioned Ridge Sign v1,
-continuous holdings, current-time missed horizons, sticky exit/re-entry rules,
-one-shot quote/filter/fee validation, paired monetary proposals, weighted-average
-accounting and exact-prefix valuation. Inputs and tests are synthetic; no I/O,
-new CLI, schema, live reader or trading service is implemented.
+Starting checkout: clean `8e094f94e4c831d62690d9487b2f85dbbaeeae9a`.
+`paper_historical.py` reuses the unchanged Ridge evaluator and exact financial
+primitives with separate historical records, next-hour opening references,
+continuous holdings, fixed 10/1/2-bps costs, explicit synthetic quantity step,
+paired postings and hourly ledger-prefix marks. No forced year-end sale.
+Missing real inputs fail closed; synthetic miss fixtures test discovery-time
+risk-off separately from prospective automation. There is no source loader, CLI,
+publication adapter, database or service addition.
 
-Final local checks: **900 passed, 183 isolated-PostgreSQL cases skipped, zero failed**
-(including 152 new synthetic cases); Ruff lint/format and whitespace checks passed.
-The guide records commands and API limits. Frozen Stage 2/3 code and Stage 4A
-protocols remain unchanged. Artifact preservation checks inspect metadata only;
-no genuine forecasts, scored outcomes or holdout payloads were opened. Changes
-remain uncommitted and undeployed for review.
+Final checks: **1,056 passed, 183 isolated-PostgreSQL cases skipped**; all 197
+Stage 4B.1 tests pass unchanged. Ruff lint/format and whitespace checks pass.
+The guide records exact commands and preservation limits. No real 2024 inputs,
+new continuous-holding performance, genuine Stage 3 evidence or holdout payloads
+were opened. Changes are uncommitted and undeployed for review.
 
-**Smallest follow-on:** Stage 4B.2 historical continuous-holding validation, using
-shared strategy/accounting mechanics with separately labelled historical execution
-assumptions. Do not begin it without a new instruction. Later Stage 4C must enforce
-atomic fill/postings/exit-satisfaction, unique identities and portfolio locks in
-isolated PostgreSQL tests. Stage 4D adds prospective readers/quotes and service
-integration only after separate approval, backup/restore coverage and rehearsal.
+**Next gate:** owner review of the engine and draft before separately authorising
+Stage 4B.2B input inspection, pinned-loader integration, real execution or economic
+publication. Confirm baseline step, reporting/benchmark conventions and immutable
+manifest design first. Frictionless/stress scenarios need a separately reviewed
+implementation; do not fake zero fees through adjusted prices. Stage 4C persistence
+and Stage 4D prospective readers/services still require their own authorisation,
+backup/restore coverage and rehearsal.
 
 ## 7. Website (Stage 5, after a reliable paper-trading contract)
 
