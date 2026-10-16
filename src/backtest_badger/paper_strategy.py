@@ -58,7 +58,6 @@ def start_strategy(account, inception_mark):
     )
     require(
         isinstance(inception_mark, Mark)
-        and inception_mark.marked_at == account.portfolio.inception_at
         and value_account(account, inception_mark).equity == D("10000"),
         "Valid inception mark required.",
     )
@@ -68,7 +67,7 @@ def start_strategy(account, inception_mark):
     )
     if inception >= close + timedelta(minutes=16):
         close += STEP
-    return State(account, close - STEP, inception)
+    return State(account, close - STEP, inception_mark.marked_at)
 
 
 def _check(state, identity, at):

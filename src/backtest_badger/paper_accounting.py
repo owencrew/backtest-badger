@@ -286,6 +286,23 @@ def value_account(account, mark):
             )
     try:
         validate_quote(mark.quote, mark.portfolio, mark.marked_at)
+        require(
+            mark.quote.request_started_at >= mark.portfolio.inception_at,
+            "Quote request before portfolio inception.",
+        )
+        # Receipt is the locally observed quotation time. Equal-time ordering
+        # and a transactionally coherent snapshot remain Stage 4C obligations.
+        require(
+            mark.quote.response_received_at >= account.at,
+            "Quote observed before pinned ledger transaction.",
+        )
+        if mark.slot is not None:
+            require(
+                mark.slot
+                <= mark.quote.request_started_at
+                < mark.slot + timedelta(minutes=5),
+                "Outside mark capture window.",
+            )
     except ValueError as error:
         return Valuation(mark, None, None, account.realised, account.fees, str(error))
     with localcontext(money_context()):

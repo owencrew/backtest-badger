@@ -38,7 +38,7 @@ than silently normalised. These APIs are not live-command clock overrides.
 | --- | --- |
 | `evaluate_strategy(prediction, *, strategy_id='ridge_sign', version='1')` | Finite exact Decimal four-hour log return → integer target 0/1. Unknown version, floats, NaN and infinity fail. No prices/outcomes enter this function. |
 | `fund_account(Account(portfolio), at)` | Exactly 10,000 USDT at the portfolio inception, zero base/basis, ledger sequence 1. A second funding fails. |
-| `start_strategy(account, inception_mark)` | Requires the funded prefix and a valid mark at inception; returns immutable `State`. Does not approve or activate a live experiment. |
+| `start_strategy(account, inception_mark)` | Requires the funded prefix and a valid initial observation captured at or after inception; returns immutable `State` with `last_at=marked_at`. Does not approve or activate a live experiment. |
 | `observe_forecast(state, forecast, identity, at)` | Returns `(new_state, Decision)`, preserving eligibility/provenance and actual decision time. |
 | `miss_horizon(state, source_open, identity, discovered_at)` | Advances exactly one expected source horizon, strictly after its deadline, at the actual discovery time. |
 | `simulate_order(order, quote, filters, fill_at, *, run_id, existing=())` | Returns terminal `Result`: `FILLED`, `REJECTED` or `EXPIRED`, typed `Reason`, retained inputs, and either a `Fill` with two postings or no postings. |
@@ -183,10 +183,35 @@ prospective bid/ask references; no profitability inference is made.
 
 `Mark` pins portfolio/identity, actual `marked_at`, `asof_ledger_seq`, the complete
 original quote, valuation-policy version/fingerprint and optional scheduled slot.
-A supplied scheduled slot must be a native boundary +10 minutes, with an exclusive
-five-minute capture window. An unscheduled mark supports inception/arithmetic
-observations. No scheduling or mark storage is implemented. Missing/stale/invalid
-quotes yield unavailable equity/P&L, even in cash; nothing is filled forward.
+A supplied scheduled slot must be a native boundary +10 minutes. Both the quote
+request and actual mark time must lie in `[slot, slot + 5 minutes)`; the opening
+boundary is inclusive and the closing boundary exclusive. A request before the
+slot cannot qualify merely because its receipt or mark time falls inside it.
+An unscheduled mark supports inception/arithmetic observations. No scheduling or
+mark storage is implemented. Missing/stale/invalid quotes yield unavailable
+equity/P&L, even in cash; nothing is filled forward.
+
+Every valuation request must begin at or after the portfolio's actual inception.
+The initial observation may complete after funding: `inception_at <= request <=
+receipt <= marked_at`, with the unchanged maximum 2-second request latency and
+1-second receipt-to-mark delay. `start_strategy` retains the original inception,
+funded account and expected-horizon grid, but starts its transition clock at the
+actual initial mark time, preventing decisions before that observation.
+
+Quote receipt must be **at or after `Account.at`**, the latest financial event
+included in the pinned replayed prefix. Thus a still-fresh pre-trade quotation
+cannot value post-trade holdings, including partially or fully sold positions.
+The existing mark-time/prefix integrity checks still raise `ValueError`; invalid
+quote timing returns an unavailable `Valuation` retaining the supplied mark,
+realised P&L and fees. `net_liquidation` also returns `None` for these marks.
+No quote is replaced, timestamp moved or past mark reconstructed.
+
+These checks establish local timestamp bounds, not full transactional snapshot
+consistency. Equal receipt/transaction timestamps remain accepted by the pure
+API; they cannot establish which event happened first. Stage 4C persistence must
+enforce equal-timestamp event ordering and coherent quote/ledger snapshots under
+the portfolio lock, including concurrent fills. Receipt is a client observation
+time, not an independently witnessed exchange-side timestamp.
 
 The caller must pass the already-replayed account **at that exact sequence**.
 Value is cash + units ×saved bid; unrealised is units ×bid −basis. Replay tests
@@ -197,7 +222,7 @@ There is no observed drawdown series, benchmark runner or performance report yet
 
 ## Validation, preservation and remaining gates
 
-Final verification from the repository root:
+Original Stage 4B.1 verification from the repository root:
 
 ```sh
 UV_CACHE_DIR=/tmp/badger-uv-cache uv run --locked ruff check .
@@ -258,5 +283,54 @@ Next: **Stage 4B.2 historical continuous-holding validation**, separately author
 using the same threshold/financial mechanics with explicitly historical next-hour
 references and synthetic depth/filter assumptions. Do not represent historical
 references as prospective quotations or change the frozen Stage 2C results.
+
+## Valuation timing correction review — 2026-10-16
+
+Correction baseline: clean HEAD `27ae92a697f2dc057f326c398353fc4988c7e5ca`.
+Changes are confined to valuation timing, initial-observation transition time,
+synthetic regressions, this guide and the verbatim prompt archive
+`prompts/stage-04-paper/002-valuation-timing-corrections.md` (reviewed for secrets).
+Decimal equations, replay, Ridge decisions, execution, filters, costs, balances
+and sticky exits are unchanged.
+
+Added 45 synthetic cases: quote receipt immediately before/at/after buys,
+partial sales and full sales; all six scheduled slots at exact opening/closing
+boundaries and one microsecond either side where relevant; pre-window requests
+with in-window receipts; exact and excessive quote freshness bounds; pre-inception
+requests and valid observations completing after inception. Tests also verify
+unavailable liquidation, retained evidence, replay equality, activation chronology
+and successful subsequent orders.
+
+Correction verification (all commands completed successfully):
+
+```sh
+UV_CACHE_DIR=/tmp/badger-uv-cache uv run --offline --locked pytest -q tests/test_paper_primitives.py
+env -u BADGER_TEST_ADMIN_DSN UV_CACHE_DIR=/tmp/badger-uv-cache uv run --offline --locked pytest -q
+UV_CACHE_DIR=/tmp/badger-uv-cache uv run --offline --locked ruff check .
+UV_CACHE_DIR=/tmp/badger-uv-cache uv run --offline --locked ruff format --check .
+git diff --check
+```
+
+Paper primitives: **197 passed**. Complete suite: **945 passed, 183 skipped,
+zero failed** in 30.26 seconds. Skips require an isolated PostgreSQL server;
+none was configured or accessed. Ruff lint passed, all **122 Python files** passed
+format checking, and whitespace checks passed. No network access, commit, push,
+deployment or Stage 4B.2 work was performed.
+
+Documentation inconsistencies found, reported without editing approved Stage 4A:
+the prospective protocol's section 11 retains provisional/draft and pending-signoff
+wording despite its approved header and the technical specification's approval;
+the technical schema's section 6.4 requires `mark_slot` for every `MARK_OBSERVED`,
+while the prospective protocol separately requires an actual inception mark that
+need not fall on the scheduled grid. Stage 4C must distinguish inception from
+scheduled marks in its persistence contract. Neither issue authorises changing
+the frozen protocol in this correction.
+
+The original verification section above records the earlier implementation's
+technical-specification hash. At this correction's baseline, the specification
+hash is `25412bf4f0e83f848adb09d42d16f39e0c46a55a339d525fd576f1fa85dff399`;
+both the working file and `HEAD` have that value. The prospective protocol still
+matches `f4561da8db29a180b9abc7b131a6455cefca3c6c44318b268ad5428769273cd9`.
+Both approved documents are unchanged by this correction.
 Stage 4C persistence and Stage 4D forecast/quote adapters, worker integration,
 clock-health checks, backup extension and deployment remain subsequent gated work.

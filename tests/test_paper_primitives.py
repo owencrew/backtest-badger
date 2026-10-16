@@ -994,3 +994,119 @@ def test_quote_decimal_notation_is_exact_not_binary_float(buy_order):
         body = json.dumps(payload).encode()
         bad = replace(q, raw_body=body, payload_sha256=sha256(body).hexdigest())
         assert simulate_buy(buy_order, q=bad).reason == Reason.INVALID_QUOTE
+
+
+@pytest.mark.parametrize("transaction", ["buy", "partial_sell", "full_sell"])
+@pytest.mark.parametrize("receipt_offset", [-US, timedelta(0), US])
+def test_valuation_receipt_cannot_predate_pinned_transaction(
+    transaction, receipt_offset
+):
+    initial = funded()
+    buy = trade(initial, "buy", Side.BUY, "10", "100", T + timedelta(seconds=10))
+    trades = (buy,)
+    account = replay(initial.portfolio, trades)
+    if transaction != "buy":
+        sale = trade(
+            account,
+            "sell",
+            Side.SELL,
+            "4" if transaction == "partial_sell" else "10",
+            "110",
+            account.at + timedelta(seconds=10),
+        )
+        trades += (sale,)
+        account = replay(initial.portfolio, trades)
+    receipt = account.at + receipt_offset
+    m = mark(account, account.at + US, quote=quote(receipt, bid="110", ask="110"))
+    valuation = value_account(account, m)
+    assert valuation == value_account(replay(initial.portfolio, trades), m)
+    assert valuation.mark == m
+    assert valuation.realised == account.realised and valuation.fees == account.fees
+    if receipt_offset < timedelta(0):
+        assert valuation.equity is None and valuation.unrealised is None
+        assert (
+            valuation.unavailable_reason
+            == "Quote observed before pinned ledger transaction."
+        )
+        assert net_liquidation(account, m, filters(receipt)) is None
+    else:
+        assert valuation.unavailable_reason is None
+        assert valuation.equity == account.cash + account.quantity * D(110)
+        assert valuation.realised + valuation.unrealised == valuation.equity - D(10000)
+
+
+@pytest.mark.parametrize("hour", range(0, 24, 4))
+@pytest.mark.parametrize(
+    "request_offset,mark_offset,available",
+    [
+        (-US, timedelta(0), False),
+        (timedelta(0), timedelta(0), True),
+        (timedelta(minutes=5) - US, timedelta(minutes=5) - US, True),
+        (timedelta(minutes=5) - US, timedelta(minutes=5), False),
+        (timedelta(minutes=5), timedelta(minutes=5), False),
+    ],
+)
+def test_scheduled_valuation_capture_boundaries(
+    hour, request_offset, mark_offset, available
+):
+    slot = T.replace(hour=hour, minute=10)
+    account = funded(portfolio(inception=slot - timedelta(minutes=10)))
+    request = slot + request_offset
+    at = slot + mark_offset
+    # Receipt is inside the slot for the pre-window request regression.
+    q = quote(request, latency=at - request)
+    m = mark(account, at, quote=q, slot=slot)
+    valuation = value_account(account, m)
+    assert (valuation.equity == D(10000)) == available
+    assert valuation.mark == m
+    if not available:
+        assert valuation.unrealised is None
+        assert valuation.unavailable_reason == "Outside mark capture window."
+        assert net_liquidation(account, m, None) is None
+
+
+@pytest.mark.parametrize(
+    "latency,processing,available",
+    [
+        (timedelta(seconds=2), timedelta(seconds=1), True),
+        (timedelta(seconds=2) + US, timedelta(0), False),
+        (timedelta(0), timedelta(seconds=1) + US, False),
+    ],
+)
+def test_scheduled_valuation_still_requires_fresh_quotes(
+    latency, processing, available
+):
+    account = funded()
+    slot = T + timedelta(minutes=10)
+    q = quote(slot, latency=latency)
+    m = mark(account, q.response_received_at + processing, quote=q, slot=slot)
+    valuation = value_account(account, m)
+    assert (valuation.equity == D(10000)) == available
+    if not available:
+        assert valuation.unavailable_reason == "Stale quote."
+
+
+@pytest.mark.parametrize("request_offset", [-US, timedelta(0), US])
+def test_inception_request_boundary_and_actual_observation_time(request_offset):
+    account = funded()
+    q = quote(T + request_offset, latency=timedelta(seconds=1))
+    m = mark(account, q.response_received_at, quote=q)
+    valuation = value_account(account, m)
+    if request_offset < timedelta(0):
+        assert valuation.equity is None and valuation.unrealised is None
+        assert (
+            valuation.unavailable_reason == "Quote request before portfolio inception."
+        )
+        with pytest.raises(ValueError, match="Valid inception mark"):
+            start_strategy(account, m)
+    else:
+        assert valuation.equity == D(10000)
+        state = start_strategy(account, m)
+        assert state.account == account
+        assert state.last_at == m.marked_at > T
+        assert state.next_source_open == start().next_source_open
+        with pytest.raises(ValueError, match="clock reversal"):
+            observe_forecast(state, forecast(state, issued=T + US), "early", T + US)
+        state, decision = observe(state)
+        assert decision.action == Action.BUY_REQUIRED
+        assert execute(state, decision)[2].status == Status.FILLED
