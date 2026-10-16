@@ -3,7 +3,7 @@
 **Last updated:** 2026-10-16 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Review Stage 4B.2A synthetic historical replay and its draft protocol; Stage 4B.2B real input access/execution requires separate approval. Stage 4C–4E and Stage 5 remain later work.
+**Next priority:** Stage 4B.2B synthetic-only loader/report/publication development under the [approved historical protocol](stage-04b2-historical-validation-protocol.md). The actual 2024 evaluation requires a later explicit real-run approval. Stage 4C–4E and Stage 5 remain later work.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
@@ -95,7 +95,7 @@ Read the approved [Stage 4A specification](stage-04a-paper-trading-spec.md),
 [prospective protocol](stage-04a-prospective-evaluation-protocol.md),
 [Stage 4B.1 guide](stage-04b1-deterministic-paper-primitives.md),
 [new replay guide](stage-04b2a-historical-replay-engine.md) and
-[historical protocol DRAFT](stage-04b2-historical-validation-protocol-DRAFT.md).
+[approved historical protocol](stage-04b2-historical-validation-protocol.md).
 
 Starting checkout: clean `8e094f94e4c831d62690d9487b2f85dbbaeeae9a`.
 `paper_historical.py` reuses the unchanged Ridge evaluator and exact financial
@@ -112,10 +112,7 @@ The guide records exact commands and preservation limits. No real 2024 inputs,
 new continuous-holding performance, genuine Stage 3 evidence or holdout payloads
 were opened. Changes are uncommitted and undeployed for review.
 
-**Next gate:** owner review of the engine and draft before separately authorising
-Stage 4B.2B input inspection, pinned-loader integration, real execution or economic
-publication. Confirm baseline step, reporting/benchmark conventions and immutable
-manifest design first. Frictionless/stress scenarios need a separately reviewed
+**Stage 4B.2A and protocol approved on 2026-10-16:** fixed the baseline synthetic step, benchmark and reporting conventions, original model-manifest anchored recipe identity and immutable publisher contract. Codex may develop Stage 4B.2B using synthetic data and mocked loaders only. **Reading the genuine 2024 inputs, real replay and publishing results require separate approval.** Frictionless/stress scenarios need a separately reviewed
 implementation; do not fake zero fees through adjusted prices. Stage 4C persistence
 and Stage 4D prospective readers/services still require their own authorisation,
 backup/restore coverage and rehearsal.

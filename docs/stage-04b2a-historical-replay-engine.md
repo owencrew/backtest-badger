@@ -2,8 +2,8 @@
 
 Implemented locally for review on 2026-10-16. **Synthetic mechanics only; no real
 2024 continuous-holding result has been calculated or inspected.** Stop here.
-The companion [historical validation protocol](stage-04b2-historical-validation-protocol-DRAFT.md)
-is **DRAFT / NOT YET APPROVED FOR 2024 EXECUTION**.
+The companion [historical validation protocol](stage-04b2-historical-validation-protocol.md)
+was **DRAFT when Stage 4B.2A was implemented; approved and frozen on 2026-10-16. Real 2024 execution remains gated**.
 
 ## Checkout, inspected contracts and scope
 
@@ -267,7 +267,7 @@ a small separate adapter can call unchanged `forecast_data.load_forecasts()` and
 Ridge and attach canonical row/month identities to these historical records.
 The engine will require both full grids; publication additionally requires both
 markets and absence of synthetic misses. No source loader is duplicated here.
-The [draft protocol](stage-04b2-historical-validation-protocol-DRAFT.md) specifies
+The [approved historical protocol](stage-04b2-historical-validation-protocol.md) specifies
 hashes, reporting, no-overwrite publication intentions and the pre-access gates.
 
 Remaining choices are owner review of this engine and draft, baseline synthetic
@@ -284,3 +284,7 @@ issuance validation or calling hourly opens REST quotes. Stage 4A's optional cos
 comparators are deferred because this task explicitly limits mechanics to base.
 The previously documented prospective section-11 provisional wording and inception
 versus scheduled-mark schema ambiguity remain unchanged and outside this task.
+
+## Subsequent review and approval — 2026-10-16
+
+Following this implementation report, the product owner approved Stage 4B.2A and froze [`historical-validation-v1`](stage-04b2-historical-validation-protocol.md). The approved choices fix the 0.000001 synthetic base-unit step, whole-Stage-2B-manifest-anchored Ridge lineage identity, cash and inception buy-and-hold controls, clearly labelled partial period returns, and exclusive hash-verified research publication. This is a subsequent documentary decision and does not imply a real 2024 replay was performed during Stage 4B.2A. Stage 4B.2B implementation may use synthetic fixtures, but actual 2024 economic calculation is not yet authorised.

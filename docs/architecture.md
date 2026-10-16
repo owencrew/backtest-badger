@@ -458,7 +458,7 @@ fail closed; explicit synthetic miss fixtures test discovery-time risk-off only.
 
 There is no loader, CLI, database, publication or worker addition. The
 [engine guide](stage-04b2a-historical-replay-engine.md) records synthetic verification;
-the [historical protocol](stage-04b2-historical-validation-protocol-DRAFT.md) remains
-DRAFT / NOT YET APPROVED FOR 2024 EXECUTION. Stage 4B.2B must obtain separate approval
-before opening actual pinned inputs, integrating existing loaders or calculating
-real 2024 results. Prospective Stage 4C–4E gates remain unchanged.
+the [historical protocol](stage-04b2-historical-validation-protocol.md) is now approved and frozen for historical methods. Stage 4B.2B may implement
+mocked-source loaders, analytical benchmarks, reports and a publisher using synthetic
+data only. Opening genuine 2024 inputs, executing the real historical replay and
+publishing economic results require a separate approval. Prospective Stage 4C–4E gates remain unchanged.
