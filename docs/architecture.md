@@ -415,3 +415,31 @@ Restored data/schema/sequence comparisons and the existing offline evidence repo
 retain failures and Mac/Linux replay limitations. No cleanup or cutover command is
 provided. See the [D2A checklist](deployment/lightsail-d2a-rehearsal.md); real server
 execution, runtime/load gates and a separately approved quiescent D2B remain pending.
+
+
+## Implemented in Stage 4B.1 — deterministic paper primitives
+
+Four standard-library-only modules provide synthetic, pure-function foundations:
+`paper_types.py` holds frozen evidence contracts and shared validation;
+`paper_strategy.py` holds versioned Ridge Sign v1 and immutable transitions;
+`paper_execution.py` validates submitted internal intents and prospective quote/
+filter evidence; `paper_accounting.py` calculates paired monetary proposals,
+weighted-average accounting, deterministic replay and exact-prefix valuation.
+
+Continuous holdings, two-miss current-time risk exits, sticky obligations and
+fresh-only re-entry are distinct from Stage 2C's historical round trips. Explicit
+UTC timestamps, worker-run identities and ledger prefixes reject stale/reordered
+inputs. All-or-nothing execution uses observed bid/ask, 2-bps adverse slippage,
+10-bps USDT fees rounded up to 1e-8, and effective versioned market filters.
+Failed attempts have zero financial postings. Full liquidation and exit satisfaction
+are one proposed pure transition, awaiting Stage 4C's atomic database enforcement.
+
+Historical marks retain original quote evidence and an exact ledger sequence;
+later trades cannot alter their reconstruction. Net-liquidation estimates remain
+separate from ordinary marked equity. See the
+[implementation guide](stage-04b1-deterministic-paper-primitives.md) for APIs,
+numerical precision, exact synthetic test results and caller trust boundaries.
+No frozen Stage 2/3 module, approved protocol, source artifact, database, scheduler,
+CLI, provider integration or production configuration was changed. Stage 4B.2
+historical validation, Stage 4C persistence and Stage 4D service integration remain
+separately scoped work.

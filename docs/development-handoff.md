@@ -3,11 +3,11 @@
 **Last updated:** 2026-10-16 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Stage 4B.1, deterministic pure-Python trading and accounting primitives under the approved Stage 4A design; then Stage 4B.2 historical validation, Stage 4C–4E and Stage 5.
+**Next priority:** Review Stage 4B.1 deterministic primitives; then separately scope Stage 4B.2 historical continuous-holding validation, Stage 4C–4E and Stage 5.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
-**Stage 4A approved (16 October 2026, design only):** [`stage-04a-paper-trading-spec.md`](stage-04a-paper-trading-spec.md) and [`stage-04a-prospective-evaluation-protocol.md`](stage-04a-prospective-evaluation-protocol.md) freeze the Ridge Sign v1 reference policy, independent USDT portfolios, continuous holdings, sticky exit obligations, five-table future schema, prospective quote simulation and versioned valuation evidence. **No Stage 4 application code, database migration, trading worker or production change has been implemented or authorised by this documentary approval.** For all Stage 4B+ planning, the two approved documents supersede provisional suggestions below.
+**Stage 4A approved (16 October 2026, design only):** [`stage-04a-paper-trading-spec.md`](stage-04a-paper-trading-spec.md) and [`stage-04a-prospective-evaluation-protocol.md`](stage-04a-prospective-evaluation-protocol.md) freeze the Ridge Sign v1 reference policy, independent USDT portfolios, continuous holdings, sticky exit obligations, five-table future schema, prospective quote simulation and versioned valuation evidence. **This documentary approval alone did not authorise application implementation or production changes.** Stage 4B.1 has subsequently been implemented locally under a separate instruction; see the [implementation guide](stage-04b1-deterministic-paper-primitives.md). No paper database migration, worker, activation or production change was made. For all Stage 4B+ planning, the two approved documents supersede provisional suggestions below.
 
 ## 1. Resume here
 
@@ -51,6 +51,7 @@ Preferred collaboration workflow: inspect first; propose narrowly scoped changes
 | Backtesting | Stage 2C long/cash backtests with delayed execution and explicit fees; Stage 2D cost/performance diagnosis |
 | Forward evidence | Stage 3A genuine immutable live predictions; Stage 3B idempotent collection operations |
 | Scoring | Stage 3C prospective outcomes and Stage 3D automated scoring with separate evidence |
+| Paper primitives | Stage 4B.1 pure strategy transitions, synthetic order execution, Decimal accounting/replay and immutable-mark valuation; locally tested, awaiting review |
 | Hosting | Operator-verified Lightsail PostgreSQL and collection/scoring systemd workers plus reliable backup/monitoring stack |
 
 There is **no verified implementation yet** of a complete order/fill/portfolio paper-trading engine, public application API or launched dashboard. Do not claim otherwise merely because the README describes the product vision.
@@ -87,21 +88,32 @@ As of this handoff, **the first unattended runs using the final configurations h
 
 Record observed unattended results as they arrive, distinguishing success from mere timer activation.
 
-## 6. Immediate task: design Stage 4 paper trading
+## 6. Stage 4B.1 implemented locally; review before Stage 4B.2
 
-**Do not implement from this document alone. First inspect actual modules, tests, schema/migrations, APIs/CLI and immutable forward records.** Then propose a bounded Stage 4A that can be tested offline and introduced without breaking existing worker timing.
+Read the approved [Stage 4A specification](stage-04a-paper-trading-spec.md),
+[prospective protocol](stage-04a-prospective-evaluation-protocol.md) and new
+[Stage 4B.1 guide](stage-04b1-deterministic-paper-primitives.md).
 
-Suggested staged direction (design proposals, **not accepted implementation decisions**):
+Working baseline: clean `main` at `50add18c17c8f6e6074bdeb1f636a78e73bb9caf`.
+Four new `paper_*.py` modules implement frozen contracts, versioned Ridge Sign v1,
+continuous holdings, current-time missed horizons, sticky exit/re-entry rules,
+one-shot quote/filter/fee validation, paired monetary proposals, weighted-average
+accounting and exact-prefix valuation. Inputs and tests are synthetic; no I/O,
+new CLI, schema, live reader or trading service is implemented.
 
-1. **4A — Trading/accounting contract:** specify a spot long/cash paper strategy, decision events, portfolio currency, eligible forecast time, capital, target exposures, idempotency keys, transaction-cost parameters and fixed evaluation protocol. Determine which existing backtest accounting functions can be reused safely.
-2. **4B — Deterministic simulation core:** separately test orders, price/quantity precision, fills, fees, cash, holdings, realised/unrealised P&L, equity, drawdown and rejected/skipped orders; define conservative execution when data is missing. No actual order submission.
-3. **4C — Persistent immutable events:** design migrations and audit trails for paper signals, orders, fills, portfolio/account state and reconciliation; safe replay and unique identity constraints.
-4. **4D — Prospective service integration:** schedule only future eligible decisions with explicit UTC observation/decision/execution timestamps; avoid hindsight executions or retroactive fills. Choose any additional timer only after a small rehearsal.
-5. **4E — Read-only reporting/API:** positions, realised/unrealised returns, fees, performance attribution, trade history and model/portfolio comparison. No publicly exposed database administrator access.
+Final local checks: **900 passed, 183 isolated-PostgreSQL cases skipped, zero failed**
+(including 152 new synthetic cases); Ruff lint/format and whitespace checks passed.
+The guide records commands and API limits. Frozen Stage 2/3 code and Stage 4A
+protocols remain unchanged. Artifact preservation checks inspect metadata only;
+no genuine forecasts, scored outcomes or holdout payloads were opened. Changes
+remain uncommitted and undeployed for review.
 
-Questions to resolve from the actual code and product requirements: what constitutes a tradable signal from the current forecasts; whether to start with BTC/ETH spot long/cash or include shorting; base quote currency and starting paper capital; forecast-to-order timing and price source; whether reference hourly prices are permissible **prospectively**; conservative fees/slippage; position sizing; handling delayed or missed cycles; accounting lots; failed fills and market outages; evaluation versus cash and buy-and-hold.
-
-**Acceptance baseline:** no real-money credentials or exchange orders, no look-ahead, no mutation of existing forecast/outcome artifacts, deterministic and auditable accounting, cost-inclusive reporting, tests for idempotency and failure, and explicit separation of simulated and real outcomes.
+**Smallest follow-on:** Stage 4B.2 historical continuous-holding validation, using
+shared strategy/accounting mechanics with separately labelled historical execution
+assumptions. Do not begin it without a new instruction. Later Stage 4C must enforce
+atomic fill/postings/exit-satisfaction, unique identities and portfolio locks in
+isolated PostgreSQL tests. Stage 4D adds prospective readers/quotes and service
+integration only after separate approval, backup/restore coverage and rehearsal.
 
 ## 7. Website (Stage 5, after a reliable paper-trading contract)
 
