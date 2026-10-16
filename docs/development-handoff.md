@@ -3,9 +3,11 @@
 **Last updated:** 2026-10-16 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Stage 4, a realistic, independently auditable **paper-trading engine**; then Stage 5, the public website.
+**Next priority:** Stage 4B.1, deterministic pure-Python trading and accounting primitives under the approved Stage 4A design; then Stage 4B.2 historical validation, Stage 4C–4E and Stage 5.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
+
+**Stage 4A approved (16 October 2026, design only):** [`stage-04a-paper-trading-spec.md`](stage-04a-paper-trading-spec.md) and [`stage-04a-prospective-evaluation-protocol.md`](stage-04a-prospective-evaluation-protocol.md) freeze the Ridge Sign v1 reference policy, independent USDT portfolios, continuous holdings, sticky exit obligations, five-table future schema, prospective quote simulation and versioned valuation evidence. **No Stage 4 application code, database migration, trading worker or production change has been implemented or authorised by this documentary approval.** For all Stage 4B+ planning, the two approved documents supersede provisional suggestions below.
 
 ## 1. Resume here
 
