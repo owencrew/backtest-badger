@@ -1,13 +1,16 @@
 # Stage 4B.2 — Historical continuous-holding validation protocol
 
-**DRAFT / NOT YET APPROVED FOR 2024 EXECUTION**
+**APPROVED / FROZEN HISTORICAL VALIDATION PROTOCOL — REAL 2024 EXECUTION NOT YET AUTHORISED**
 
-Version: `historical-validation-draft-v1`
+Version: `historical-validation-v1`
 
-Prepared: 2026-10-16, before viewing any new continuous-holding economic result.
+Approved and frozen by product owner: 2026-10-16, before viewing any new continuous-holding economic result. No real 2024 replay has been run. Changes to this protocol require a new version and separate approval.
 
-Implementation gate: Stage 4B.2A, supplied synthetic inputs only. Stage 4B.2B
-requires separate review and explicit authorisation before opening actual inputs.
+Implementation gate: Stage 4B.2A mechanics reviewed and approved. Stage 4B.2B may implement/test verified-loader integration, benchmarks, reporting and publication on **synthetic fixtures only**. Actual inspection/loading of 2024 artifacts, economic computation and publication remain subject to a separate explicit real-run approval.
+
+## Fixed approval boundaries
+
+This frozen historical experiment is descriptive 2024 validation-period evidence only. Approval covers the fixed base policy, synthetic-only Stage 4B.2B engineering and its tests, **not** genuine 2024 input access, execution, results publication, 2025–2026 holdout access, prospective trading or deployment. Pin the SHA-256 of this exact protocol externally in future economic artifacts; do not write a file's own hash inside itself. Never adjust costs, quantities, signals, benchmarks or report definitions in response to viewed historical performance.
 
 ## Scope and scientific status
 
@@ -22,7 +25,7 @@ Stage 3 forecast/outcome/operations artifacts, database or provider are required
 
 The approved [Stage 4A specification](stage-04a-paper-trading-spec.md) and
 [prospective protocol](stage-04a-prospective-evaluation-protocol.md) are unchanged.
-This draft does not reapprove or revise them. Its historical timing and reference
+This frozen historical protocol does not reapprove or revise them. Its historical timing and reference
 prices cannot pass their genuine issuance and REST observation requirements.
 
 ## Frozen input declarations, not newly verified artifact bytes
@@ -57,8 +60,7 @@ The future manifest must retain all of that loader-verified source metadata,
 including original URLs, hashes and actual retrospective acquisition timestamps.
 Acquisition timestamps are not 2024 availability or exchange quote timestamps.
 
-After separate approval, Stage 4B.2B will call `forecast_data.load_forecasts()`
-with its unchanged default pins and `execution_data.load_execution_data()`.
+Following a **separate real-run approval**, the historical adapter may call unchanged `forecast_data.load_forecasts()` with default pins and `execution_data.load_execution_data()` on the actual reviewed artifacts. In synthetic-only Stage 4B.2B engineering, use stubbed/mock loaders and fabricated fixture data; do not call genuine artifact loaders.
 The latter reproduces the CSV from source archives but does not itself hard-code
 the reviewed release manifest hash: the future adapter must additionally compare
 its returned manifest/output hashes with the declarations above. Do not accept
@@ -69,10 +71,7 @@ Select only `(symbol, "ridge")` from the forecast loader. Construct row identiti
 from venue/type/symbol/native interval/source opening/model and retain the pinned
 CSV hash. Construct hourly identities from venue/type/symbol/3600/opening, retaining
 the CSV hash and the corresponding monthly source ZIP hash. The loader metadata
-provides that month-to-source association. The future adapter must pin a canonical
-fingerprint of the **existing** declared Ridge recipe, without re-fitting it, and
-record its precise canonicalisation in the run manifest. The pure engine accepts
-caller-supplied protocol/recipe hashes; it does not authenticate them.
+provides that month-to-source association. **Approved Ridge recipe lineage identity:** pass the Stage 2B frozen `manifest.json` SHA-256, `af89bcdcd5a40b0ad0d011e09ee49d60b6f26dc24d5db5b9f08de8fa1d1a0581`, as `model_recipe_sha256` in `replay_historical()` for both independent markets. This is explicitly a **whole-manifest-anchored lineage fingerprint**, not the SHA-256 of standalone Ridge coefficients or an assertion that BTC/ETH fitted weights are identical. That pinned manifest contains original market-specific Ridge parameters, scaler provenance, train-only feature recipe and the prediction lineage. Record `recipe_identity_kind=stage2b_manifest_sha256`, market name, pinned manifest SHA-256 and verified Ridge/scaler parameters in final source evidence. Do not refit the estimator, generate forecasts, read Stage 2A research CSV or touch withheld labels. The pure engine accepts caller-supplied identities and does not authenticate artifacts.
 
 ## Period, grid, availability and account transitions
 
@@ -140,9 +139,7 @@ Only `HistoricalConfig(version="historical-base-v1")` is supported:
 | Default base quantity step | `Decimal('0.000001')` for both markets |
 | Sizing convention | `hypothetical-base-step-v1`, explicitly synthetic |
 
-The step is a versioned configuration field, included in its fingerprint. Alternate
-positive steps are supported for synthetic edge tests; the intended historical
-baseline fixes the default before any real results are viewed. It is not a Binance
+The step is a versioned configuration field included in its fingerprint. **Approved base experiment uses `Decimal('0.000001')` for BOTH BTCUSDT and ETHUSDT**, without per-market tuning. Alternate positive steps are synthetic test fixtures only; do not use them in the real run. It is not a Binance
 filter. A step change requires separately labelled configuration/results.
 
 Reuse exact Stage 4B.1 affordability, fee, paired postings and weighted-average
@@ -220,11 +217,7 @@ Planned 4B.2B outputs per market, before examining results:
   unrealised changes, unlike Stage 2D's exit-month round-trip attribution. The full
   baseline's permitted fills never occur at midnight, avoiding a boundary-flow
   ambiguity; new timing policies must explicitly resolve any such ambiguity.
-- Potential context, subject to protocol signoff: constant 10,000-USDT cash;
-  one hypothetical buy-and-hold purchase at inception's original 00:00 reference,
-  using the same base costs/step and all subsequent shared marks. This contextual
-  account must disclose its earlier entry/exposure than Ridge's first 01:00 trade.
-  No counterfactual is silently added to the current engine or called observed.
+- **Required approved contextual benchmarks:** a constant 10,000-USDT virtual cash account with no fees/trades, and a separate buy-and-hold hypothetical account funded with 10,000 USDT. Buy-and-hold makes exactly one full fee-affordable **initial** purchase using the 2024-01-01 00:00 original hourly opening reference at `P × 1.0003`, with identical 10-bps rounded-up USDT fee and `0.000001` synthetic base-unit step. Hold thereafter without further trades or a forced year-end sale. Both comparisons use precisely the SAME retained hourly marks and full 2024 time window as Ridge, retain distinct funds/portfolios and independent ledger-replay evidence, and use shared `affordable_quantity`, `calculate_trade`, `apply_trade` and `reconcile` for all monetary arithmetic. Label B&H an analytical historical counterfactual: its 00:00 entry precedes the earliest possible Ridge 01:00 trade; disclose differing exposure and cost timing. If the initial hypothetical all-or-nothing acquisition is mathematically impossible, label the B&H result unavailable without substituting a later hour or a different sizing policy. No performance selection or retrospective benchmark change is allowed.
 
 No formal significance, independently confirmed alpha, tick-for-tick execution
 parity or holdout performance is inferred. BTC/ETH are correlated. One retrospective
@@ -282,10 +275,6 @@ and protected source/protocol preservation checks. Skipped isolated PostgreSQL
 fixtures are explicitly reported, never counted as passing integration evidence.
 Do not open genuine artifacts merely to satisfy a loader integration test here.
 
-Owner approval must resolve this draft, baseline step, reporting/benchmark
-conventions, recipe-fingerprint canonicalisation and the future publication
-contract **before** actual input inspection. Scenario expansion, real source-loader
-integration and any optional liquidation calculation require their own reviewed
-implementation/tests. Approving synthetic mechanics alone does not authorise
-opening the 2024 predictions, executing the real replay, publishing economic
-results, accessing the holdout or beginning prospective deployment.
+**Approved and frozen 2026-10-16:** Stage 4B.2A synthetic replay mechanics, historical base case 10/1/2-bps costs, `0.000001` synthetic quantity step in both markets, the original 2024 input/hash/chronology and next-hour execution policies, untouched open year-end holdings, explicitly partial final-day and December returns, cash and initial-00:00 buy-and-hold contextual benchmarks, whole-Stage-2B-manifest-anchored Ridge lineage identity, and separate exclusively published deterministic output files with hash-verified manifest.
+
+**Next authorised development:** implement and test Stage 4B.2B offline integration/reporting/publication with fabricated inputs and mocked source-loader calls. **A new approval is mandatory** before genuine 2024 inputs are opened, genuine loaders run, actual 2024 results calculated or economic output files published. Frictionless/stress cost scenarios, optional counterfactual liquidation, new models, parameter search, withheld 2025–2026 labels, genuine Stage 3 evidence and production work are excluded.
