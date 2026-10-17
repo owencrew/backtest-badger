@@ -474,8 +474,28 @@ shared-ledger prefix checks and fixed hourly/daily/monthly reporting.
 bytes and every saved mark, and publishes the manifest last in a new supplied
 temporary directory. All fixture publications explicitly say `synthetic_test`.
 
-Implementation awaits review; see the [guide](stage-04b2b-historical-evaluation-integration.md).
+Stage 4B.2B synthetic integration is accepted; see the [guide](stage-04b2b-historical-evaluation-integration.md).
 No genuine source loader is called and no executable real-run entrypoint exists.
 The hourly baseline and all frozen implementation/protocol files are unchanged.
 Genuine 2024 source access, computation and publication require a later explicit
-owner-approved wrapper. A one-minute scenario is a future proposal only.
+owner-approved wrapper. The separately proposed minute scenario is described below.
+
+
+## Implemented in Stage 4B.2C — draft minute design and synthetic source engineering
+
+The [minute protocol](stage-04b2c-minute-execution-protocol-DRAFT.md) proposes
+strictly-next-minute execution and hourly marks from native minute opens, with a
+prospective fail-closed parity audit before direct hourly valuation comparisons.
+It is DRAFT, not approved or frozen. No minute replay is authorised or implemented.
+
+`minute_execution_data.py` is an isolated standard-library path: exactly 24 fixed
+2024 Binance Spot monthly 1m identities, bounded ZIP/checksum/CSV validation,
+strict complete minute grids, deterministic opening-only CSV and exclusive
+manifest-last publication. Acquisition requires an explicitly injected downloader;
+offline loading requires an external manifest hash and reproduces retained source
+bytes one month at a time. Tests use fabricated ZIPs and temporary destinations.
+See the [engineering guide](stage-04b2c-minute-data-engineering.md) for limits,
+APIs, trust boundaries and source-revision policy. No genuine one-minute source
+release has been acquired, authenticated or frozen. Owner approval of the separate
+protocol and engineering, then explicit acquisition approval, remain required.
+Existing hourly/native 4h paths, PostgreSQL and approved protocols are unchanged.

@@ -3,7 +3,7 @@
 **Last updated:** 2026-10-17 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Review the implemented [Stage 4B.2B synthetic integration](stage-04b2b-historical-evaluation-integration.md) under the [approved historical protocol](stage-04b2-historical-validation-protocol.md). Genuine 2024 input access, calculation and publication remain gated on separate explicit approval and a future real-run wrapper. Stage 4C–4E and Stage 5 remain later work.
+**Next priority:** Owner review of the separate [Stage 4B.2C DRAFT minute protocol](stage-04b2c-minute-execution-protocol-DRAFT.md) and [synthetic source engineering](stage-04b2c-minute-data-engineering.md). Stage 4B.2B is accepted. No genuine minute source release is authenticated/frozen and no minute replay is authorised. Actual acquisition and evaluation require separate approvals; Stage 4C–4E and Stage 5 remain later work.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
@@ -52,7 +52,8 @@ Preferred collaboration workflow: inspect first; propose narrowly scoped changes
 | Forward evidence | Stage 3A genuine immutable live predictions; Stage 3B idempotent collection operations |
 | Scoring | Stage 3C prospective outcomes and Stage 3D automated scoring with separate evidence |
 | Paper primitives | Stage 4B.1 pure strategy transitions, synthetic order execution, Decimal accounting/replay and immutable-mark valuation; locally tested, awaiting review |
-| Historical replay | Approved Stage 4B.2A engine; Stage 4B.2B supplied-loader integration, analytical controls, reports and temporary publisher now implemented awaiting review; synthetic-only, genuine 2024 evaluation not authorised |
+| Historical replay | Approved Stage 4B.2A engine; Stage 4B.2B supplied-loader integration, analytical controls, reports and temporary publisher accepted; synthetic-only, genuine 2024 evaluation not authorised |
+| Minute sources | Stage 4B.2C isolated native 1m validation/publication and offline replay tested with fabricated sources; separate minute protocol remains DRAFT awaiting owner approval; no genuine acquisition or replay |
 | Hosting | Operator-verified Lightsail PostgreSQL and collection/scoring systemd workers plus reliable backup/monitoring stack |
 
 There is **no verified implementation yet** of a complete order/fill/portfolio paper-trading engine, public application API or launched dashboard. Do not claim otherwise merely because the README describes the product vision.
@@ -134,10 +135,35 @@ whitespace checks passed. No isolated PostgreSQL or remote CI execution is claim
 The frozen historical protocol SHA-256 remains
 `b781ddef6d3d26f1dc6d0dcf0336b2bce7ba314b062b87e85fdaff7271839a2b`.
 Existing implementation, Stage 4A documents and genuine artifacts were not changed;
-real artifact contents were not opened or audited. Implementation is uncommitted
-and awaiting review. No real economic result, deployment, new dependency, database
-operation or one-minute scenario was produced. Require separate explicit approval
+real artifact contents were not opened or audited. Stage 4B.2B is now accepted
+and committed in the starting baseline for Stage 4B.2C. No real economic result,
+deployment, new dependency, database operation or one-minute scenario was produced
+by Stage 4B.2B. Require separate explicit approval
 before creating a genuine-source wrapper or reading any real 2024 evidence.
+
+### Stage 4B.2C draft and synthetic sources, 17 October 2026
+
+Starting clean `main`: `fe6035f4bda09a1bbeb59afd8b0d1899463ae4f4`, one CI-only
+commit after expected `31fb40fc88d93a9eeed578412342359fe222def5`. No reset/pull.
+Added isolated minute request/ZIP/CSV validator, injected acquisition publisher
+and pinned offline verifier; tests fabricate native monthly sources and publish
+only under pytest temporary roots. Existing hourly modules and frozen documents
+remain unchanged. The [engineering guide](stage-04b2c-minute-data-engineering.md)
+records APIs, limits, verification and preservation evidence.
+
+Proposed 12:01→12:02 execution, fixed costs/step, separate benchmarks and hourly
+marks from native 1m HH:00 opens remain **DRAFT / NOT APPROVED**. Source revisions
+can cause minute/hourly price discrepancies; a prospectively specified fail-closed
+audit must precede direct comparison. No actual minute source release exists from
+this work. Owner protocol/implementation review, separate explicit acquisition
+authorisation, exact acquired-byte pin review/freeze, separate replay approval and
+finally real-evaluation approval are still required. No Stage 4B.2D was started.
+
+Final checks: **157 focused tests passed; 1,305 passed and 183 isolated-PostgreSQL
+cases skipped in the complete locked suite**. Ruff lint/format (137 files) and
+whitespace checks passed. SHA-256 preservation checks confirm 124 pre-existing
+files unchanged; only the three authorised status documents changed. No database
+or remote CI execution, genuine artifact access, commit, push or deployment.
 
 ## 7. Website (Stage 5, after a reliable paper-trading contract)
 
