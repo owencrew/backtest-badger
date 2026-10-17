@@ -483,7 +483,7 @@ owner-approved wrapper. The separately proposed minute scenario is described bel
 
 ## Implemented in Stage 4B.2C — draft minute design and synthetic source engineering
 
-The [minute protocol](stage-04b2c-minute-execution-protocol-DRAFT.md) proposes
+The [minute protocol](stage-04b2c-minute-execution-protocol.md) proposes
 strictly-next-minute execution and hourly marks from native minute opens, with a
 prospective fail-closed parity audit before direct hourly valuation comparisons.
 It is DRAFT, not approved or frozen. No minute replay is authorised or implemented.
@@ -499,3 +499,5 @@ APIs, trust boundaries and source-revision policy. No genuine one-minute source
 release has been acquired, authenticated or frozen. Owner approval of the separate
 protocol and engineering, then explicit acquisition approval, remain required.
 Existing hourly/native 4h paths, PostgreSQL and approved protocols are unchanged.
+
+**Stage 4B.2C gate update (2026-10-17):** GitHub Actions CI passed and isolated native-1m archive validation is approved; the separate [minute scientific protocol](stage-04b2c-minute-execution-protocol.md) is frozen as `historical-minute-execution-v1`. No 2024 minute archive download, original hourly/reference forecast source access, minute replay, parity audit or economic publication has been authorised.

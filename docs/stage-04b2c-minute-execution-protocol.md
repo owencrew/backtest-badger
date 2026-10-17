@@ -1,16 +1,13 @@
-# DRAFT / NOT APPROVED FOR GENUINE DATA ACQUISITION OR ECONOMIC EVALUATION
+# APPROVED / FROZEN MINUTE EXECUTION METHODOLOGY — REAL DATA ACQUISITION AND EVALUATION NOT YET AUTHORISED
 
-## Stage 4B.2C — Proposed one-minute historical execution scenario
+## Stage 4B.2C — Approved one-minute historical execution scenario
 
-Provisional version: **`historical-minute-execution-draft-v1`**.
-Written 2026-10-17 for owner review. This is a separate proposed scenario, not an
-amendment to frozen `historical-validation-v1`, Stage 4A, or any hourly experiment.
-Stage 4B.2B synthetic engineering is accepted; that acceptance does not approve
-real hourly evaluation or this minute methodology. No minute replay is implemented
+Approved version: **`historical-minute-execution-v1`**.
+Approved and frozen by the product owner on 2026-10-17 after Stage 4B.2C code review and green GitHub Actions CI. This is a distinct scientific design from frozen `historical-validation-v1`, Stage 4A and the hourly experiment. **The approval is methodology-only.** A separate authorisation is required for actual source downloads, real-research source access, minute replay and any results. Substantive scientific changes require a new approved version. No minute replay is implemented
 or authorised, no genuine minute source release is authenticated or frozen, and
 no minute economic result has been calculated.
 
-## Proposed fixed research inputs and decisions
+## Frozen research inputs and decisions
 
 Binance Spot BTCUSDT and ETHUSDT, independently, over
 `[2024-01-01T00:00:00+00:00, 2025-01-01T00:00:00+00:00)`.
@@ -52,10 +49,9 @@ completed exit, and sticky risk-off exit intent. Pending risk exits cannot be
 cancelled by intervening positive forecasts or reused for reentry. Missing real
 forecasts/references abort the scenario, not create synthetic outage histories.
 Future synthetic risk-off tests must explicitly record discovery times and use
-the strictly next minute. These principles are **proposed only**, not simulated
-or implemented here.
+the strictly next minute. These principles are **approved as a research specification only**, not simulated or implemented here.
 
-## Proposed fixed economics and contextual accounts
+## Frozen economics and contextual accounts
 
 Each market's Ridge account starts with **10,000 USDT once** at inception.
 Independent cash and buy-and-hold accounts also start with 10,000 USDT each.
@@ -64,12 +60,12 @@ year-end sale. Retain unsold holdings and basis at year end. A new Ridge signal
 may invest its existing available cash following an earlier exit.
 
 Only the initial timing comparison's **10-bps fee, 1-bp hypothetical half-spread,
-2-bps adverse slippage per side** is proposed. Buy reference ×1.0003; sell
+2-bps adverse slippage per side** is frozen. Buy reference ×1.0003; sell
 reference ×0.9997. Preserve Stage 4B.1's exact fee rounding: 10 bps of adjusted
 notional, rounded UP to 0.00000001 USDT; shared isolated monetary context, exact
 paired ledger postings and fee-aware affordability. Use a synthetic base quantity
 step of **0.000001 for both markets**; full affordable buys and complete sells.
-No frictionless/stress alternative is authorised by this draft.
+No frictionless/stress alternative is authorised by this protocol.
 
 These assumptions are not observations of 2024 fees, spreads, depth, liquidity,
 market impact, tick/lot-size or other Binance filters. No quote, order submission,
@@ -82,7 +78,7 @@ precedes the earliest Ridge trade by two minutes. If inception acquisition is
 mathematically infeasible, report the benchmark unavailable, without substituting
 a later opening. Benchmark accounts remain independent from Ridge and each other.
 
-## Proposed valuation, parity audit and reporting
+## Frozen valuation, parity audit and reporting
 
 Retain **hourly portfolio marks at HH:00**, sourced exclusively from the new
 native **1m HH:00 opening**: 8,784 marks per market per available account, ending
@@ -148,8 +144,7 @@ manifest/schema version, native ZIP/sidecar pins and `minute_opens.csv` hash.
 Hourly source paths, the approved hourly protocol hash and prior experiment
 identifiers remain unchanged.
 
-A future accepted protocol must have a newly approved version/hash. Reserve
-provisional experiment label `stage-4b2-minute-base-v1` and a separate proposed
+This approved protocol is versioned `historical-minute-execution-v1`; record its exact SHA-256 **externally** at future acquisition and evaluation gates, never recursively in this file. The minute source release still lacks genuine source-byte pins and must be frozen after authorised acquisition. Reserve experiment label `stage-4b2-minute-base-v1` and a separate reserved, but not currently authorised,
 `artifacts/paper-historical/stage-4b2-minute-base-v1/` destination. Minute policy,
 source evidence, decisions, fills, ledger, hourly marks and reports need separate
 versioned manifests and filenames/paths within that destination. Record execution
@@ -158,10 +153,8 @@ or opportunistically select among Stage 2C/2D or hourly Stage 4B.2 results.
 
 Required future sequence, each step preserving earlier evidence:
 
-1. Owner finalises and explicitly approves/freezes this separate protocol,
-   including timing, costs, benchmarks, marks, parity-failure treatment and limits.
-2. Review/validate the isolated acquisition implementation, synthetic tests,
-   size/format limits, source identities and exclusive publication contract.
+1. **Completed 2026-10-17:** owner approved and froze this separate minute-execution methodology, including timing, costs, benchmarks, marks, exact parity-failure treatment and resource limits.
+2. **Completed 2026-10-17:** isolated acquisition implementation and its synthetic tests reviewed; CI passed. Genuine 2024 archive availability, source sizes and prices remain unexamined.
 3. **Separately authorise actual acquisition** of exactly the 24 monthly Spot
    ZIP/sidecar pairs into a named fresh destination, using the reviewed code
    revision. Confirm source accessibility; no fallback source or loosened parsing.
@@ -174,6 +167,12 @@ Required future sequence, each step preserving earlier evidence:
 6. Only then explicitly authorise real evaluations against those frozen sources
    and approved implementations into new destinations, with reproduction/review.
 
-Neither this task nor the approved hourly protocol authorises those future steps.
-Stage 4B.2C stops at draft design and synthetic source engineering. No Stage 4B.2D,
+Neither the approval of this minute protocol nor the approved hourly protocol authorises those future steps.
+Stage 4B.2C ends with approved methodology and synthetic source engineering. No Stage 4B.2D,
 holdout access, genuine Stage 3 evidence, database or production work is included.
+
+## Approval record and next authorisation gate
+
+Approved on 2026-10-17 following GitHub Actions success for implementation commit `98a99bde7380cbfdc0efa819abb68d37f87e7e16` (CI run `39055403823`). Frozen choices include the exact Ridge signal/threshold, `12:01 → 12:02` next-minute execution, 10/1/2 bps base-cost policy, `0.000001` synthetic step, independent cash and inception buy-and-hold accounts, hourly HH:00 marks, full native one-minute coverage, and fail-closed exact 1m/1h open parity before any timing-only comparison. Historical outputs remain exploratory validation-period evidence, not independently validated alpha.
+
+**No actual source acquisition is authorised by this approval.** The next gate requires separate explicit owner permission for precisely the 24 specified Binance Spot 2024 1m ZIP/sidecar pairs, an identified reviewed code revision and a fresh destination. Until granted, only acquisition instructions/code may be prepared and reviewed, with no real downloader invocation, artifact creation or real source inspection. After acquisition, the verified original ZIP/sidecar/content and manifest SHA-256s must be reviewed and frozen before minute replay or real economic analysis. Any discrepancy in source parity blocks a direct timing-only comparison pending owner review. No holdout, genuine Stage 3 data, database, prospective execution or deployment is approved.

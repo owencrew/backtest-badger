@@ -3,7 +3,7 @@
 Implemented for review on 2026-10-17. **Synthetic ZIP/CSV fixtures only. No genuine
 2024 one-minute acquisition, source authentication/freeze, historical artifact
 access, minute simulation or economic report.** The separate
-[minute protocol is DRAFT](stage-04b2c-minute-execution-protocol-DRAFT.md), not
+[minute protocol is DRAFT](stage-04b2c-minute-execution-protocol.md), not
 approved. Stage 4B.2B synthetic integration is accepted; its hourly contracts and
 genuine-data gates remain unchanged.
 
@@ -283,3 +283,7 @@ owner review and freeze. Source publication is not approval for replay or econom
 evaluation. Minute replay, parity-audit access to old inputs, original forecast
 loading and real evaluation each remain subject to the draft's separate gates.
 No Stage 4B.2D, holdout, genuine Stage 3, production or public-dashboard work.
+
+## Subsequent owner approval — 2026-10-17
+
+After this synthetic engineering report, GitHub Actions succeeded on commit `98a99bde7380cbfdc0efa819abb68d37f87e7e16`; the owner accepted Stage 4B.2C and froze the separate [minute execution methodology](stage-04b2c-minute-execution-protocol.md) as `historical-minute-execution-v1`. **Real Binance source acquisition and all historical evaluation remain unauthorised** pending explicit separate gates; this statement does not revise earlier synthetic test claims.

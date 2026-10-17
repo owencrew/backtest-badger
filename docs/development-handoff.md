@@ -3,7 +3,7 @@
 **Last updated:** 2026-10-17 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Owner review of the separate [Stage 4B.2C DRAFT minute protocol](stage-04b2c-minute-execution-protocol-DRAFT.md) and [synthetic source engineering](stage-04b2c-minute-data-engineering.md). Stage 4B.2B is accepted. No genuine minute source release is authenticated/frozen and no minute replay is authorised. Actual acquisition and evaluation require separate approvals; Stage 4C–4E and Stage 5 remain later work.
+**Next priority:** Owner review of the separate [Stage 4B.2C DRAFT minute protocol](stage-04b2c-minute-execution-protocol.md) and [synthetic source engineering](stage-04b2c-minute-data-engineering.md). Stage 4B.2B is accepted. No genuine minute source release is authenticated/frozen and no minute replay is authorised. Actual acquisition and evaluation require separate approvals; Stage 4C–4E and Stage 5 remain later work.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
@@ -189,3 +189,7 @@ After each meaningful milestone, refresh:
 - **Next exact task** and open blockers/decisions; remove obsolete claims rather than accumulating contradictory history.
 
 Maintain this as a **short current-state handoff**, not a transcript of hundreds of development steps. Git commits, code, tests and runbooks remain the underlying source of truth.
+
+## Stage 4B.2C subsequent owner approval (2026-10-17)
+
+The pushed source-engineering commit `98a99bde7380cbfdc0efa819abb68d37f87e7e16` passed CI run `39055403823`. Stage 4B.2C is approved; the distinct [one-minute protocol](stage-04b2c-minute-execution-protocol.md) is frozen as `historical-minute-execution-v1`, separate from the hourly baseline. **Next: request explicit permission for the exact 24 monthly native-minute Binance ZIP/sidecar pairs, reviewed code revision and fresh destination before any real download.** Real source availability/pins, 1m vs 1h opening parity, minute replay and any performance evidence remain unverified and unauthorised.
