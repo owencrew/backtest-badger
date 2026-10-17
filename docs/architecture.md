@@ -481,12 +481,13 @@ Genuine 2024 source access, computation and publication require a later explicit
 owner-approved wrapper. The separately proposed minute scenario is described below.
 
 
-## Implemented in Stage 4B.2C — draft minute design and synthetic source engineering
+## Implemented in Stage 4B.2C — frozen minute design and synthetic source engineering
 
-The [minute protocol](stage-04b2c-minute-execution-protocol.md) proposes
+The [minute protocol](stage-04b2c-minute-execution-protocol.md) freezes
 strictly-next-minute execution and hourly marks from native minute opens, with a
 prospective fail-closed parity audit before direct hourly valuation comparisons.
-It is DRAFT, not approved or frozen. No minute replay is authorised or implemented.
+It was approved on 2026-10-17, after synthetic implementation review and CI.
+No real minute acquisition, replay or evaluation is yet authorised.
 
 `minute_execution_data.py` is an isolated standard-library path: exactly 24 fixed
 2024 Binance Spot monthly 1m identities, bounded ZIP/checksum/CSV validation,

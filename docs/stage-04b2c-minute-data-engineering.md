@@ -3,8 +3,7 @@
 Implemented for review on 2026-10-17. **Synthetic ZIP/CSV fixtures only. No genuine
 2024 one-minute acquisition, source authentication/freeze, historical artifact
 access, minute simulation or economic report.** The separate
-[minute protocol is DRAFT](stage-04b2c-minute-execution-protocol.md), not
-approved. Stage 4B.2B synthetic integration is accepted; its hourly contracts and
+[minute protocol](stage-04b2c-minute-execution-protocol.md) was DRAFT at the time of implementation and was subsequently approved/frozen on 2026-10-17; real acquisition and evaluation remain separately gated. Stage 4B.2B synthetic integration is accepted; its hourly contracts and
 genuine-data gates remain unchanged.
 
 ## Verified checkout and scope
