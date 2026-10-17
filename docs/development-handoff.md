@@ -1,9 +1,9 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-16 (UTC)
+**Last updated:** 2026-10-17 (UTC)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Stage 4B.2B synthetic-only loader/report/publication development under the [approved historical protocol](stage-04b2-historical-validation-protocol.md). The actual 2024 evaluation requires a later explicit real-run approval. Stage 4C–4E and Stage 5 remain later work.
+**Next priority:** Review the implemented [Stage 4B.2B synthetic integration](stage-04b2b-historical-evaluation-integration.md) under the [approved historical protocol](stage-04b2-historical-validation-protocol.md). Genuine 2024 input access, calculation and publication remain gated on separate explicit approval and a future real-run wrapper. Stage 4C–4E and Stage 5 remain later work.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
@@ -52,7 +52,7 @@ Preferred collaboration workflow: inspect first; propose narrowly scoped changes
 | Forward evidence | Stage 3A genuine immutable live predictions; Stage 3B idempotent collection operations |
 | Scoring | Stage 3C prospective outcomes and Stage 3D automated scoring with separate evidence |
 | Paper primitives | Stage 4B.1 pure strategy transitions, synthetic order execution, Decimal accounting/replay and immutable-mark valuation; locally tested, awaiting review |
-| Historical replay | Stage 4B.2A supplied-input continuous-holding engine; synthetic tests only, real 2024 evaluation not authorised |
+| Historical replay | Approved Stage 4B.2A engine; Stage 4B.2B supplied-loader integration, analytical controls, reports and temporary publisher now implemented awaiting review; synthetic-only, genuine 2024 evaluation not authorised |
 | Hosting | Operator-verified Lightsail PostgreSQL and collection/scoring systemd workers plus reliable backup/monitoring stack |
 
 There is **no verified implementation yet** of a complete order/fill/portfolio paper-trading engine, public application API or launched dashboard. Do not claim otherwise merely because the README describes the product vision.
@@ -116,6 +116,28 @@ were opened. Changes are uncommitted and undeployed for review.
 implementation; do not fake zero fees through adjusted prices. Stage 4C persistence
 and Stage 4D prospective readers/services still require their own authorisation,
 backup/restore coverage and rehearsal.
+
+### Stage 4B.2B synthetic integration, 17 October 2026
+
+Starting clean HEAD and cached `origin/main` both matched
+`f1df2ecaa426957a09d3577125d1095a2d5dc69b`; no remote fetch or production check.
+Two new modules adapt full supplied loader results, preserve all source/recipe
+identities, run the unchanged base engine and independent cash/B&H accounts,
+report complete/partial calendar periods, and reproduce/verify immutable outputs
+in temporary destinations with the manifest last. No real source loader or CLI
+entrypoint is exposed. The [guide](stage-04b2b-historical-evaluation-integration.md)
+records APIs, synthetic verification, preservation and exact future gate changes.
+Final checks: **92 focused tests passed; 1,148 passed and 183 PostgreSQL cases
+skipped in the complete available suite**. Locked offline Ruff lint/format and
+whitespace checks passed. No isolated PostgreSQL or remote CI execution is claimed.
+
+The frozen historical protocol SHA-256 remains
+`b781ddef6d3d26f1dc6d0dcf0336b2bce7ba314b062b87e85fdaff7271839a2b`.
+Existing implementation, Stage 4A documents and genuine artifacts were not changed;
+real artifact contents were not opened or audited. Implementation is uncommitted
+and awaiting review. No real economic result, deployment, new dependency, database
+operation or one-minute scenario was produced. Require separate explicit approval
+before creating a genuine-source wrapper or reading any real 2024 evidence.
 
 ## 7. Website (Stage 5, after a reliable paper-trading contract)
 

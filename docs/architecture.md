@@ -462,3 +462,20 @@ the [historical protocol](stage-04b2-historical-validation-protocol.md) is now a
 mocked-source loaders, analytical benchmarks, reports and a publisher using synthetic
 data only. Opening genuine 2024 inputs, executing the real historical replay and
 publishing economic results require a separate approval. Prospective Stage 4C–4E gates remain unchanged.
+
+
+## Implemented in Stage 4B.2B — synthetic historical integration
+
+`paper_historical_evaluation.py` validates full two-market loader-shaped supplied
+inputs, declared release/monthly-source pins and manifest-anchored Ridge lineage.
+It composes the unchanged replay engine with separately funded cash/B&H accounts,
+shared-ledger prefix checks and fixed hourly/daily/monthly reporting.
+`paper_historical_publication.py` repeats the calculation, checks deterministic
+bytes and every saved mark, and publishes the manifest last in a new supplied
+temporary directory. All fixture publications explicitly say `synthetic_test`.
+
+Implementation awaits review; see the [guide](stage-04b2b-historical-evaluation-integration.md).
+No genuine source loader is called and no executable real-run entrypoint exists.
+The hourly baseline and all frozen implementation/protocol files are unchanged.
+Genuine 2024 source access, computation and publication require a later explicit
+owner-approved wrapper. A one-minute scenario is a future proposal only.
