@@ -310,3 +310,19 @@ limitations and backups including both outcomes and scoring operations. Stop aft
 Stage 3D; Stage 4 paper trading remains unstarted.
 
 **Stage 4B.2C approval (2026-10-17):** Reviewed synthetic one-minute acquisition code passed GitHub CI. The [minute-execution methodology](stage-04b2c-minute-execution-protocol.md) is now frozen as `historical-minute-execution-v1`. Next approval is **only** a specifically scoped genuine 24-archive/sidecar acquisition with a fixed code revision and new destination; minute replay, source parity and economic results remain separately gated.
+
+
+### Stage 4B.2D — synthetic minute replay and parity (awaiting review)
+
+The minute source release was separately acquired, verified and frozen; see the
+[Stage 4B.2C.3 pins](stage-04b2c-minute-source-pins.md). Stage 4B.2D now implements
+the frozen strictly-next-minute methodology with fabricated inputs, independent
+cash and inception buy-and-hold benchmarks, compact hourly mark reconciliation
+and a pure exact-price parity auditor. Full synthetic 2024 coverage preserves the
+2,195-signal / 8,784-mark grids per market and the missing final 20:01 signal.
+
+Review the [implementation and tests](stage-04b2d-minute-replay-engine.md) before
+separately authorising genuine hourly/minute parity, forecast loading and any
+historical evaluation/publication integration. Source verification does not
+approve economic use. No real replay, holdout access, production work or advance
+to Stage 4C–4E is included.

@@ -502,3 +502,21 @@ protocol and engineering, then explicit acquisition approval, remain required.
 Existing hourly/native 4h paths, PostgreSQL and approved protocols are unchanged.
 
 **Stage 4B.2C gate update (2026-10-17):** GitHub Actions CI passed and isolated native-1m archive validation is approved; the separate [minute scientific protocol](stage-04b2c-minute-execution-protocol.md) is frozen as `historical-minute-execution-v1`. No 2024 minute archive download, original hourly/reference forecast source access, minute replay, parity audit or economic publication has been authorised.
+
+
+## Implemented in Stage 4B.2D — synthetic minute replay and parity
+
+`paper_minute_historical.py` consumes supplied synthetic minute execution/hourly
+mark projections and four-hour Ridge forecasts. It reuses unchanged strategy and
+accounting primitives, maintains independent Ridge/cash/inception-buy-and-hold
+accounts, and verifies compact hourly ledger prefixes after minute executions.
+`minute_price_parity.py` compares separately identified supplied native-hourly and
+native-minute HH:00 grids with exact prices and fail-closed discrepancy reports.
+Neither module loads sources or authenticates the complete minute release.
+
+The [engine guide](stage-04b2d-minute-replay-engine.md) defines APIs, synthetic trust
+boundaries and genuine integration gates. The source release was separately
+verified and frozen in [Stage 4B.2C.3](stage-04b2c-minute-source-pins.md); that record
+supersedes earlier acquisition-status text without changing the frozen protocols.
+Stage 4B.2D is awaiting review. Genuine source access, parity auditing, evaluation
+and publication remain separately authorised work; no production changes occur.
