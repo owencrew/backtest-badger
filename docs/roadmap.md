@@ -321,8 +321,13 @@ cash and inception buy-and-hold benchmarks, compact hourly mark reconciliation
 and a pure exact-price parity auditor. Full synthetic 2024 coverage preserves the
 2,195-signal / 8,784-mark grids per market and the missing final 20:01 signal.
 
-Review the [implementation and tests](stage-04b2d-minute-replay-engine.md) before
-separately authorising genuine hourly/minute parity, forecast loading and any
-historical evaluation/publication integration. Source verification does not
-approve economic use. No real replay, holdout access, production work or advance
-to Stage 4C–4E is included.
+The owner separately authorised Stage 4B.2D.1 implementation and one read-only
+genuine hourly/minute price audit after all synthetic/preflight gates pass.
+The completed audit authenticated both full releases and found **zero exact
+mismatches across 17,568 HH:00 pairs**; no economic calculation was run. The
+[audit guide](stage-04b2d1-genuine-price-parity-audit.md) retains the output pins
+and validation/preservation evidence. Review that evidence
+before separately approving design/tests for a genuine forecast/minute replay
+adapter; actual strategy calculation and immutable economic publication require
+later explicit authorisation. No real replay, holdout access, production work
+or advance to Stage 4C–4E is included.

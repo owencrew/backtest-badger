@@ -518,5 +518,11 @@ The [engine guide](stage-04b2d-minute-replay-engine.md) defines APIs, synthetic 
 boundaries and genuine integration gates. The source release was separately
 verified and frozen in [Stage 4B.2C.3](stage-04b2c-minute-source-pins.md); that record
 supersedes earlier acquisition-status text without changing the frozen protocols.
-Stage 4B.2D is awaiting review. Genuine source access, parity auditing, evaluation
-and publication remain separately authorised work; no production changes occur.
+Stage 4B.2D preserves its synthetic-only APIs. Stage 4B.2D.1 adds the separately
+authorised [genuine opening-price audit](stage-04b2d1-genuine-price-parity-audit.md):
+external pins and unchanged upstream loaders authenticate both full releases
+before exact HH:00 comparison and exclusive manifest-last publication. The
+single authorised genuine audit authenticated both full releases and found zero
+exact mismatches across 17,568 HH:00 pairs; all 101 source files stayed unchanged.
+The guide retains source/output hashes and synthetic/offline validation evidence. Forecast loading, replay and economic publication remain separately
+gated. No production changes occur.

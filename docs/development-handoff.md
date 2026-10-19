@@ -1,9 +1,9 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-18 (UTC)
+**Last updated:** 2026-10-19 (Europe/Ljubljana)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Review the synthetic-only [Stage 4B.2D minute replay and parity implementation](stage-04b2d-minute-replay-engine.md). Stage 4B.2B remains accepted; genuine minute acquisition and source verification were separately completed and [source pins frozen](stage-04b2c-minute-source-pins.md). No genuine parity audit or historical evaluation is authorised by this implementation. Those require separate scoped owner approval and reviewed genuine integration; Stage 4C–4E and Stage 5 remain later work.
+**Next priority:** Review the separately authorised [Stage 4B.2D.1 genuine source-price parity adapter and evidence](stage-04b2d1-genuine-price-parity-audit.md). The single genuine audit completed with zero exact mismatches across all 17,568 HH:00 pairs; both full releases authenticated and all 101 source files remained unchanged. Local validation passed: 72 focused tests; full suite 1,465 passed, 183 PostgreSQL skips. Stage 4B.2D remains synthetic-only. Original forecasts, strategy calculations and economic publication remain outside this task. The next gate requires separate owner approval to design/test a genuine forecast/minute replay adapter, plus later explicit real-calculation/publication approval.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 
@@ -54,7 +54,7 @@ Preferred collaboration workflow: inspect first; propose narrowly scoped changes
 | Paper primitives | Stage 4B.1 pure strategy transitions, synthetic order execution, Decimal accounting/replay and immutable-mark valuation; locally tested, awaiting review |
 | Historical replay | Approved Stage 4B.2A engine; Stage 4B.2B supplied-loader integration, analytical controls, reports and temporary publisher accepted; synthetic-only, genuine 2024 evaluation not authorised |
 | Minute sources | Stage 4B.2C native 1m methodology/engineering approved; separately authorised acquisition and offline verification completed, with immutable Stage 4B.2C.3 source pins frozen on 2026-10-18; economic use remains gated |
-| Minute replay/parity | Stage 4B.2D supplied synthetic execution, independent cash/B&H accounts, compact hourly ledger verification and exact native-hourly/minute parity auditor implemented locally, awaiting review; no genuine artifact access or results |
+| Minute replay/parity | Stage 4B.2D synthetic APIs preserved. Separate Stage 4B.2D.1 authenticated price-only audit completed: 17,568 equal pairs, zero discrepancies, timing-comparison flag true; see its guide for external report pins and test/preservation evidence. No forecast access or economic calculations |
 | Hosting | Operator-verified Lightsail PostgreSQL and collection/scoring systemd workers plus reliable backup/monitoring stack |
 
 There is **no verified implementation yet** of a complete order/fill/portfolio paper-trading engine, public application API or launched dashboard. Do not claim otherwise merely because the README describes the product vision.
