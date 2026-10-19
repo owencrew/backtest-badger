@@ -326,8 +326,23 @@ genuine hourly/minute price audit after all synthetic/preflight gates pass.
 The completed audit authenticated both full releases and found **zero exact
 mismatches across 17,568 HH:00 pairs**; no economic calculation was run. The
 [audit guide](stage-04b2d1-genuine-price-parity-audit.md) retains the output pins
-and validation/preservation evidence. Review that evidence
-before separately approving design/tests for a genuine forecast/minute replay
-adapter; actual strategy calculation and immutable economic publication require
+and validation/preservation evidence. The subsequently authorised Stage 4B.2D.2
+implements only synthetic integration design/tests, as recorded below; actual
+source access, strategy calculation and immutable economic publication require
 later explicit authorisation. No real replay, holdout access, production work
 or advance to Stage 4C–4E is included.
+
+
+### Stage 4B.2D.2 — forecast/minute integration (synthetic; awaiting review)
+
+The [pure adapter and synthetic tests](stage-04b2d2-minute-forecast-integration.md)
+validate all original loader account shapes, model lineage, required next-minute
+references and independently pinned fixture parity evidence. The complete-year
+fixture has 2,195 forecasts and 10,979 projected references per market. Existing
+loaders, scientific protocols, replay guards and monetary modules are unchanged.
+
+Next: owner/code review and CI, then separately approved genuine authentication
+implementation and exact read-only input scope with a fresh verification output.
+A separate typed genuine replay boundary, actual economic calculation, reproduction
+and immutable publication require later approval. No genuine source was opened
+or economic result produced by this synthetic stage.

@@ -526,3 +526,20 @@ single authorised genuine audit authenticated both full releases and found zero
 exact mismatches across 17,568 HH:00 pairs; all 101 source files stayed unchanged.
 The guide retains source/output hashes and synthetic/offline validation evidence. Forecast loading, replay and economic publication remain separately
 gated. No production changes occur.
+
+
+## Stage 4B.2D.2 — synthetic forecast/minute integration awaiting review
+
+`paper_minute_integration.py` validates fabricated loader-shaped evidence only:
+all eight original forecast accounts, train-only Ridge/scaler lineage, full native
+minute metadata, a bounded required-opening projection and independently pinned
+synthetic parity proof. It emits immutable synthetic inputs with explicit
+provenance limitations; no loader, strategy calculation or genuine entry point
+is added. The existing replay/status guard remains byte-identical.
+
+The [integration guide](stage-04b2d2-minute-forecast-integration.md) records the
+required TEST pins, 2,195 signals / 8,784 marks / 10,979 projected minutes per
+market, failure cases and unexecuted genuine-authentication operator plan.
+Review this synthetic stage first. Genuine source access, a distinct typed
+execution boundary, actual simulation and fresh immutable publication each
+remain subject to their separate approvals. No genuine artifacts were accessed.
