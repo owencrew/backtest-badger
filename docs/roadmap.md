@@ -373,3 +373,17 @@ opened or inventoried, and no economic calculation was performed. Next is owner/
 review, then separately reviewed exact-root production wiring and explicit approval
 for one read-only genuine verification attempt. Genuine replay and economic
 reproduction/publication require subsequent distinct authorisations.
+
+### Stage 4B.2D.5 — verification wiring preparation (awaiting review)
+
+The [binding plan and readiness template](stage-04b2d5-genuine-verification-wiring.md)
+now make original loader contracts, exact 57-file declarations, implementation
+allowlist and missing approval evidence inspectable without an executable genuine
+path. The existing fixture runner, publisher and all prior code/tests remain
+unchanged. Both public genuine gates still refuse before argument inspection.
+
+Next: owner review of this preparation, then separately authorised/reviewed
+genuine-enabled wiring, clean commit and matching green CI, complete externally
+retained evidence (including both original forecast lengths), and a distinct
+one-attempt read-only invocation approval. Destination state remains uninspected.
+Genuine replay, strategy execution and economic publication retain later gates.

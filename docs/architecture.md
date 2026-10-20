@@ -570,3 +570,20 @@ opened or inventoried, and no economic calculation was performed. Next is owner/
 review, then separately reviewed exact-root production wiring and explicit approval
 for one read-only genuine verification attempt. Genuine replay and economic
 reproduction/publication require subsequent distinct authorisations.
+
+## Stage 4B.2D.5 — non-executing verification bindings and readiness template
+
+`genuine_minute_verification_wiring.py` declares exact unchanged loader,
+lineage, bounded-projector and prior-publication bindings without dispatching them.
+Its immutable checklist enumerates 57 source files and optionally expands only
+the hash-pinned tracked minute source tables through the existing pure parser.
+It always reports `NOT_APPROVED / NOT_READY / NO_SOURCE_ACCESS`; original forecast
+lengths, future reviewed code/CI/runtime identities, destination preflight and
+owner one-attempt permission remain unresolved.
+
+The [wiring guide](stage-04b2d5-genuine-verification-wiring.md) documents the
+existing private fixture seam, proposed future source change and evidence gates.
+All earlier source modules/tests and both unconditional public refusals remain
+byte-identical. No genuine source or output path was inspected. Owner review,
+separately reviewed enabled code, its green CI and complete independent evidence
+must precede any separately authorised genuine verification invocation.
