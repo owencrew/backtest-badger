@@ -346,3 +346,17 @@ implementation and exact read-only input scope with a fresh verification output.
 A separate typed genuine replay boundary, actual economic calculation, reproduction
 and immutable publication require later approval. No genuine source was opened
 or economic result produced by this synthetic stage.
+
+### Stage 4B.2D.3 — input authentication primitives (synthetic tests only)
+
+The [authentication guide](stage-04b2d3-genuine-minute-input-authentication.md)
+describes the separate frozen `AuthenticatedMinuteInputs` type, original-byte
+checks, full native-grid streaming projection, unchanged forecast/lineage policy
+and actual five-file parity schema validation. Only invented temporary fixtures
+were processed. Source and projection identities remain distinct; execution
+authority is always false. Existing synthetic replay/integration gates are unchanged.
+
+The public operator interface rejects every call before I/O. A reviewed exact-root,
+code-pin, one-use approval and exclusive verification publisher remains design-only.
+Next is owner review of this implementation and its tests; genuine verification,
+then real replay and economic publication each require separate explicit approval.
