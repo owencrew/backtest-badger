@@ -553,7 +553,20 @@ and actual five-file parity schema validation. Only invented temporary fixtures
 were processed. Source and projection identities remain distinct; execution
 authority is always false. Existing synthetic replay/integration gates are unchanged.
 
-The public operator interface rejects every call before I/O. A reviewed exact-root,
-code-pin, one-use approval and exclusive verification publisher remains design-only.
-Next is owner review of this implementation and its tests; genuine verification,
-then real replay and economic publication each require separate explicit approval.
+The public authentication interface still rejects every call before I/O.
+Stage 4B.2D.4 below adds the separately closed verification/publication operator.
+Genuine verification, real replay and economic publication retain distinct approvals.
+
+## Stage 4B.2D.4 — closed one-use verification operator
+
+The [operator guide](stage-04b2d4-genuine-verification-operator.md) describes strict
+external approval pins, atomic one-use reservation, source/code preservation,
+exclusive publication and manifest-last readback. Full native fabricated archives
+and the unchanged validators exercise the private temporary fixture path.
+Scientific verification bytes remain reproducible; filesystem evidence is separate.
+
+Both public interfaces remain unconditionally closed. No genuine artifact was
+opened or inventoried, and no economic calculation was performed. Next is owner/code
+review, then separately reviewed exact-root production wiring and explicit approval
+for one read-only genuine verification attempt. Genuine replay and economic
+reproduction/publication require subsequent distinct authorisations.
