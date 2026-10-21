@@ -587,3 +587,14 @@ All earlier source modules/tests and both unconditional public refusals remain
 byte-identical. No genuine source or output path was inspected. Owner review,
 separately reviewed enabled code, its green CI and complete independent evidence
 must precede any separately authorised genuine verification invocation.
+
+## Stage 4B.2D.6 — activation blocked on independent approval authority
+
+The [activation review proposal](stage-04b2d6-genuine-verification-activation.md)
+uses the owner-authorised fail-closed fallback. No independent approval anchor
+or reviewed observation mechanism has been designated; selecting one requires
+an owner decision. Both public APIs and all production code remain unchanged.
+New refusal regressions supplement the existing fabricated native/publisher tests.
+Both forecast lengths, complete prior auditor identities and future enabled-code/
+CI/runtime evidence remain unresolved. Review this proposal before implementing
+the trusted approval mechanism; no genuine invocation is authorised.

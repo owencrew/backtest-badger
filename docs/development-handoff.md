@@ -1,9 +1,9 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-20 (Europe/London)
+**Last updated:** 2026-10-21 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Review [Stage 4B.2D.5 verification wiring preparation](stage-04b2d5-genuine-verification-wiring.md), based on clean `main` at `550d457aef42b08a2933a701136266d31da082b5`. The non-executing binding plan and 57-file evidence template always report `NOT_APPROVED / NOT_READY / NO_SOURCE_ACCESS`. Both public gates and all previous source/tests remain unchanged. Original forecast lengths, future enabled-code/CI/runtime identities, independent evidence retention, destination preflight and owner one-attempt permission remain unresolved. Separately reviewed source changes and explicit invocation approval are required; no genuine artifacts were accessed and nothing was committed, pushed or deployed.
+**Next priority:** Review the [Stage 4B.2D.6 fail-closed activation proposal](stage-04b2d6-genuine-verification-activation.md), based on clean `main` at `94c0f08cd73e4cbe298ddf1baeec6fe08248cea9`. The owner must designate the independently retained approval anchor and distinct reviewed observation mechanism before genuine activation can be implemented. Both public APIs and all production code/old tests remain unchanged; new refusal tests supplement existing fabricated validation. Both original forecast lengths, complete historical auditor identities, future enabled-code/CI/runtime evidence and one-attempt invocation permission remain unresolved. No genuine source or destination was inspected; no commit, push or deployment occurred.
 
 > **Purpose:** This is a concise continuity record for a new developer, coding agent or ChatGPT conversation. It is not a substitute for reading the current source code, tests, Git history or actual host status. Update it after each substantial milestone. Never infer that proposed work is deployed.
 

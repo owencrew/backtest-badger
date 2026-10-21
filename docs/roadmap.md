@@ -387,3 +387,14 @@ genuine-enabled wiring, clean commit and matching green CI, complete externally
 retained evidence (including both original forecast lengths), and a distinct
 one-attempt read-only invocation approval. Destination state remains uninspected.
 Genuine replay, strategy execution and economic publication retain later gates.
+
+### Stage 4B.2D.6 — activation blocked on independent approval authority
+
+The [activation review proposal](stage-04b2d6-genuine-verification-activation.md)
+uses the owner-authorised fail-closed fallback. No independent approval anchor
+or reviewed observation mechanism has been designated; selecting one requires
+an owner decision. Both public APIs and all production code remain unchanged.
+New refusal regressions supplement the existing fabricated native/publisher tests.
+Both forecast lengths, complete prior auditor identities and future enabled-code/
+CI/runtime evidence remain unresolved. Review this proposal before implementing
+the trusted approval mechanism; no genuine invocation is authorised.
