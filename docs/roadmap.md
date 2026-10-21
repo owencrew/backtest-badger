@@ -423,13 +423,31 @@ records a separate `genuine_minute_verification_runtime.run_genuine_minute_verif
 entry point. It connects the V1 Ed25519 preflight to clean-checkout/runtime and
 external code/source declarations, original scientific validators and the shared
 one-use publisher. CI claims are signed owner declarations, never locally verified
-GitHub attestations. Both owner trust constants remain `None`; default calls refuse
-before approval inspection or I/O. The legacy public refusals, fixture restrictions,
-source loaders, protocols, readiness checklist and scientific semantics are preserved.
+GitHub attestations. At the end of Stage 4B.2D.8 both owner trust constants were
+`None`; enrolment is recorded in Stage 4B.2D.9 below. The legacy public refusals,
+fixture restrictions, source loaders, protocols, readiness checklist and scientific
+semantics are preserved.
 
 Implementation and fabricated tests only, awaiting owner review. Full-native test
 publication is explicitly `synthetic_test_fabricated_signed_genuine_path`; no genuine
-source/destination was inspected or output published. Next: review/commit/green CI,
-separately authorised manual public-key enrolment, independent acquisition of both
-missing forecast lengths and the complete historical auditor map, then a separately
-signed one-attempt approval. No strategy/replay or economic authority is added.
+source/destination was inspected or output published. The then-outstanding steps
+were review/commit/green CI, separate public-key enrolment, independent acquisition
+of both missing forecast lengths and the complete historical auditor map, then a
+separately signed one-attempt approval. No strategy/replay or economic authority is added.
+
+### Stage 4B.2D.9 — owner public key enrolled locally
+
+The [enrolment guide](stage-04b2d9-owner-public-key-enrolment.md) records the
+owner-supplied 32-byte Ed25519 public key and independently pinned raw-byte SHA-256
+ID. Only the verifier constants and its descriptive module sentence changed in
+production source. The separate signed runtime can now in principle accept a
+future valid, complete owner-signed approval; no such approval or genuine
+invocation is supplied or authorised here. Invalid candidates reject before
+source/destination I/O; both legacy public gates still refuse unconditionally.
+
+Next: owner review of this uncommitted change, separate commit/push permission
+and green CI for that exact future commit. Both original forecast byte lengths,
+the complete historical auditor map, all future reviewed code/runtime/document
+identities and the exact complete signed intent remain outstanding. Evidence
+acquisition and any later single invocation need separate permission. No original
+source/destination access, signing, replay, economics or deployment occurred.

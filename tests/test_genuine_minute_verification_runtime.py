@@ -1,4 +1,4 @@
-"""Fabricated signatures/sources only; production owner trust stays unenrolled."""
+"""Fabricated signatures/sources only; no owner-signed approval or genuine run."""
 
 import builtins
 import copy
@@ -81,7 +81,8 @@ def all_io_forbidden(patch):
 
 
 def test_unenrolled_runtime_refuses_every_claim_before_inspection(keys, monkeypatch):
-    assert signed.TRUSTED_OWNER_PUBLIC_KEY is signed.TRUSTED_OWNER_KEY_ID is None
+    assert signed.TRUSTED_OWNER_PUBLIC_KEY != keys[1]
+    assert signed.TRUSTED_OWNER_KEY_ID != keys[2]
     good = document(keys, original_shaped_payload())
     for key, key_id in ((None, None), (None, keys[2]), (keys[1], None)):
         monkeypatch.setattr(signed, "TRUSTED_OWNER_PUBLIC_KEY", key)
@@ -390,7 +391,8 @@ def test_full_native_signed_test_route(verified):
         assert fixtures.ident((output / name).read_bytes()) == identity
     assert phases[-1] == "after_manifest"
     assert phases.index("after_output_readback") < phases.index("create:manifest.json")
-    assert signed.TRUSTED_OWNER_PUBLIC_KEY is signed.TRUSTED_OWNER_KEY_ID is None
+    assert signed.TRUSTED_OWNER_PUBLIC_KEY is not None
+    assert signed.TRUSTED_OWNER_KEY_ID is not None
     with pytest.raises(ValueError):
         fixtures.SYNTHETIC_REPLAY(
             "BTCUSDT",
@@ -674,8 +676,8 @@ from backtest_badger import genuine_minute_verification_runtime as runtime
 class Untrusted:
     def __getattribute__(self, name): raise AssertionError('argument inspected')
 try: runtime.run_genuine_minute_verification(approval=Untrusted())
-except PermissionError: pass
-else: raise AssertionError('unenrolled gate opened')
+except ValueError: pass
+else: raise AssertionError('invalid approval accepted')
 for path in (root / 'artifacts', root.parent / 'crypto-trading-platform'):
     for operation in (lambda: path.stat(), lambda: path.lstat(),
                       lambda: os.listdir(path), lambda: os.open(path, os.O_RDONLY)):
@@ -696,3 +698,135 @@ print('guarded cold runtime and temporary I/O passed')
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.strip() == "guarded cold runtime and temporary I/O passed"
+
+
+def test_enrolled_owner_public_key_identity():
+    expected = bytes.fromhex(
+        "9b22dba87d87cd5d4fa5c6db7948eb3d117ae3ad17b7956a3b0b71d5ba4c18a9"
+    )
+    expected_id = (
+        "sha256:503ebad4f2d36152e2fdc8d71a9b8cbaf2cede3804e6293d7a939f65578abe43"
+    )
+    assert type(signed.TRUSTED_OWNER_PUBLIC_KEY) is bytes
+    assert signed.TRUSTED_OWNER_PUBLIC_KEY == expected
+    assert len(expected) == 32
+    assert signed.TRUSTED_OWNER_KEY_ID == expected_id
+    assert "sha256:" + sha256(expected).hexdigest() == expected_id
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "ephemeral_key",
+        "forged_owner_id",
+        "altered_signature",
+        "missing_signature",
+        "malformed_signature",
+        "fake_key_id",
+        "public_key",
+        "key_fingerprint",
+        "trusted_digest",
+        "trust_store",
+        "missing_manifest_length",
+        "missing_forecast_length",
+        "unsigned_payload",
+        "incomplete_payload",
+        "noncanonical",
+        "malicious",
+        "missing",
+    ],
+)
+def test_enrolled_public_apis_reject_without_any_io(keys, monkeypatch, kind):
+    # All signed bytes come from unrelated ephemeral TEST keys. Even a valid
+    # test signature over the published owner ID cannot authenticate as the owner.
+    candidate = signatures.envelope(keys)
+    assert signatures.verify(keys, signatures.wire(candidate))
+    assert keys[1] != signed.TRUSTED_OWNER_PUBLIC_KEY
+    if kind != "ephemeral_key":
+        candidate["key_id"] = signed.TRUSTED_OWNER_KEY_ID
+        authenticated = {n: candidate[n] for n in ("schema", "key_id", "payload")}
+        candidate["signature"] = (
+            keys[0].sign(signed.DOMAIN + signatures.wire(authenticated)).hex()
+        )
+    if kind == "altered_signature":
+        candidate["signature"] = "00" * 64
+    elif kind == "missing_signature":
+        del candidate["signature"]
+    elif kind == "malformed_signature":
+        candidate["signature"] = "invalid"
+    elif kind == "fake_key_id":
+        candidate["key_id"] = "sha256:" + "0" * 64
+    elif kind in ("public_key", "key_fingerprint", "trusted_digest", "trust_store"):
+        candidate[kind] = keys[1].hex()
+    elif kind in ("missing_manifest_length", "missing_forecast_length"):
+        name = (
+            "manifest.json"
+            if kind == "missing_manifest_length"
+            else "validation_predictions.csv"
+        )
+        del candidate["payload"]["input_inventory"]["forecast"][name]["bytes"]
+    elif kind == "incomplete_payload":
+        candidate["payload"] = {}
+    body = signatures.wire(candidate)
+    if kind == "unsigned_payload":
+        body = signatures.wire(candidate["payload"])
+    elif kind == "noncanonical":
+        body += b"\n"
+    elif kind == "malicious":
+        body = signatures.Malicious()
+    elif kind == "missing":
+        body = None
+    with monkeypatch.context() as patch:
+        all_io_forbidden(patch)
+        for module, name in (
+            (runtime, "_prepare_and_operate"),
+            (runtime, "_read_environment"),
+            (operator, "_publish"),
+            (auth.forecast, "load_forecasts"),
+            (auth.minute, "load_minute_execution_data"),
+        ):
+            patch.setattr(module, name, fixtures.forbidden)
+        for gate in (
+            signed.preflight_owner_approval,
+            runtime.run_genuine_minute_verification,
+        ):
+            with pytest.raises(ValueError, match="^Invalid offline approval.$"):
+                gate(approval=body)
+            for name in ("public_key", "key_id", "trust_store", "trusted_digest"):
+                with pytest.raises(TypeError):
+                    gate(approval=body, **{name: keys[1]})
+        # Prove the interceptors raise before the real operation, including stat,
+        # listing, reservation and dispatch, without probing any original path.
+        for operation in (
+            lambda: builtins.open("/fabricated-guard-probe"),
+            lambda: io.open("/fabricated-guard-probe"),  # noqa: UP020 - test io guard
+            lambda: os.open("/fabricated-guard-probe", os.O_RDONLY),
+            lambda: os.stat("/fabricated-guard-probe"),
+            lambda: os.lstat("/fabricated-guard-probe"),
+            lambda: os.listdir("/fabricated-guard-probe"),
+            lambda: os.scandir("/fabricated-guard-probe"),
+            lambda: os.mkdir("/fabricated-guard-probe"),
+            lambda: runtime._prepare_and_operate(None),
+            lambda: operator._publish(None),
+            lambda: auth.forecast.load_forecasts(None),
+            lambda: auth.minute.load_minute_execution_data(None),
+        ):
+            with pytest.raises(AssertionError, match="Offline boundary"):
+                operation()
+
+
+def test_enrolled_module_body_has_no_io_or_implicit_invocation(monkeypatch):
+    import types
+
+    # Ordinary imports necessarily load Python files. Execute the unchanged module
+    # body with dependencies already imported to isolate any enrolment side effect;
+    # the separate cold-process tests cover normal import under the path guard.
+    code = compile(Path(signed.__file__).read_bytes(), signed.__file__, "exec")
+    module = types.ModuleType("enrolment_import_test")
+    with monkeypatch.context() as patch:
+        all_io_forbidden(patch)
+        patch.setattr(runtime, "run_genuine_minute_verification", fixtures.forbidden)
+        patch.setattr(runtime, "_prepare_and_operate", fixtures.forbidden)
+        exec(code, module.__dict__)
+    assert module.TRUSTED_OWNER_PUBLIC_KEY == signed.TRUSTED_OWNER_PUBLIC_KEY
+    assert module.TRUSTED_OWNER_KEY_ID == signed.TRUSTED_OWNER_KEY_ID

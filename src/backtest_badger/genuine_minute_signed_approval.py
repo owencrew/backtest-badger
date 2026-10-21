@@ -1,4 +1,4 @@
-"""Offline owner signature and intent checks, disabled until reviewed enrolment.
+"""Offline owner signature and intent checks with a pinned owner public key.
 
 No signing, file reading, key discovery or runtime trust injection. Signed CI
 claims are owner declarations, not independent GitHub attestations.
@@ -20,8 +20,12 @@ from backtest_badger import genuine_minute_verification_wiring as wiring
 SCHEMA = "minute-input-owner-signature-v1"
 PAYLOAD_SCHEMA = "minute-input-verification-intent-v1"
 DOMAIN = b"BACKTEST_BADGER_MINUTE_INPUT_VERIFICATION_APPROVAL_V1\n"
-TRUSTED_OWNER_PUBLIC_KEY = None
-TRUSTED_OWNER_KEY_ID = None
+TRUSTED_OWNER_PUBLIC_KEY = bytes.fromhex(
+    "9b22dba87d87cd5d4fa5c6db7948eb3d117ae3ad17b7956a3b0b71d5ba4c18a9"
+)
+TRUSTED_OWNER_KEY_ID = (
+    "sha256:503ebad4f2d36152e2fdc8d71a9b8cbaf2cede3804e6293d7a939f65578abe43"
+)
 MAX_DOCUMENT_BYTES = 1024 * 1024
 IMPLEMENTATION_FILES = tuple(
     sorted(

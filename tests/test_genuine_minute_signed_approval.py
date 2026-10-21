@@ -492,10 +492,13 @@ def test_no_object_adaptation_or_non_json_types(keys):
 
 
 @pytest.mark.parametrize("gate", GATES)
-def test_closed_gates_before_inspection_and_all_io(keys, gate, monkeypatch, tmp_path):
+def test_gates_reject_fabricated_claims_before_all_io(
+    keys, gate, monkeypatch, tmp_path
+):
     good = wire(envelope(keys))
     verified = verify(keys, good)
-    assert signed.TRUSTED_OWNER_PUBLIC_KEY is signed.TRUSTED_OWNER_KEY_ID is None
+    assert signed.TRUSTED_OWNER_PUBLIC_KEY != keys[1]
+    assert signed.TRUSTED_OWNER_KEY_ID != keys[2]
     attempts = []
 
     def unexpected(*args, **kwargs):
@@ -520,12 +523,17 @@ def test_closed_gates_before_inspection_and_all_io(keys, gate, monkeypatch, tmp_
             (operator, ("_run_fixture_verification", "_publish", "_source_snapshot")),
             (auth.forecast, ("load_forecasts",)),
             (auth.minute, ("load_minute_execution_data",)),
-            (signed, ("_verify_envelope",)),
         ):
             for name in names:
                 patch.setattr(module, name, unexpected)
+        if gate is not signed.preflight_owner_approval:
+            patch.setattr(signed, "_verify_envelope", unexpected)
         for value in candidates:
-            with pytest.raises(PermissionError):
+            with pytest.raises(
+                ValueError
+                if gate is signed.preflight_owner_approval
+                else PermissionError
+            ):
                 gate(approval=value)
     assert attempts == []
     assert list(tmp_path.iterdir()) == []
@@ -538,7 +546,7 @@ def test_closed_gates_before_inspection_and_all_io(keys, gate, monkeypatch, tmp_
     ):
         with pytest.raises(TypeError):
             gate(approval=good, **{field: keys[1]})
-    # Enrolment alone is deliberately insufficient; a future code change is needed.
+    # Even test trust cannot authorise invented pins or open the legacy gates.
     monkeypatch.setattr(signed, "TRUSTED_OWNER_PUBLIC_KEY", keys[1])
     monkeypatch.setattr(signed, "TRUSTED_OWNER_KEY_ID", keys[2])
     with pytest.raises(PermissionError):
@@ -648,14 +656,15 @@ assert blocked == 23
 from backtest_badger import genuine_minute_signed_approval as signed
 class Untrusted:
     def __getattribute__(self, name): raise AssertionError('Argument inspected')
-for gate in (signed.preflight_owner_approval,
-             signed.fixture_contract.run_genuine_minute_verification,
-             signed.fixture_contract.auth.authenticate_minute_inputs):
+for gate, error in ((signed.preflight_owner_approval, ValueError),
+             (signed.fixture_contract.run_genuine_minute_verification, PermissionError),
+             (signed.fixture_contract.auth.authenticate_minute_inputs,
+              PermissionError)):
     try: gate(approval=Untrusted())
-    except PermissionError: pass
+    except error: pass
     else: raise AssertionError('Gate opened')
 assert list(Path(sys.argv[1]).iterdir()) == []
-print('23 guarded operations; cold imports and three closed gates passed')
+print('23 guarded operations; cold imports and three refusing gates passed')
 """
     result = subprocess.run(
         [sys.executable, "-c", script, str(tmp_path)],
@@ -667,5 +676,5 @@ print('23 guarded operations; cold imports and three closed gates passed')
     assert result.returncode == 0, result.stdout + result.stderr
     assert (
         result.stdout.strip()
-        == "23 guarded operations; cold imports and three closed gates passed"
+        == "23 guarded operations; cold imports and three refusing gates passed"
     )
