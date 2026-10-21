@@ -288,16 +288,30 @@ from pathlib import Path
 import psycopg
 
 root = Path.cwd()
-tree = ast.parse((root / 'tests/test_genuine_minute_inputs.py').read_text())
-names = {'forbidden', 'check_path', 'install_offline_audit'}
-guard = ast.Module(body=[n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names], type_ignores=[])
+tree = ast.parse((root / "tests/test_genuine_minute_inputs.py").read_text())
+names = {"forbidden", "check_path", "install_offline_audit"}
+guard = ast.Module(
+    body=[n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names],
+    type_ignores=[],
+)
 namespace = dict(os=os, sys=sys, Path=Path, psycopg=psycopg, ROOT=root)
-exec(compile(guard, '<unchanged precollection guard>', 'exec'), namespace)
-namespace['install_offline_audit']()
+exec(compile(guard, "<unchanged precollection guard>", "exec"), namespace)
+namespace["install_offline_audit"]()
 import pytest
-base = Path(tempfile.mkdtemp(prefix='badger-stage8-')).resolve() / 'suite'
-result = pytest.main(['-q', '--rootdir=tests', '--confcutdir=tests', f'--basetemp={base}', '-p', 'no:cacheprovider', *sys.argv[1:]])
-print(f'PYTEST_EXIT={result}', flush=True)
+
+base = Path(tempfile.mkdtemp(prefix="badger-stage8-")).resolve() / "suite"
+result = pytest.main(
+    [
+        "-q",
+        "--rootdir=tests",
+        "--confcutdir=tests",
+        f"--basetemp={base}",
+        "-p",
+        "no:cacheprovider",
+        *sys.argv[1:],
+    ]
+)
+print(f"PYTEST_EXIT={result}", flush=True)
 sys.exit(result)
 ```
 
