@@ -12,6 +12,7 @@ license = "MIT"
 authors = [{ name = "Owen Crew" }]
 dependencies = [
     "alembic>=1.16,<2",
+    "cryptography>=46,<47",
     "numpy>=2,<3",
     "psycopg[binary]>=3.2,<4",
     "scikit-learn>=1.7,<2",

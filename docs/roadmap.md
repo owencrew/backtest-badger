@@ -398,3 +398,19 @@ New refusal regressions supplement the existing fabricated native/publisher test
 Both forecast lengths, complete prior auditor identities and future enabled-code/
 CI/runtime evidence remain unresolved. Review this proposal before implementing
 the trusted approval mechanism; no genuine invocation is authorised.
+
+### Stage 4B.2D.7 — offline Ed25519 approval integrity (awaiting review)
+
+The owner selected offline Ed25519, resolving Stage 4B.2D.6's design-choice
+blocker. The [signed-approval guide](stage-04b2d7-offline-signed-approval.md)
+defines a strict canonical UTF-8 envelope, domain-separated real signature
+verification and a complete inert 57-file intent schema. Fabricated tests use
+ephemeral keys; `cryptography>=46,<47` and its dependencies are locked.
+Production key/ID constants remain `None`; the new preflight and both unchanged
+genuine gates refuse before inspecting arguments or accessing any paths.
+
+Next: owner review, separate independently confirmed public-key enrolment and
+reviewed genuine activation code with matching CI, complete independent evidence
+(including both forecast sizes and the original auditor identity map), then
+separate one-attempt permission. Signature integrity alone grants no source
+access, single-use guarantee, replay authority or economic publication rights.
