@@ -1,7 +1,7 @@
-"""Closed genuine gate; one-use verification/publication mechanics for TEST bytes.
+"""Legacy closed gate, restricted fixtures, and shared verification publication.
 
-No CLI or genuine wiring exists. Injection belongs only to the private temporary
-fixture entry point, never to an owner-facing permission decision.
+The separate signed genuine entry point lives in genuine_minute_verification_runtime.
+Fixture permissions and bindings remain distinct from that production route.
 """
 
 import hashlib
@@ -12,6 +12,8 @@ import re
 import stat
 import subprocess
 import tempfile
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 
 from backtest_badger import genuine_minute_inputs as auth
@@ -75,6 +77,19 @@ APPROVAL_FIELDS = {
     "single_attempt",
     "resume",
 }
+
+
+class _SourceKind(Enum):
+    FIXTURE = SOURCE_KIND
+    GENUINE = "genuine_retained_stage2b_native_minute_prior_parity"
+    SYNTHETIC_TEST = "synthetic_test_fabricated_signed_genuine_path"
+
+
+@dataclass(frozen=True)
+class _SourceRoots:
+    forecast: Path
+    minute: Path
+    parity: Path
 
 
 def run_genuine_minute_verification(*, approval) -> auth.AuthenticatedMinuteInputs:
@@ -287,15 +302,41 @@ def _verify_sources(
     lineage_validator,
     native_loader_evidence,
 ):
-    """Same unchanged validators for all fixture tests; no policy/hash translation."""
+    """Restricted fixture route; never produces genuine scientific evidence."""
+    return _verify_source_roots(
+        _SourceRoots(*(root / name for name in ("forecast", "minute", "parity"))),
+        approved,
+        before,
+        forecast_loader=forecast_loader,
+        minute_loader=minute_loader,
+        lineage_validator=lineage_validator,
+        native_loader_evidence=native_loader_evidence,
+        source_kind=_SourceKind.FIXTURE,
+    )
+
+
+def _verify_source_roots(
+    roots,
+    approved,
+    before,
+    *,
+    forecast_loader,
+    minute_loader,
+    lineage_validator,
+    native_loader_evidence,
+    source_kind,
+):
+    """Shared scientific checks; route is explicit and cannot relabel a record."""
+    require(type(roots) is _SourceRoots, "Explicit source roots required.")
+    require(type(source_kind) is _SourceKind, "Explicit source route required.")
     pins = approved["pins"]
     monthly = {(s, m): row for s, m, row in approved["monthly_sources"]}
     size = approved["input_inventory"]["minute"]["minute_opens.csv"]["bytes"]
     manifest = auth._json(
-        auth._read(root / "forecast/manifest.json", pins["forecast_manifest"])
+        auth._read(roots.forecast / "manifest.json", pins["forecast_manifest"])
     )
     minute_manifest = auth._json(
-        auth._read(root / "minute/manifest.json", pins["minute_manifest"])
+        auth._read(roots.minute / "manifest.json", pins["minute_manifest"])
     )
     auth._minute_metadata(
         minute_manifest,
@@ -308,21 +349,21 @@ def _verify_sources(
         ],
     )
     lineage_validator(manifest)
-    forecasts = auth._forecasts(forecast_loader(root / "forecast"), manifest, pins)
+    forecasts = auth._forecasts(forecast_loader(roots.forecast), manifest, pins)
     verified = minute_loader(
-        root / "minute", expected_manifest_sha256=pins["minute_manifest"]
+        roots.minute, expected_manifest_sha256=pins["minute_manifest"]
     )
     require(
         _json(verified) == _json(minute_manifest), "Native loader metadata mismatch."
     )
     references = auth._stream_projection(
-        root / "minute/minute_opens.csv",
+        roots.minute / "minute_opens.csv",
         monthly,
         expected_sha256=pins["minute_csv"],
         expected_bytes=size,
     )
     bodies = {
-        name: auth._read(root / "parity" / name, before["parity"][name]["sha256"])
+        name: auth._read(roots.parity / name, before["parity"][name]["sha256"])
         for name in auth.PARITY_FILES
     }
     publication, report, provenance = auth._parity_evidence(
@@ -336,7 +377,7 @@ def _verify_sources(
     projections = tuple(auth.projection_sha256(refs) for refs in references)
     evidence = {
         "schema": "minute-input-scientific-evidence-v1",
-        "source_kind": SOURCE_KIND,
+        "source_kind": source_kind.value,
         "native_loader_evidence": native_loader_evidence,
         "pins": pins,
         "original_files": approved["input_inventory"],
@@ -418,7 +459,10 @@ def _readback(destination, payloads):
     return identities
 
 
-def _crosscheck(payloads, approved, before, code_before):
+def _crosscheck(
+    payloads, approved, before, code_before, *, source_kind=_SourceKind.FIXTURE
+):
+    require(type(source_kind) is _SourceKind, "Explicit source route required.")
     science, integrity = (
         auth._json(payloads[n]) for n in ("authenticated_inputs.json", "integrity.json")
     )
@@ -426,7 +470,7 @@ def _crosscheck(payloads, approved, before, code_before):
     require(
         science["status"] == auth.STATUS
         and science["genuine_execution_authorised"] is False
-        and evidence["source_kind"] == SOURCE_KIND
+        and evidence["source_kind"] == source_kind.value
         and evidence["pins"] == approved["pins"]
         and evidence["original_files"] == approved["input_inventory"]
         and evidence["recipe_sha256"] == approved["pins"]["forecast_manifest"]
@@ -503,6 +547,39 @@ def _operate_fixture(root, approved, **bindings):
     directory_before = _directory_identity(root)
     for name in ("forecast", "minute", "parity", "code"):
         _directory_identity(root / name)
+    return _operate_verified(
+        destination,
+        approved,
+        source_kind=_SourceKind.FIXTURE,
+        source_snapshot=lambda: _source_snapshot(root, approved),
+        code_snapshot=lambda: _code_snapshot(root, approved),
+        environment_reader=lambda: _environment(
+            root, approved, bindings["environment_reader"]
+        ),
+        verify_sources=lambda before: _verify_sources(
+            root,
+            approved,
+            before,
+            **{k: v for k, v in bindings.items() if k != "environment_reader"},
+        ),
+        directory_before=directory_before,
+    )
+
+
+def _operate_verified(
+    destination,
+    approved,
+    *,
+    source_kind,
+    source_snapshot,
+    code_snapshot,
+    environment_reader,
+    verify_sources,
+    directory_before,
+):
+    """Shared one-attempt publisher; callbacks are private, never public authority."""
+    require(type(source_kind) is _SourceKind, "Explicit source route required.")
+    root = destination.parent
     # Absence without following even a broken destination symlink; no source open.
     try:
         destination.lstat()
@@ -510,8 +587,8 @@ def _operate_fixture(root, approved, **bindings):
         pass
     else:
         raise FileExistsError("Attempt destination already reserved.")
-    environment = _environment(root, approved, bindings["environment_reader"])
-    code_before = _code_snapshot(root, approved)
+    environment = environment_reader()
+    code_before = code_snapshot()
     _checkpoint("before_reservation")
     parent_fd = os.open(auth._safe(root), os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     fd = None
@@ -524,10 +601,14 @@ def _operate_fixture(root, approved, **bindings):
             == directory_before,
             "Parent directory replaced.",
         )
-        os.mkdir("output", mode=0o700, dir_fd=parent_fd)  # Exactly once; no retry.
+        os.mkdir(
+            destination.name, mode=0o700, dir_fd=parent_fd
+        )  # Exactly once; no retry.
         reserved = True
         fd = os.open(
-            "output", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd
+            destination.name,
+            os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+            dir_fd=parent_fd,
         )
         output_identity = (os.fstat(fd).st_dev, os.fstat(fd).st_ino)
 
@@ -543,28 +624,22 @@ def _operate_fixture(root, approved, **bindings):
 
         def preservation():
             require(
-                _source_snapshot(root, approved) == before,
+                source_snapshot() == before,
                 "Sources changed during attempt.",
             )
             require(
-                _code_snapshot(root, approved) == code_before,
+                code_snapshot() == code_before,
                 "Code inode/stat changed during attempt.",
             )
             require(
-                _environment(root, approved, bindings["environment_reader"])
-                == environment,
+                environment_reader() == environment,
                 "Environment changed during attempt.",
             )
 
         checkpoint("after_reservation")
-        before = _source_snapshot(root, approved)
+        before = source_snapshot()
         checkpoint("source_verification")
-        result = _verify_sources(
-            root,
-            approved,
-            before,
-            **{k: v for k, v in bindings.items() if k != "environment_reader"},
-        )
+        result = verify_sources(before)
         checkpoint("after_verification")
         preservation()
         payloads = {
@@ -581,7 +656,7 @@ def _operate_fixture(root, approved, **bindings):
                 }
             ),
         }
-        _crosscheck(payloads, approved, before, code_before)
+        _crosscheck(payloads, approved, before, code_before, source_kind=source_kind)
         for name, body in payloads.items():
             _publish(fd, name, body, owned, checkpoint)
         checkpoint("output_readback")
@@ -594,6 +669,7 @@ def _operate_fixture(root, approved, **bindings):
             approved,
             before,
             code_before,
+            source_kind=source_kind,
         )
         checkpoint("after_output_readback")
         preservation()
@@ -606,7 +682,7 @@ def _operate_fixture(root, approved, **bindings):
                 "kind": "source_authentication_only",
                 "complete": True,
                 "status": auth.STATUS,
-                "source_kind": SOURCE_KIND,
+                "source_kind": source_kind.value,
                 "genuine_execution_authorised": False,
                 "economic_results": False,
                 "files": identities,

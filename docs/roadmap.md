@@ -414,3 +414,22 @@ reviewed genuine activation code with matching CI, complete independent evidence
 (including both forecast sizes and the original auditor identity map), then
 separate one-attempt permission. Signature integrity alone grants no source
 access, single-use guarantee, replay authority or economic publication rights.
+
+
+### Stage 4B.2D.8 — signed verification integration, unenrolled
+
+The [owner-key and integration guide](stage-04b2d8-owner-key-enrolment-verification-integration.md)
+records a separate `genuine_minute_verification_runtime.run_genuine_minute_verification`
+entry point. It connects the V1 Ed25519 preflight to clean-checkout/runtime and
+external code/source declarations, original scientific validators and the shared
+one-use publisher. CI claims are signed owner declarations, never locally verified
+GitHub attestations. Both owner trust constants remain `None`; default calls refuse
+before approval inspection or I/O. The legacy public refusals, fixture restrictions,
+source loaders, protocols, readiness checklist and scientific semantics are preserved.
+
+Implementation and fabricated tests only, awaiting owner review. Full-native test
+publication is explicitly `synthetic_test_fabricated_signed_genuine_path`; no genuine
+source/destination was inspected or output published. Next: review/commit/green CI,
+separately authorised manual public-key enrolment, independent acquisition of both
+missing forecast lengths and the complete historical auditor map, then a separately
+signed one-attempt approval. No strategy/replay or economic authority is added.

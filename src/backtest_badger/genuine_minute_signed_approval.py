@@ -1,8 +1,7 @@
-"""Offline envelope integrity, never permission to invoke genuine verification.
+"""Offline owner signature and intent checks, disabled until reviewed enrolment.
 
-Only the private verifier accepts an injected key, for fabricated tests. The
-production preflight is unconditionally closed, even if constants are changed.
-No signing, file-reading, key-enrolment, invocation or publication API exists.
+No signing, file reading, key discovery or runtime trust injection. Signed CI
+claims are owner declarations, not independent GitHub attestations.
 """
 
 import calendar
@@ -29,6 +28,9 @@ IMPLEMENTATION_FILES = tuple(
         {
             *wiring.IMPLEMENTATION_FILES,
             "src/backtest_badger/genuine_minute_signed_approval.py",
+            "src/backtest_badger/genuine_minute_verification_runtime.py",
+            ".gitignore",
+            "docs/stage-04b2d8-owner-key-enrolment-verification-integration.md",
             "docs/stage-04b2d6-genuine-verification-activation.md",
             "docs/stage-04b2d7-offline-signed-approval.md",
         }
@@ -63,8 +65,41 @@ MONTHLY_FIELDS = {
 
 
 def preflight_owner_approval(*, approval):
-    """Refuse before argument inspection or I/O; enrolment alone cannot enable it."""
-    raise PermissionError("Owner trust enrolment and genuine invocation remain closed.")
+    """Return detached signed intent bytes; no filesystem or runtime observations.
+
+    The enrolled key is the independent anchor. Commit/CI are signed owner claims;
+    the runtime must separately verify the actual clean checkout and environment.
+    """
+    if TRUSTED_OWNER_PUBLIC_KEY is None or TRUSTED_OWNER_KEY_ID is None:
+        raise PermissionError("Owner trust enrolment remains closed.")
+    payload = _verify_envelope(
+        document=approval,
+        public_key=TRUSTED_OWNER_PUBLIC_KEY,
+        key_id=TRUSTED_OWNER_KEY_ID,
+    )
+    approved = json.loads(payload)
+    if approved["pins"] != dict(wiring.DECLARATIONS):
+        raise PermissionError("Original genuine source declarations required.")
+    _require(
+        approved["hourly_monthly"]
+        == [
+            [s, m, v]
+            for (s, m), v in sorted(
+                fixture_contract.auth.policy.MONTHLY_ZIP_SHA256.items()
+            )
+        ]
+    )
+    for path, key in (
+        (fixture_contract.auth.parity.HOURLY_PROTOCOL, "hourly_protocol"),
+        (fixture_contract.auth.parity.MINUTE_PROTOCOL, "minute_protocol"),
+        (wiring.PIN_DOCUMENT, "minute_pin_document"),
+    ):
+        _require(approved["audit_code"][path] == approved["pins"][key])
+    _require(
+        approved["audit_code"]["src/backtest_badger/genuine_minute_price_parity.py"]
+        == "d4b3fb3f9f06b553fce0f1303a61bc4483feb2d90840573c9c33ac9e5523d092"
+    )
+    return payload
 
 
 def _require(condition):
@@ -139,11 +174,7 @@ def _identities(value, names):
 
 
 def _validate_payload(payload, *, reviewed_commit, ci_run_id):
-    """Validate an inert intent, not genuine evidence or fixture execution rights.
-
-    Expected review identities are independent TEST inputs here. Future production
-    validation must also compare enrolled owner declarations and observed runtime.
-    """
+    """Check complete signed intent; optional expected review values are TEST-only."""
     auth = fixture_contract.auth
     _fields(payload, fixture_contract.APPROVAL_FIELDS)
     _require(payload["schema"] == PAYLOAD_SCHEMA)
@@ -268,11 +299,14 @@ def _validate_payload(payload, *, reviewed_commit, ci_run_id):
             )
 
 
-def _verify_envelope(*, document, public_key, key_id, reviewed_commit, ci_run_id):
-    """Pure INTERNAL fabricated-key seam; return detached canonical payload bytes.
+def _verify_envelope(
+    *, document, public_key, key_id, reviewed_commit=None, ci_run_id=None
+):
+    """Pure verifier reused by enrolled preflight and ephemeral-key tests.
 
-    Injected key/review identities are never production authority. A successful
-    result has no execution eligibility and cannot open either genuine gate.
+    Optional expected commit/CI arguments preserve the earlier private test seam.
+    Absent those TEST assertions, validate the authenticated owner's declarations;
+    never present their internal consistency as independent CI observation.
     """
     try:
         _require(type(public_key) is bytes and len(public_key) == 32)
@@ -308,8 +342,13 @@ def _verify_envelope(*, document, public_key, key_id, reviewed_commit, ci_run_id
             bytes.fromhex(envelope["signature"]),
             DOMAIN + canonical_approval_bytes(authenticated),
         )
+        payload = envelope["payload"]
         _validate_payload(
-            envelope["payload"], reviewed_commit=reviewed_commit, ci_run_id=ci_run_id
+            payload,
+            reviewed_commit=(
+                payload["commit"] if reviewed_commit is None else reviewed_commit
+            ),
+            ci_run_id=(payload["ci"]["run_id"] if ci_run_id is None else ci_run_id),
         )
         return canonical_approval_bytes(envelope["payload"])
     except (
