@@ -1,5 +1,9 @@
 # Stage 4B.2E.1 — Verified-record replay integration
 
+Successor: [Stage 4B.2E.2](stage-04b2e2-publication-replay-bridge.md) adds a private
+in-memory publication reader and replay seam, tested only with invented bytes.
+The public genuine gate remains closed. The record below is the E.1 stage snapshot.
+
 Prepared 2026-10-22 (Europe/London). **Fabricated tests only; awaiting owner review.**
 Starting and final HEAD: `94584dc4b08f06441cff3bcd7983bba1ca0afe8d`.
 The owner's baseline CI declaration is run `39668530849`, success, 2,301 passed

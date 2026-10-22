@@ -669,3 +669,22 @@ the uncommitted diff and the guide's disclosed initial discovery deviation befor
 separately authorising commit/push and CI. A later independently reviewed reader,
 explicit source-access scope and separate execution/publication approvals are
 required. No genuine backtest, signing, economic publication or deployment ran.
+
+## Stage 4B.2E.2 — publication-to-replay bridge, fabricated tests only
+
+The [bridge guide](stage-04b2e2-publication-replay-bridge.md) supersedes E.1's
+pending-reader description. A private pure reader validates three supplied
+publication bodies against separately trusted external byte/hash pins, retained
+verification intent and science/integrity links. Full-year typed conversion feeds
+the unchanged shared monetary core with distinct publication source/result and
+portfolio identities. Existing fixture and synthetic boundaries remain unchanged;
+the public genuine replay gate still refuses before inspection or I/O.
+
+The original publication and private sign-off remain unread. The sign-off is
+represented only by an external fingerprint claim, not an invented JSON schema
+or execution authority. Review of its exact original schema after separately
+authorised read-only access remains a required future integration step. No real
+runner, genuine replay or economic publication is enabled. Review this uncommitted
+change and its disclosed initial filename-discovery deviation before separately
+authorising commit/push, CI, exact original reads, one genuine strategy evaluation,
+and any immutable economic publication.
