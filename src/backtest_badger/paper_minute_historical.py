@@ -1,4 +1,4 @@
-"""Pure, synthetic-only minute replay; supplied projections are NOT source audits.
+"""Synthetic-only public replay and private pure shared minute accounting core.
 
 No loaders, paths, network, databases, quotes, or publication entry points. Native
 minute observations, hypothetical fills and hourly marks have separate identities.
@@ -479,6 +479,31 @@ def replay_minute_historical(
         )
     labels = ("ridge", "cash", "buy_and_hold")
     initial = {label: _fund(symbol, label, model_recipe_sha256) for label in labels}
+    decisions, outputs = _replay_minute_core(
+        plan, refs, marks_at, initial, end_exclusive=end_exclusive
+    )
+    return MinuteResult(
+        symbol,
+        end_exclusive,
+        source,
+        forecast_sha256,
+        model_recipe_sha256,
+        decisions,
+        outputs,
+        "synthetic_missing_signals"
+        if any(d.miss for d in decisions)
+        else "synthetic_complete",
+    )
+
+
+def _replay_minute_core(plan, refs, marks_at, initial, *, end_exclusive):
+    """Private pure loop over validated inputs and independently funded accounts.
+
+    Wrappers own source validation and provenance; this is not an authority gate.
+    No source-kind switch, I/O, policy override or second trading algorithm.
+    """
+    labels = ("ridge", "cash", "buy_and_hold")
+    symbol = initial["ridge"].portfolio.symbol
     accounts = dict(initial)
     fills, marks = {k: [] for k in labels}, {k: [] for k in labels}
     with localcontext(money_context()):
@@ -589,18 +614,7 @@ def replay_minute_historical(
         )
         verify_minute_account(result, end_exclusive=end_exclusive)
         outputs.append(result)
-    return MinuteResult(
-        symbol,
-        end_exclusive,
-        source,
-        forecast_sha256,
-        model_recipe_sha256,
-        tuple(decisions),
-        tuple(outputs),
-        "synthetic_missing_signals"
-        if any(d.miss for d in decisions)
-        else "synthetic_complete",
-    )
+    return tuple(decisions), tuple(outputs)
 
 
 def verify_minute_account(result, *, end_exclusive):

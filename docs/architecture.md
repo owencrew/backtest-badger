@@ -651,3 +651,21 @@ the complete historical auditor map, all future reviewed code/runtime/document
 identities and the exact complete signed intent remain outstanding. Evidence
 acquisition and any later single invocation need separate permission. No original
 source/destination access, signing, replay, economics or deployment occurred.
+
+## Stage 4B.2E.1 — verified-record replay seam, fabricated tests only
+
+The [integration guide](stage-04b2e1-genuine-replay-integration.md) documents the
+closed genuine replay API, private full-grid fixture adapter and minimal shared
+minute accounting loop. Existing synthetic type/status gates remain unchanged.
+All eight forecast accounts and 21,958 projected minute rows remain bound to
+independent fixture declarations; only Ridge drives trading. Test source, result
+and portfolio identities explicitly distinguish this path from synthetic replay.
+
+The owner reports successful Stage 4B.2D.13 verification and Stage 4B.2D.14
+exact-publication readback; retained evidence was not inspected or reused here.
+These later declarations supersede earlier pending-verification descriptions.
+Exact-publication ingestion and genuine strategy execution remain closed. Review
+the uncommitted diff and the guide's disclosed initial discovery deviation before
+separately authorising commit/push and CI. A later independently reviewed reader,
+explicit source-access scope and separate execution/publication approvals are
+required. No genuine backtest, signing, economic publication or deployment ran.
