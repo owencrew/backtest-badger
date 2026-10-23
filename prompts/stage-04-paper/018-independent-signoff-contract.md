@@ -52,45 +52,60 @@ The D.14 readback script creates an record mapping, serialized with json.dumps(r
 
 ```python
 {
-  "schema": "stage-04b2d14-publication-signoff-v1",
-  "status": "PASS",
-  "original_execution_commit": "94584dc4b08f06441cff3bcd7983bba1ca0afe8d",
-  "reviewed_ci_run_id": "39668530849",
-  "publication": "artifacts/audits/stage-04b2d3-minute-inputs-v1",
-  "independent_manifest_sha256": "3d58852c3b837f2853beb6def5350932a25d52dc1373a9fc9d8db5b0d9f31eea",
-  "published_file_identities": {
-    "authenticated_inputs.json": {"bytes": 15272413, "sha256": "2581482b4b8a60fa1a53f7710ed080be7de25d50a76fcae35c8aaf64f2cb2168"},
-    "integrity.json": {"bytes": 74200, "sha256": "23c3d17b2e5b67de701d9a0dd22d6135a907057b9acaeb16bcbdb4cb9c613a8b"},
-    "manifest.json": {"bytes": 560, "sha256": "3d58852c3b837f2853beb6def5350932a25d52dc1373a9fc9d8db5b0d9f31eea"}
-  },
-  "publication_kind": "source_authentication_only",
-  "source_kind": "genuine_retained_stage2b_native_minute_prior_parity",
-  "verification_flags": {
-    "verification_only": True, "single_attempt": True, "resume": False,
-    "strategy_authorised": False, "economic_publication_authorised": False
-  },
-  "genuine_execution_authorised": False,
-  "economic_results": False,
-  "scientific_counts": {
-    "forecast_accounts": 8, "forecasts": 17560, "reference_markets": 2,
-    "references": 21958, "native_minute_rows_authenticated": 1054080
-  },
-  "checks": [
-    "Exact no-follow publication path; exactly three existing files",
-    "Independently retained manifest SHA-256 before parsing",
-    "All manifest-declared companion hashes and byte lengths",
-    "Strict canonical JSON, scientific and operational crosschecks",
-    "Original 57 source, 45 implementation, and 22 historical audit identities",
-    "Second exact-file byte/hash/metadata readback"
-  ],
-  "limitations": [
-    "Read-only post-publication readback, not genuine verification rerun",
-    "No original data sources, signed approval, private signing key or strategy engine read",
-    "CI success was previously independently checked, not re-queried by this script",
-    "Observed file preservation does not exclude hostile replace/restore races",
-    "Procedure restricts inputs by exact paths; no OS-enforced sandbox",
-    "No economic or replay authority is conferred by this sign-off"
-  ]
+    "schema": "stage-04b2d14-publication-signoff-v1",
+    "status": "PASS",
+    "original_execution_commit": "94584dc4b08f06441cff3bcd7983bba1ca0afe8d",
+    "reviewed_ci_run_id": "39668530849",
+    "publication": "artifacts/audits/stage-04b2d3-minute-inputs-v1",
+    "independent_manifest_sha256": "3d58852c3b837f2853beb6def5350932a25d52dc1373a9fc9d8db5b0d9f31eea",
+    "published_file_identities": {
+        "authenticated_inputs.json": {
+            "bytes": 15272413,
+            "sha256": "2581482b4b8a60fa1a53f7710ed080be7de25d50a76fcae35c8aaf64f2cb2168",
+        },
+        "integrity.json": {
+            "bytes": 74200,
+            "sha256": "23c3d17b2e5b67de701d9a0dd22d6135a907057b9acaeb16bcbdb4cb9c613a8b",
+        },
+        "manifest.json": {
+            "bytes": 560,
+            "sha256": "3d58852c3b837f2853beb6def5350932a25d52dc1373a9fc9d8db5b0d9f31eea",
+        },
+    },
+    "publication_kind": "source_authentication_only",
+    "source_kind": "genuine_retained_stage2b_native_minute_prior_parity",
+    "verification_flags": {
+        "verification_only": True,
+        "single_attempt": True,
+        "resume": False,
+        "strategy_authorised": False,
+        "economic_publication_authorised": False,
+    },
+    "genuine_execution_authorised": False,
+    "economic_results": False,
+    "scientific_counts": {
+        "forecast_accounts": 8,
+        "forecasts": 17560,
+        "reference_markets": 2,
+        "references": 21958,
+        "native_minute_rows_authenticated": 1054080,
+    },
+    "checks": [
+        "Exact no-follow publication path; exactly three existing files",
+        "Independently retained manifest SHA-256 before parsing",
+        "All manifest-declared companion hashes and byte lengths",
+        "Strict canonical JSON, scientific and operational crosschecks",
+        "Original 57 source, 45 implementation, and 22 historical audit identities",
+        "Second exact-file byte/hash/metadata readback",
+    ],
+    "limitations": [
+        "Read-only post-publication readback, not genuine verification rerun",
+        "No original data sources, signed approval, private signing key or strategy engine read",
+        "CI success was previously independently checked, not re-queried by this script",
+        "Observed file preservation does not exclude hostile replace/restore races",
+        "Procedure restricts inputs by exact paths; no OS-enforced sandbox",
+        "No economic or replay authority is conferred by this sign-off",
+    ],
 }
 ```
 
