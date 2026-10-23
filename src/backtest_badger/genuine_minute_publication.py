@@ -580,20 +580,56 @@ def _parity_links(evidence, approved):
         == {n: h for n, h in external["hourly"].items() if n != "manifest.json"},
         "Wrong retained hourly lineage.",
     )
+    _verify_hourly_associations(hourly["sources"], approved["hourly_monthly"])
+
+
+def _verify_hourly_associations(sources, declarations):
+    """Verify 24 monthly hourly sources by (symbol, month), not list position.
+
+    This matches the original genuine auditor's key-based association policy.
+    Reject duplicates, missing/extra keys, changed hashes or failed integrity flags.
+    """
     require(
-        type(hourly["sources"]) is list and len(hourly["sources"]) == 24,
+        type(sources) is list and len(sources) == 24,
         "Incomplete hourly sources.",
     )
-    for source, (symbol, month, value) in zip(
-        hourly["sources"], approved["hourly_monthly"], strict=True
-    ):
+    require(
+        type(declarations) is list and len(declarations) == 24,
+        "Incomplete reviewed hourly associations.",
+    )
+    expected = {}
+    for row in declarations:
+        require(type(row) is list and len(row) == 3, "Invalid hourly declaration.")
+        symbol, month, source_sha256 = row
         require(
-            (source["symbol"], source["month"], source["sha256"])
-            == (symbol, month, value)
+            type(symbol) is str
+            and type(month) is str
+            and type(source_sha256) is str
+            and (symbol, month) not in expected,
+            "Duplicate/invalid reviewed hourly association.",
+        )
+        digest(source_sha256)
+        expected[symbol, month] = source_sha256
+
+    seen = set()
+    for source in sources:
+        require(type(source) is dict, "Invalid retained hourly source.")
+        symbol, month = source["symbol"], source["month"]
+        require(
+            type(symbol) is str and type(month) is str,
+            "Invalid retained hourly market/month.",
+        )
+        key = symbol, month
+        require(
+            key in expected
+            and key not in seen
+            and source["sha256"] == expected[key]
             and source["complete"] is True
             and source["checksum_valid"] is True,
             "Retained hourly source association changed.",
         )
+        seen.add(key)
+    require(seen == set(expected), "Incomplete retained hourly associations.")
 
 
 def _records(science, evidence):
