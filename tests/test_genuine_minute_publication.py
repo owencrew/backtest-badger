@@ -1,6 +1,7 @@
 """Invented full-year publication bytes only; never original evidence or authority."""
 
-from dataclasses import replace
+import json
+from dataclasses import FrozenInstanceError, replace
 from hashlib import sha256
 
 import pytest
@@ -578,3 +579,364 @@ def test_changed_original_commit_and_ci_not_blessed_by_candidate(fabricated):
     integrity["environment"]["commit"] = "b" * 40
     with pytest.raises(ValueError, match="External publication"):
         parse(serialize(science, integrity), pins)
+
+
+# This is the owner-supplied WRITER SCHEMA with unrelated fabricated identities.
+# It is not a serialization or verification of the externally retained original.
+def signoff_record(pins):
+    return {
+        "schema": "stage-04b2d14-publication-signoff-v1",
+        "status": "PASS",
+        "original_execution_commit": signatures.COMMIT,
+        "reviewed_ci_run_id": signatures.RUN,
+        "publication": "artifacts/audits/stage-04b2d3-minute-inputs-v1",
+        "independent_manifest_sha256": pins.manifest.sha256,
+        "published_file_identities": {
+            name: {"bytes": pin.bytes, "sha256": pin.sha256}
+            for name, pin in zip(
+                bridge.FILES,
+                (pins.manifest, pins.authenticated_inputs, pins.integrity),
+                strict=True,
+            )
+        },
+        "publication_kind": "source_authentication_only",
+        "source_kind": "genuine_retained_stage2b_native_minute_prior_parity",
+        "verification_flags": {
+            "verification_only": True,
+            "single_attempt": True,
+            "resume": False,
+            "strategy_authorised": False,
+            "economic_publication_authorised": False,
+        },
+        "genuine_execution_authorised": False,
+        "economic_results": False,
+        "scientific_counts": {
+            "forecast_accounts": 8,
+            "forecasts": 17560,
+            "reference_markets": 2,
+            "references": 21958,
+            "native_minute_rows_authenticated": 1054080,
+        },
+        "checks": [
+            "Exact no-follow publication path; exactly three existing files",
+            "Independently retained manifest SHA-256 before parsing",
+            "All manifest-declared companion hashes and byte lengths",
+            "Strict canonical JSON, scientific and operational crosschecks",
+            "Original 57 source, 45 implementation, and 22 historical audit identities",
+            "Second exact-file byte/hash/metadata readback",
+        ],
+        "limitations": [
+            "Read-only post-publication readback, not genuine verification rerun",
+            "No original data sources, signed approval, private signing key "
+            "or strategy engine read",
+            "CI success was previously independently checked, "
+            "not re-queried by this script",
+            "Observed file preservation does not exclude hostile replace/restore races",
+            "Procedure restricts inputs by exact paths; no OS-enforced sandbox",
+            "No economic or replay authority is conferred by this sign-off",
+        ],
+    }
+
+
+def signoff_wire(record):
+    # Deliberately independent of the production serializer.
+    return (
+        json.dumps(record, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        + "\n"
+    ).encode("utf-8")
+
+
+@pytest.fixture(scope="module")
+def signed_publication(fabricated):
+    bodies, pins, _ = fabricated
+    body = signoff_wire(signoff_record(pins))
+    pins = replace(pins, signoff=fingerprint(body))
+    return body, parse(bodies, pins), pins
+
+
+def reconcile(body, publication, pins, *, retained=None):
+    return bridge._validate_independent_signoff(
+        signoff=body,
+        expected_signoff=pins.signoff if retained is None else retained,
+        publication=publication,
+        expected=pins,
+    )
+
+
+def candidate_signoff(body, publication, pins):
+    # TEST-only repinning exercises content checks beyond the external hash gate.
+    pins = replace(pins, signoff=fingerprint(body))
+    return body, replace(publication, pins=pins), pins
+
+
+def test_signoff_complete_roundtrip_no_execution(signed_publication, monkeypatch):
+    monkeypatch.setattr(minute, "_replay_minute_core", fixtures.forbidden)
+    monkeypatch.setattr(bridge, "_replay_verified_publication", fixtures.forbidden)
+    body, publication, pins = signed_publication
+    result = reconcile(body, publication, pins)
+    assert type(result) is bridge._ReconciledSignoff
+    assert result.body == body == signoff_wire(json.loads(body))
+    assert result.publication == publication
+    assert result.publication is not publication  # newly validated evidence
+    assert json.loads(body)["original_execution_commit"] == "a" * 40
+    assert json.loads(body)["reviewed_ci_run_id"] == "123456"
+    with pytest.raises(FrozenInstanceError):
+        result.body = b"changed"
+    for argument in (result, publication, ExplosiveApproval()):
+        with pytest.raises(PermissionError):
+            replay.replay_genuine_minute_historical(approval=argument)
+    with pytest.raises(ValueError):
+        minute.price_source_sha256(result)
+    with pytest.raises(ValueError):
+        prior.hourly.evaluate_bundle(result)
+
+
+class ExplosiveApproval:
+    def __getattribute__(self, name):
+        raise AssertionError("Public gate inspected its argument")
+
+
+# Every leaf and every object/list in the frozen schema is independently mutated.
+_SCHEMA = signoff_record(
+    bridge._PublicationPins(*(bridge._Fingerprint("c" * 64, 123) for _ in range(4)))
+)
+
+
+def schema_paths(value, prefix=()):
+    for key, item in value.items():
+        path = (*prefix, key)
+        yield path
+        if type(item) is dict:
+            yield from schema_paths(item, path)
+
+
+SIGNOFF_PATHS = tuple(schema_paths(_SCHEMA))
+
+
+@pytest.mark.parametrize("path", SIGNOFF_PATHS, ids=lambda p: ".".join(p))
+@pytest.mark.parametrize("mutation", ("alter", "omit", "wrong_type"))
+def test_signoff_every_required_field(signed_publication, path, mutation):
+    body, publication, pins = signed_publication
+    record = json.loads(body)
+    parent = record
+    for key in path[:-1]:
+        parent = parent[key]
+    key = path[-1]
+    old = parent[key]
+    if mutation == "omit":
+        del parent[key]
+    elif mutation == "wrong_type":
+        parent[key] = {
+            bool: int,
+            int: float,
+            str: list,
+            list: lambda _: {},
+            dict: list,
+        }[type(old)](old)
+    else:
+        parent[key] = (
+            {**old, "unexpected": 0}
+            if type(old) is dict
+            else [*old, "substitute"]
+            if type(old) is list
+            else not old
+            if type(old) is bool
+            else old + 1
+            if type(old) is int
+            else old + "-altered"
+        )
+    with pytest.raises(ValueError):
+        reconcile(*candidate_signoff(signoff_wire(record), publication, pins))
+
+
+@pytest.mark.parametrize("name", ("checks", "limitations"))
+@pytest.mark.parametrize("index", range(6))
+@pytest.mark.parametrize("mutation", ("omit", "substitute", "reorder"))
+def test_signoff_exact_attestation_lists(signed_publication, name, index, mutation):
+    body, publication, pins = signed_publication
+    record = json.loads(body)
+    items = record[name]
+    if mutation == "omit":
+        items.pop(index)
+    elif mutation == "substitute":
+        items[index] += " "
+    else:
+        items[index], items[(index + 1) % 6] = items[(index + 1) % 6], items[index]
+    with pytest.raises(ValueError):
+        reconcile(*candidate_signoff(signoff_wire(record), publication, pins))
+
+
+@pytest.mark.parametrize(
+    "kind",
+    (
+        "no_newline",
+        "spaces",
+        "reordered",
+        "duplicate",
+        "nested_duplicate",
+        "nan",
+        "infinity",
+        "negative_infinity",
+        "overflow",
+        "extra",
+        "array",
+        "invalid_utf8",
+        "bom",
+        "trailing",
+        "deep",
+    ),
+)
+def test_signoff_strict_json(signed_publication, kind):
+    body, publication, pins = signed_publication
+    record = json.loads(body)
+    candidates = {
+        "no_newline": body[:-1],
+        "spaces": body + b" ",
+        "reordered": (
+            json.dumps(dict(reversed(record.items())), separators=(",", ":")) + "\n"
+        ).encode(),
+        "duplicate": body.replace(b"{", b'{"status":"PASS",', 1),
+        "nested_duplicate": body.replace(
+            b'"forecast_accounts":8', b'"forecast_accounts":8,"forecast_accounts":8'
+        ),
+        "extra": body.replace(b"{", b'{"extra":0,', 1),
+        "array": b"[]\n",
+        "invalid_utf8": b"\xff\n",
+        "bom": b"\xef\xbb\xbf" + body,
+        "trailing": body + b"{}\n",
+        "deep": b"[" * 2000 + b"]" * 2000 + b"\n",
+    }
+    for label, number in (
+        ("nan", b"NaN"),
+        ("infinity", b"Infinity"),
+        ("negative_infinity", b"-Infinity"),
+        ("overflow", b"1e999"),
+    ):
+        candidates[label] = body.replace(b'"forecasts":17560', b'"forecasts":' + number)
+    with pytest.raises(ValueError):
+        reconcile(*candidate_signoff(candidates[kind], publication, pins))
+
+
+@pytest.mark.parametrize(
+    "kind",
+    (
+        "body_hash",
+        "body_length",
+        "bytearray",
+        "pin_hash",
+        "pin_length",
+        "bool_length",
+        "float_length",
+        "over_limit",
+        "zero_length",
+        "pin_dict",
+        "continuity",
+    ),
+)
+def test_signoff_identity_before_any_json(signed_publication, kind, monkeypatch):
+    body, publication, pins = signed_publication
+    retained = pins.signoff
+    if kind == "body_hash":
+        body = body.replace(b"PASS", b"FAIL")
+    elif kind == "body_length":
+        body += b"\n"
+    elif kind == "bytearray":
+        body = bytearray(body)
+    elif kind == "pin_hash":
+        retained = replace(retained, sha256="0" * 64)
+    elif kind == "pin_dict":
+        retained = {"sha256": retained.sha256, "bytes": retained.bytes}
+    elif kind == "continuity":
+        pins = replace(pins, signoff=replace(retained, sha256="0" * 64))
+    else:
+        retained = replace(
+            retained,
+            bytes={
+                "pin_length": retained.bytes + 1,
+                "bool_length": True,
+                "float_length": float(retained.bytes),
+                "over_limit": 1024 * 1024 + 1,
+                "zero_length": 0,
+            }[kind],
+        )
+    monkeypatch.setattr(auth, "_json", fixtures.forbidden)
+    with pytest.raises(ValueError):
+        reconcile(body, publication, pins, retained=retained)
+
+
+@pytest.mark.parametrize("name", ("original_execution_commit", "reviewed_ci_run_id"))
+def test_signoff_self_hashed_new_execution_claim_rejected(signed_publication, name):
+    body, publication, pins = signed_publication
+    record = json.loads(body)
+    record[name] = "b" * 40 if name.endswith("commit") else "987654321"
+    body = signoff_wire(record)
+    # Keeping independent pins refuses even syntactically sound fake records.
+    with pytest.raises(ValueError, match="External sign-off"):
+        reconcile(body, publication, pins, retained=fingerprint(body))
+    # Even TEST repinning cannot reconcile a new implementation's identity with
+    # the distinct original verification commit/CI retained in integrity.json.
+    with pytest.raises(ValueError, match="contract/publication"):
+        reconcile(*candidate_signoff(body, publication, pins))
+
+
+@pytest.mark.parametrize("kind", ("inputs", "pins", "bodies", "list", "object"))
+def test_signoff_injected_publication(signed_publication, kind):
+    body, publication, pins = signed_publication
+    if kind == "inputs":
+        publication = replace(
+            publication, inputs=replace(publication.inputs, forecasts=())
+        )
+    elif kind == "pins":
+        publication = replace(publication, pins=replace(pins, integrity=pins.manifest))
+    elif kind == "bodies":
+        publication = replace(publication, bodies=(b"{}\n", *publication.bodies[1:]))
+    elif kind == "list":
+        publication = replace(publication, bodies=list(publication.bodies))
+    else:
+        publication = object()
+    with pytest.raises(ValueError):
+        reconcile(body, publication, pins)
+
+
+@pytest.mark.parametrize("name", bridge.FILES_KEYS)
+def test_signoff_external_publication_pin_mismatch(signed_publication, name):
+    body, publication, pins = signed_publication
+    pins = replace(pins, **{name: replace(getattr(pins, name), sha256="0" * 64)})
+    with pytest.raises(ValueError, match="External publication"):
+        reconcile(body, publication, pins)
+
+
+@pytest.mark.parametrize("name", tuple(_SCHEMA["scientific_counts"]))
+def test_signoff_boolean_counts_rejected(signed_publication, name):
+    body, publication, pins = signed_publication
+    record = json.loads(body)
+    record["scientific_counts"][name] = True
+    with pytest.raises(ValueError):
+        reconcile(*candidate_signoff(signoff_wire(record), publication, pins))
+
+
+@pytest.mark.parametrize(
+    "kind", ("manifest_flag", "manifest_identity", "integrity_flag", "counts")
+)
+def test_signoff_revalidates_upstream_claims(signed_publication, kind):
+    body, publication, pins = signed_publication
+    manifest, science, integrity = map(auth._json, publication.bodies)
+    if kind == "manifest_flag":
+        manifest["economic_results"] = True
+    elif kind == "manifest_identity":
+        manifest["files"]["integrity.json"]["bytes"] += 1
+    elif kind == "integrity_flag":
+        integrity["approval"]["strategy_authorised"] = True
+    else:
+        evidence = auth._json(science["source_evidence_json"])
+        evidence["counts"]["native_rows"] += 1
+        science["source_evidence_json"] = operator._json(evidence).decode()
+    bodies = serialize(science, integrity)
+    if kind.startswith("manifest"):
+        bodies = (operator._json(manifest), *bodies[1:])
+    pins = repin(bodies, pins.signoff)
+    body = signoff_wire(signoff_record(pins))
+    pins = replace(pins, signoff=fingerprint(body))
+    publication = replace(publication, bodies=bodies, pins=pins)
+    with pytest.raises(ValueError):
+        reconcile(body, publication, pins)

@@ -2,7 +2,8 @@
 
 External pins must come from a separately trusted owner-reviewed boundary. Matching
 caller-invented bytes and pins do NOT establish independent authentication. Frozen
-Python records are not capabilities. The original sign-off schema remains unread.
+Python records are not capabilities. Original publication/sign-off bytes stay unread
+during development; the D.14 writer contract is supplied independently by the owner.
 """
 
 import json
@@ -24,6 +25,24 @@ KIND = "genuine_publication_hypothetical_minute_replay"
 SOURCE_KIND = operator._SourceKind.GENUINE.value
 FILES = ("manifest.json", "authenticated_inputs.json", "integrity.json")
 LIMITS = (4096, 32 * 1024 * 1024, 1024 * 1024)
+SIGNOFF_PUBLICATION = "artifacts/audits/stage-04b2d3-minute-inputs-v1"
+SIGNOFF_CHECKS = (
+    "Exact no-follow publication path; exactly three existing files",
+    "Independently retained manifest SHA-256 before parsing",
+    "All manifest-declared companion hashes and byte lengths",
+    "Strict canonical JSON, scientific and operational crosschecks",
+    "Original 57 source, 45 implementation, and 22 historical audit identities",
+    "Second exact-file byte/hash/metadata readback",
+)
+SIGNOFF_LIMITATIONS = (
+    "Read-only post-publication readback, not genuine verification rerun",
+    "No original data sources, signed approval, private signing key "
+    "or strategy engine read",
+    "CI success was previously independently checked, not re-queried by this script",
+    "Observed file preservation does not exclude hostile replace/restore races",
+    "Procedure restricts inputs by exact paths; no OS-enforced sandbox",
+    "No economic or replay authority is conferred by this sign-off",
+)
 
 
 @dataclass(frozen=True)
@@ -49,6 +68,14 @@ class _VerifiedPublication:
     bodies: tuple[bytes, bytes, bytes]
     pins: _PublicationPins
     inputs: auth.AuthenticatedMinuteInputs
+
+
+@dataclass(frozen=True)
+class _ReconciledSignoff:
+    """Historical document agreement only; not an execution capability."""
+
+    body: bytes
+    publication: _VerifiedPublication
 
 
 @dataclass(frozen=True)
@@ -751,6 +778,99 @@ def _parse_verified_publication(
         InvalidOperation,
     ) as error:
         raise ValueError("Malformed verified publication.") from error
+
+
+def _validate_independent_signoff(*, signoff, expected_signoff, publication, expected):
+    """Reconcile exact D.14 bytes with independently pinned publication evidence.
+
+    Caller-created pins cannot establish independence. Reparse retained publication
+    bytes rather than trusting an injected record. No source reads, signature/CI
+    refresh, strategy execution or authority transfer takes place here.
+    """
+    _fingerprint(expected_signoff, 1024 * 1024)
+    require(
+        type(signoff) is bytes
+        and len(signoff) == expected_signoff.bytes
+        and sha256(signoff).hexdigest() == expected_signoff.sha256,
+        "External sign-off bytes/hash mismatch.",
+    )
+    require(
+        type(expected) is _PublicationPins, "Independent publication pins required."
+    )
+    _fingerprint(expected.signoff, 1024 * 1024)
+    require(expected_signoff == expected.signoff, "External sign-off pin changed.")
+    require(type(publication) is _VerifiedPublication, "Parsed publication required.")
+    require(
+        type(publication.bodies) is tuple and len(publication.bodies) == 3,
+        "Immutable original publication bodies required.",
+    )
+    try:
+        record = _canonical(signoff)
+        checked = _parse_verified_publication(
+            **dict(zip(FILES_KEYS, publication.bodies, strict=True)),
+            expected=expected,
+            signoff_claim=expected_signoff,
+        )
+        require(publication == checked, "Injected/changed verified record.")
+        manifest = _canonical(checked.bodies[0])
+        approved = _canonical(checked.bodies[2])["approval"]
+        evidence = _canonical(checked.inputs.source_evidence_json)
+        identities = {
+            name: {"sha256": pin.sha256, "bytes": pin.bytes}
+            for name, pin in zip(
+                FILES,
+                (expected.manifest, expected.authenticated_inputs, expected.integrity),
+                strict=True,
+            )
+        }
+        # The manifest binds its two companions; its own identity is bound by
+        # exact externally pinned bytes above, never by a self-referential hash.
+        require(
+            operator._json(manifest["files"])
+            == operator._json({name: identities[name] for name in FILES[1:]}),
+            "Manifest/external identity mismatch.",
+        )
+        # Canonical encoded comparison preserves bool/int/float distinctions and
+        # enforces every key, scalar type and ordered descriptive statement.
+        declaration = {
+            "schema": "stage-04b2d14-publication-signoff-v1",
+            "status": "PASS",
+            "original_execution_commit": approved["commit"],
+            "reviewed_ci_run_id": approved["ci"]["run_id"],
+            "publication": SIGNOFF_PUBLICATION,
+            "independent_manifest_sha256": expected.manifest.sha256,
+            "published_file_identities": identities,
+            "publication_kind": manifest["kind"],
+            "source_kind": manifest["source_kind"],
+            "verification_flags": {
+                name: approved[name]
+                for name in (
+                    "verification_only",
+                    "single_attempt",
+                    "resume",
+                    "strategy_authorised",
+                    "economic_publication_authorised",
+                )
+            },
+            "genuine_execution_authorised": manifest["genuine_execution_authorised"],
+            "economic_results": manifest["economic_results"],
+            "scientific_counts": {
+                "forecast_accounts": len(checked.inputs.forecasts),
+                "forecasts": sum(map(len, checked.inputs.forecasts)),
+                "reference_markets": len(checked.inputs.references),
+                "references": sum(map(len, checked.inputs.references)),
+                "native_minute_rows_authenticated": evidence["counts"]["native_rows"],
+            },
+            "checks": list(SIGNOFF_CHECKS),
+            "limitations": list(SIGNOFF_LIMITATIONS),
+        }
+        require(
+            operator._json(record) == operator._json(declaration),
+            "Independent sign-off contract/publication mismatch.",
+        )
+        return _ReconciledSignoff(signoff, checked)
+    except (KeyError, TypeError, IndexError, UnicodeError, RecursionError) as error:
+        raise ValueError("Malformed independent sign-off.") from error
 
 
 def _replay_verified_publication(publication, *, expected, signoff_claim):
