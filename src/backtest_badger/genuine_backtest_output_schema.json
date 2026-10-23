@@ -1,0 +1,1174 @@
+{
+  "definitions": {
+    "s0516901a3a19": {
+      "literals": [
+        "hypothetical_previously_inspected_validation"
+      ]
+    },
+    "s071cbce1a2ec": {
+      "literals": [
+        "source_authentication_complete_verification_only_replay_not_authorised"
+      ]
+    },
+    "s08fc6c8c1d26": {
+      "items": "sf04a3f18a34f"
+    },
+    "s0a4a25c46708": {
+      "patterns": [
+        "reference"
+      ]
+    },
+    "s0c199748d20f": {
+      "objects": [
+        {
+          "amount": "se59a48182ddb",
+          "asset": "s6aa8aa5c9524"
+        }
+      ]
+    },
+    "s0e529b211aab": {
+      "items": "sc69d5bdf9c4a"
+    },
+    "s0ec7c0acbb50": {
+      "objects": [
+        {
+          "fills": "s368983869b60",
+          "final": "s5dc810c8c5c0",
+          "initial": "s40a8ecfd8e93",
+          "label": "s5e8816d19f3a",
+          "marks": "sc9eb89d54918",
+          "reason": "s8fc8919921c4",
+          "status": "sd9fe86d7d072"
+        }
+      ]
+    },
+    "s10253a686b55": {
+      "literals": [
+        "hourly_valuation_from_native_minute_open"
+      ]
+    },
+    "s107bd04fb520": {
+      "literals": [
+        "native-minute-economic-reporting-v1"
+      ]
+    },
+    "s11823dffff21": {
+      "literals": [
+        "artifacts/audits/stage-04b2d3-minute-inputs-v1"
+      ]
+    },
+    "s12f6727541eb": {
+      "objects": [
+        {
+          "account_id": "s711468a6dcb5",
+          "basis": "se59a48182ddb",
+          "cash": "se59a48182ddb",
+          "equity": "se59a48182ddb",
+          "fees": "se59a48182ddb",
+          "kind": "s10253a686b55",
+          "ledger_seq": "s1e5893d13ec5",
+          "quantity": "se59a48182ddb",
+          "realised": "se59a48182ddb",
+          "reference": "se79a60ee0232",
+          "unrealised": "se59a48182ddb"
+        }
+      ]
+    },
+    "s144c500f4288": {
+      "literals": [
+        "analytical_buy_and_hold",
+        "analytical_cash",
+        "ridge_sign"
+      ]
+    },
+    "s1566ef49e82d": {
+      "objects": [
+        {
+          "authenticated_inputs": "s1e94169c4d6e",
+          "integrity": "s1e94169c4d6e",
+          "manifest": "s1e94169c4d6e",
+          "signoff": "s1e94169c4d6e"
+        }
+      ]
+    },
+    "s1578ac48bc42": {
+      "objects": [
+        {
+          "checks": "sc4de246cabd4",
+          "economic_results": "s50e6449154df",
+          "genuine_execution_authorised": "s50e6449154df",
+          "independent_manifest_sha256": "s28260b70f185",
+          "limitations": "s7232b10a51b8",
+          "original_execution_commit": "sf7feedc1201b",
+          "publication": "s11823dffff21",
+          "publication_kind": "s5eb89c9d3794",
+          "published_file_identities": "s4f4ddfb058e6",
+          "reviewed_ci_run_id": "se59a48182ddb",
+          "schema": "s70ad35516e1d",
+          "scientific_counts": "s288e5817f009",
+          "source_kind": "s6250699d8911",
+          "status": "s90ce7637d1d5",
+          "verification_flags": "s7756146d6dd6"
+        }
+      ]
+    },
+    "s1645283b9043": {
+      "items": "s29ac5648eaef"
+    },
+    "s186a08b35da9": {
+      "objects": [
+        {
+          "accounts": "se5961e916c22",
+          "replay_sha256": "s28260b70f185"
+        }
+      ]
+    },
+    "s1992e09c0fb6": {
+      "literals": [
+        "BUY",
+        "SELL"
+      ]
+    },
+    "s19bc9b202c54": {
+      "items": "s08fc6c8c1d26"
+    },
+    "s1e5893d13ec5": {
+      "int": true
+    },
+    "s1e94169c4d6e": {
+      "objects": [
+        {
+          "bytes": "s1e5893d13ec5",
+          "sha256": "s28260b70f185"
+        }
+      ]
+    },
+    "s210c3624b02a": {
+      "objects": [
+        {
+          "at": "s3f1b3c3e9d53",
+          "fee": "se59a48182ddb",
+          "identity": "sf78bffc4dd84",
+          "ledger_seq_before": "s1e5893d13ec5",
+          "notional": "se59a48182ddb",
+          "policy": "s43c26e32b910",
+          "portfolio": "s64f00b587733",
+          "postings": "sd51f45407854",
+          "price": "se59a48182ddb",
+          "quantity": "se59a48182ddb",
+          "side": "s1992e09c0fb6"
+        }
+      ]
+    },
+    "s223c3841b7d2": {
+      "objects": [
+        {
+          "boundary": "s3f1b3c3e9d53",
+          "costs_by_side": "s9fd3307600a7",
+          "fills": "s368983869b60",
+          "flow_complete": "s50e6449154df",
+          "flow_end_exclusive": "s3f1b3c3e9d53",
+          "period": "s90043a4b2536",
+          "start": "s3f1b3c3e9d53"
+        }
+      ]
+    },
+    "s24253336cb1b": {
+      "objects": [
+        {
+          "costs_by_side": "s9cc2ca439244",
+          "exposure_seconds": "s1e5893d13ec5",
+          "funding_relative_marked_return": "se59a48182ddb",
+          "invested_hourly_mark_fraction": "se59a48182ddb",
+          "last_mark_at": "s3f1b3c3e9d53",
+          "last_mark_pnl": "se59a48182ddb",
+          "maximum_observed_hourly_reference_mark_drawdown": "se59a48182ddb",
+          "period_seconds": "s1e5893d13ec5",
+          "status": "sd9fe86d7d072"
+        }
+      ]
+    },
+    "s2500c6a4e186": {
+      "items": "sfce65bb927c7"
+    },
+    "s277d917e2ca7": {
+      "objects": [
+        {
+          "sha256": "s28260b70f185",
+          "version": "s70fd092caedf"
+        }
+      ]
+    },
+    "s28260b70f185": {
+      "patterns": [
+        "sha256"
+      ]
+    },
+    "s288e5817f009": {
+      "objects": [
+        {
+          "forecast_accounts": "s1e5893d13ec5",
+          "forecasts": "s1e5893d13ec5",
+          "native_minute_rows_authenticated": "s1e5893d13ec5",
+          "reference_markets": "s1e5893d13ec5",
+          "references": "s1e5893d13ec5"
+        }
+      ]
+    },
+    "s29ac5648eaef": {
+      "objects": [
+        {
+          "boundary": "s3f1b3c3e9d53",
+          "complete": "s50e6449154df",
+          "costs_by_side": "s9fd3307600a7",
+          "end": "s3f1b3c3e9d53",
+          "end_mark": "s12f6727541eb",
+          "fills": "s368983869b60",
+          "flow_complete": "s50e6449154df",
+          "flow_end_exclusive": "s3f1b3c3e9d53",
+          "missing_boundary_seconds": "s1e5893d13ec5",
+          "observed_seconds": "s1e5893d13ec5",
+          "period": "s90043a4b2536",
+          "pnl": "se59a48182ddb",
+          "return": "se59a48182ddb",
+          "return_basis": "sea74b9b69a0a",
+          "start": "s3f1b3c3e9d53",
+          "start_mark": "s12f6727541eb"
+        }
+      ]
+    },
+    "s29f23897e2aa": {
+      "items": "s579a2a553c4c"
+    },
+    "s2c680bdb5bd6": {
+      "literals": [
+        "native_minute_HH:00_trade_before_mark"
+      ]
+    },
+    "s2d9e3f984334": {
+      "literals": [
+        "genuine_publication_hypothetical_minute_replay"
+      ]
+    },
+    "s31ed8c7f6afe": {
+      "objects": [
+        {
+          "discrepancies.csv": "s1e94169c4d6e",
+          "integrity.json": "s1e94169c4d6e",
+          "manifest.json": "s1e94169c4d6e",
+          "parity_report.json": "s1e94169c4d6e",
+          "provenance.json": "s1e94169c4d6e"
+        }
+      ]
+    },
+    "s32bdb7316933": {
+      "items": "s28260b70f185"
+    },
+    "s33a181f69049": {
+      "objects": [
+        {
+          "file_sha256": "s28260b70f185",
+          "forecast_sha256": "s28260b70f185",
+          "kind": "s2d9e3f984334",
+          "manifest_sha256": "s28260b70f185",
+          "model_recipe_sha256": "s28260b70f185",
+          "monthly_sources": "s0e529b211aab",
+          "projected_sha256": "s28260b70f185",
+          "publication": "s1566ef49e82d",
+          "symbol": "s3d162377e830"
+        }
+      ]
+    },
+    "s368983869b60": {
+      "items": "s37daa59381c1"
+    },
+    "s37320ed45713": {
+      "literals": [
+        "not_granted_by_private_conversion_or_replay"
+      ]
+    },
+    "s377835755abb": {
+      "objects": [
+        {
+          "accounting_status": "s3909e2ec3942",
+          "economic_publication": "s50e6449154df",
+          "evidence": "s45a230f123a0",
+          "execution_authorised": "s50e6449154df",
+          "external_independence_proven": "s50e6449154df",
+          "fabricated_only": "s50e6449154df",
+          "handoff_pins": "s186a08b35da9",
+          "limitations": "sfc093a3ed5a8",
+          "method": "sd4c7f0e5ac49",
+          "protocol": "s277d917e2ca7",
+          "reports": "s63437f50eb80",
+          "schema": "sd201ea3d3267",
+          "source_authentication_proven": "s50e6449154df"
+        }
+      ]
+    },
+    "s37825b595279": {
+      "literals": [
+        "2024-01",
+        "2024-02",
+        "2024-03",
+        "2024-04",
+        "2024-05",
+        "2024-06",
+        "2024-07",
+        "2024-08",
+        "2024-09",
+        "2024-10",
+        "2024-11",
+        "2024-12",
+        "BTCUSDT",
+        "ETHUSDT"
+      ],
+      "patterns": [
+        "sha256"
+      ]
+    },
+    "s379885fd93a2": {
+      "items": "s3d162377e830"
+    },
+    "s37daa59381c1": {
+      "objects": [
+        {
+          "decision_id": "s898fb7e75e32",
+          "half_spread_cost": "se59a48182ddb",
+          "kind": "s5c19d89be1f5",
+          "reference": "se79a60ee0232",
+          "slippage_cost": "se59a48182ddb",
+          "trade": "s210c3624b02a"
+        }
+      ]
+    },
+    "s3909e2ec3942": {
+      "literals": [
+        "verified_fabricated_records_only"
+      ]
+    },
+    "s3b08a2be6c54": {
+      "items": "empty"
+    },
+    "s3d162377e830": {
+      "literals": [
+        "BTCUSDT",
+        "ETHUSDT"
+      ]
+    },
+    "s3f1b3c3e9d53": {
+      "patterns": [
+        "utc"
+      ]
+    },
+    "s3fce60f7d9a0": {
+      "items": "s5e8816d19f3a"
+    },
+    "s40a8ecfd8e93": {
+      "objects": [
+        {
+          "at": "s3f1b3c3e9d53",
+          "basis": "se59a48182ddb",
+          "cash": "se59a48182ddb",
+          "fees": "se59a48182ddb",
+          "ledger_seq": "s1e5893d13ec5",
+          "portfolio": "sd92452a80efc",
+          "quantity": "se59a48182ddb",
+          "realised": "se59a48182ddb",
+          "trade_ids": "s3b08a2be6c54"
+        }
+      ]
+    },
+    "s425321039ae2": {
+      "literals": [
+        "spot"
+      ]
+    },
+    "s43c26e32b910": {
+      "literals": [
+        "stage-4a-execution-v1"
+      ]
+    },
+    "s45a230f123a0": {
+      "objects": [
+        {
+          "forecasts": "s19bc9b202c54",
+          "projection_sha256": "s32bdb7316933",
+          "publication_claims": "se0fc153f7d7a",
+          "publication_pins": "s1566ef49e82d",
+          "references": "se28a2533c246",
+          "results": "s4d8762c6d394",
+          "signoff_claims": "s1578ac48bc42",
+          "source_identities": "sfbc229a81755"
+        }
+      ]
+    },
+    "s4c0895b67a12": {
+      "literals": [
+        "All manifest-declared companion hashes and byte lengths",
+        "Exact no-follow publication path; exactly three existing files",
+        "Independently retained manifest SHA-256 before parsing",
+        "Original 57 source, 45 implementation, and 22 historical audit identities",
+        "Second exact-file byte/hash/metadata readback",
+        "Strict canonical JSON, scientific and operational crosschecks"
+      ]
+    },
+    "s4d8762c6d394": {
+      "items": "s621d718f22b5"
+    },
+    "s4f4ddfb058e6": {
+      "objects": [
+        {
+          "authenticated_inputs.json": "s1e94169c4d6e",
+          "integrity.json": "s1e94169c4d6e",
+          "manifest.json": "s1e94169c4d6e"
+        }
+      ]
+    },
+    "s50e6449154df": {
+      "bool": true
+    },
+    "s539ea83e22e0": {
+      "objects": [
+        {
+          "forecast_csv": "s28260b70f185",
+          "forecast_manifest": "s28260b70f185",
+          "hourly_acquisition": "s28260b70f185",
+          "hourly_csv": "s28260b70f185",
+          "hourly_manifest": "s28260b70f185",
+          "hourly_protocol": "s28260b70f185",
+          "minute_csv": "s28260b70f185",
+          "minute_manifest": "s28260b70f185",
+          "minute_pin_document": "s28260b70f185",
+          "minute_protocol": "s28260b70f185",
+          "parity_discrepancies": "s28260b70f185",
+          "parity_integrity": "s28260b70f185",
+          "parity_manifest": "s28260b70f185",
+          "parity_provenance": "s28260b70f185",
+          "parity_report": "s28260b70f185",
+          "research_csv": "s28260b70f185",
+          "research_manifest": "s28260b70f185"
+        }
+      ]
+    },
+    "s54d29116b0ee": {
+      "literals": [
+        "BUY_REQUIRED",
+        "CASH_NOOP",
+        "EXIT_REQUIRED",
+        "HOLD"
+      ]
+    },
+    "s579a2a553c4c": {
+      "objects": [
+        {
+          "account_id": "s711468a6dcb5",
+          "amount": "se59a48182ddb",
+          "asset": "s6aa8aa5c9524",
+          "at": "s3f1b3c3e9d53",
+          "event": "sa86ec229d53b",
+          "sequence": "s1e5893d13ec5"
+        },
+        {
+          "account_id": "s711468a6dcb5",
+          "amount": "se59a48182ddb",
+          "asset": "s6aa8aa5c9524",
+          "at": "s3f1b3c3e9d53",
+          "event": "sa86ec229d53b",
+          "sequence": "s1e5893d13ec5",
+          "trade_id": "sf78bffc4dd84"
+        }
+      ]
+    },
+    "s5c19d89be1f5": {
+      "literals": [
+        "hypothetical_native_minute_execution"
+      ]
+    },
+    "s5dc810c8c5c0": {
+      "objects": [
+        {
+          "at": "s3f1b3c3e9d53",
+          "basis": "se59a48182ddb",
+          "cash": "se59a48182ddb",
+          "fees": "se59a48182ddb",
+          "ledger_seq": "s1e5893d13ec5",
+          "portfolio": "sd92452a80efc",
+          "quantity": "se59a48182ddb",
+          "realised": "se59a48182ddb",
+          "trade_ids": "sb4119e4c46f4"
+        }
+      ]
+    },
+    "s5e8816d19f3a": {
+      "literals": [
+        "buy_and_hold",
+        "cash",
+        "ridge"
+      ]
+    },
+    "s5eb89c9d3794": {
+      "literals": [
+        "source_authentication_only"
+      ]
+    },
+    "s621d718f22b5": {
+      "objects": [
+        {
+          "accounts": "s7a2efed00a1c",
+          "authority": "s37320ed45713",
+          "decisions": "s2500c6a4e186",
+          "end_exclusive": "s3f1b3c3e9d53",
+          "kind": "s2d9e3f984334",
+          "protocol_sha256": "s28260b70f185",
+          "protocol_version": "s70fd092caedf",
+          "source": "s33a181f69049",
+          "status": "s0516901a3a19",
+          "symbol": "s3d162377e830"
+        }
+      ]
+    },
+    "s6250699d8911": {
+      "literals": [
+        "genuine_retained_stage2b_native_minute_prior_parity"
+      ]
+    },
+    "s62e3119f3112": {
+      "literals": [
+        "ridge_nonpositive",
+        "ridge_positive"
+      ]
+    },
+    "s632883c0fe94": {
+      "objects": [
+        {
+          "count": "s1e5893d13ec5",
+          "fees": "se59a48182ddb",
+          "half_spread": "se59a48182ddb",
+          "notional": "se59a48182ddb",
+          "slippage": "se59a48182ddb"
+        }
+      ]
+    },
+    "s63437f50eb80": {
+      "items": "sdd701e6b5526"
+    },
+    "s64f00b587733": {
+      "objects": [
+        {
+          "config_sha256": "s28260b70f185",
+          "inception_at": "s3f1b3c3e9d53",
+          "key": "s711468a6dcb5",
+          "market_type": "s425321039ae2",
+          "model_recipe_sha256": "s28260b70f185",
+          "protocol_sha256": "s28260b70f185",
+          "strategy_id": "sf6eda5f9d300",
+          "strategy_version": "se59a48182ddb",
+          "symbol": "s3d162377e830",
+          "venue": "s7c1d2737c41c"
+        }
+      ]
+    },
+    "s665c40519f67": {
+      "literals": [
+        "unchanged_minute_verifier_passed_on_fabricated_records"
+      ]
+    },
+    "s691c01d46bd2": {
+      "items": "se79a60ee0232"
+    },
+    "s6aa8aa5c9524": {
+      "literals": [
+        "BTC",
+        "ETH",
+        "USDT"
+      ]
+    },
+    "s6b2dad6940c4": {
+      "literals": [
+        "CI success was previously independently checked, not re-queried by this script",
+        "No economic or replay authority is conferred by this sign-off",
+        "No original data sources, signed approval, private signing key or strategy engine read",
+        "Observed file preservation does not exclude hostile replace/restore races",
+        "Procedure restricts inputs by exact paths; no OS-enforced sandbox",
+        "Read-only post-publication readback, not genuine verification rerun"
+      ]
+    },
+    "s70a587fe3d8d": {
+      "objects": [
+        {
+          "count": "s1e5893d13ec5",
+          "fees": "se59a48182ddb",
+          "hypothetical_half_spread": "se59a48182ddb",
+          "hypothetical_slippage": "se59a48182ddb",
+          "notional": "se59a48182ddb",
+          "turnover_denominator": "se59a48182ddb",
+          "turnover_initial_funding": "se59a48182ddb"
+        }
+      ]
+    },
+    "s70ad35516e1d": {
+      "literals": [
+        "stage-04b2d14-publication-signoff-v1"
+      ]
+    },
+    "s70fd092caedf": {
+      "literals": [
+        "historical-minute-execution-v1"
+      ]
+    },
+    "s711468a6dcb5": {
+      "patterns": [
+        "account"
+      ]
+    },
+    "s7232b10a51b8": {
+      "items": "s6b2dad6940c4"
+    },
+    "s7756146d6dd6": {
+      "objects": [
+        {
+          "economic_publication_authorised": "s50e6449154df",
+          "resume": "s50e6449154df",
+          "single_attempt": "s50e6449154df",
+          "strategy_authorised": "s50e6449154df",
+          "verification_only": "s50e6449154df"
+        }
+      ]
+    },
+    "s7804788468c7": {
+      "items": "s223c3841b7d2"
+    },
+    "s7a2efed00a1c": {
+      "items": "s0ec7c0acbb50"
+    },
+    "s7c1d2737c41c": {
+      "literals": [
+        "binance"
+      ]
+    },
+    "s80b3997ddd2c": {
+      "objects": [
+        {
+          "account_id": "s711468a6dcb5",
+          "fingerprint": "s28260b70f185"
+        }
+      ]
+    },
+    "s812b95804bd8": {
+      "objects": [
+        {
+          "feature_available_at": "s3f1b3c3e9d53",
+          "file_sha256": "s28260b70f185",
+          "market_type": "s425321039ae2",
+          "model": "se49cf218c503",
+          "prediction": "se59a48182ddb",
+          "record_id": "s0a4a25c46708",
+          "source_open": "s3f1b3c3e9d53",
+          "symbol": "s3d162377e830",
+          "venue": "s7c1d2737c41c"
+        }
+      ]
+    },
+    "s898fb7e75e32": {
+      "NoneType": true,
+      "patterns": [
+        "decision"
+      ]
+    },
+    "s8c163ccb4260": {
+      "literals": [
+        "Availability is assumed; archive opens are not executable quotes or fills.",
+        "E.5 raw transport remains TEST-only with accounting NOT_PERFORMED.",
+        "Entirely invented inputs and hypothetical TEST arithmetic; no real profits.",
+        "Final day/month returns are partial; no 2025 price or terminal liquidation.",
+        "Historical authenticity is not proven by structural consistency.",
+        "Independent fingerprint retention is a caller obligation, not proven here.",
+        "Market portfolios and daily/monthly alternative aggregations stay separate.",
+        "Same-process private records are not security capabilities or authority.",
+        "Upstream source/sign-off claims are fabricated, not fresh source audits."
+      ]
+    },
+    "s8cedb8212a24": {
+      "objects": [
+        {
+          "count": "s1e5893d13ec5",
+          "max": "se59a48182ddb",
+          "mean": "se59a48182ddb",
+          "min": "se59a48182ddb"
+        }
+      ]
+    },
+    "s8fc8919921c4": {
+      "NoneType": true
+    },
+    "s90043a4b2536": {
+      "literals": [
+        "daily",
+        "monthly"
+      ]
+    },
+    "s90ce7637d1d5": {
+      "literals": [
+        "PASS"
+      ]
+    },
+    "s985a23473122": {
+      "literals": [
+        "previously_inspected_exploratory_validation_not_untouched_OOS"
+      ]
+    },
+    "s9cc2ca439244": {
+      "objects": [
+        {
+          "BUY": "s632883c0fe94",
+          "SELL": "s632883c0fe94"
+        }
+      ]
+    },
+    "s9ed456292f56": {
+      "objects": [
+        {
+          "manifest.json": "s1e94169c4d6e",
+          "validation_predictions.csv": "s1e94169c4d6e"
+        }
+      ]
+    },
+    "s9f897ebd904b": {
+      "patterns": [
+        "decision"
+      ]
+    },
+    "s9fd3307600a7": {
+      "objects": [
+        {
+          "BUY": "s70a587fe3d8d",
+          "SELL": "s70a587fe3d8d"
+        }
+      ]
+    },
+    "sa663fa943960": {
+      "objects": [
+        {
+          "account_id": "s711468a6dcb5",
+          "complete_day_statistics": "s8cedb8212a24",
+          "costs_by_side": "s9fd3307600a7",
+          "end_exclusive": "s3f1b3c3e9d53",
+          "execution_interval_seconds": "s1e5893d13ec5",
+          "final_account": "s5dc810c8c5c0",
+          "initial_account": "s40a8ecfd8e93",
+          "initial_funding": "se59a48182ddb",
+          "input_fingerprint": "s28260b70f185",
+          "label": "s5e8816d19f3a",
+          "last_observed_mark": "s12f6727541eb",
+          "observations": "s1645283b9043",
+          "performance": "s24253336cb1b",
+          "periods": "s7804788468c7",
+          "reason": "s8fc8919921c4",
+          "schema": "s107bd04fb520",
+          "start_inclusive": "s3f1b3c3e9d53",
+          "status": "sd9fe86d7d072",
+          "symbol": "s3d162377e830",
+          "valuation_interval_seconds": "s1e5893d13ec5"
+        }
+      ]
+    },
+    "sa86ec229d53b": {
+      "literals": [
+        "funding",
+        "hypothetical_native_minute_execution"
+      ]
+    },
+    "sa9786ba05393": {
+      "literals": [
+        "Decimal_160_digits_Inexact_trapped"
+      ]
+    },
+    "sad760ea8d5be": {
+      "literals": [
+        "2024-01-01T00:00:00Z"
+      ]
+    },
+    "sb0f03c1ce106": {
+      "objects": [
+        {
+          ".github/workflows/ci.yml": "s28260b70f185",
+          ".gitignore": "s28260b70f185",
+          ".python-version": "s28260b70f185",
+          "AGENTS.md": "s28260b70f185",
+          "docs/stage-04b2-historical-validation-protocol.md": "s28260b70f185",
+          "docs/stage-04b2c-minute-data-engineering.md": "s28260b70f185",
+          "docs/stage-04b2c-minute-execution-protocol.md": "s28260b70f185",
+          "docs/stage-04b2c-minute-source-pins.md": "s28260b70f185",
+          "docs/stage-04b2d1-genuine-price-parity-audit.md": "s28260b70f185",
+          "docs/stage-04b2d3-genuine-minute-input-authentication.md": "s28260b70f185",
+          "docs/stage-04b2d4-genuine-verification-operator.md": "s28260b70f185",
+          "docs/stage-04b2d5-genuine-verification-wiring.md": "s28260b70f185",
+          "docs/stage-04b2d6-genuine-verification-activation.md": "s28260b70f185",
+          "docs/stage-04b2d7-offline-signed-approval.md": "s28260b70f185",
+          "docs/stage-04b2d8-owner-key-enrolment-verification-integration.md": "s28260b70f185",
+          "pyproject.toml": "s28260b70f185",
+          "src/backtest_badger/__init__.py": "s28260b70f185",
+          "src/backtest_badger/archives.py": "s28260b70f185",
+          "src/backtest_badger/candles.py": "s28260b70f185",
+          "src/backtest_badger/config.py": "s28260b70f185",
+          "src/backtest_badger/db.py": "s28260b70f185",
+          "src/backtest_badger/execution_data.py": "s28260b70f185",
+          "src/backtest_badger/features.py": "s28260b70f185",
+          "src/backtest_badger/forecast_data.py": "s28260b70f185",
+          "src/backtest_badger/frozen.py": "s28260b70f185",
+          "src/backtest_badger/genuine_minute_inputs.py": "s28260b70f185",
+          "src/backtest_badger/genuine_minute_price_parity.py": "s28260b70f185",
+          "src/backtest_badger/genuine_minute_signed_approval.py": "s28260b70f185",
+          "src/backtest_badger/genuine_minute_verification_operator.py": "s28260b70f185",
+          "src/backtest_badger/genuine_minute_verification_runtime.py": "s28260b70f185",
+          "src/backtest_badger/genuine_minute_verification_wiring.py": "s28260b70f185",
+          "src/backtest_badger/history.py": "s28260b70f185",
+          "src/backtest_badger/ingestion.py": "s28260b70f185",
+          "src/backtest_badger/minute_execution_data.py": "s28260b70f185",
+          "src/backtest_badger/minute_price_parity.py": "s28260b70f185",
+          "src/backtest_badger/model_data.py": "s28260b70f185",
+          "src/backtest_badger/paper_accounting.py": "s28260b70f185",
+          "src/backtest_badger/paper_execution.py": "s28260b70f185",
+          "src/backtest_badger/paper_historical.py": "s28260b70f185",
+          "src/backtest_badger/paper_historical_evaluation.py": "s28260b70f185",
+          "src/backtest_badger/paper_minute_historical.py": "s28260b70f185",
+          "src/backtest_badger/paper_strategy.py": "s28260b70f185",
+          "src/backtest_badger/paper_types.py": "s28260b70f185",
+          "src/backtest_badger/research.py": "s28260b70f185",
+          "uv.lock": "s28260b70f185"
+        }
+      ]
+    },
+    "sb4119e4c46f4": {
+      "items": "sf78bffc4dd84"
+    },
+    "sb5a517e76617": {
+      "literals": [
+        "gradient_boosting",
+        "ridge",
+        "training_mean",
+        "zero"
+      ]
+    },
+    "sbe7bcc663bb9": {
+      "literals": [
+        "minute-input-verification-publication-v1"
+      ]
+    },
+    "sc4d72619f479": {
+      "literals": [
+        "2025-01-01T00:00:00Z"
+      ]
+    },
+    "sc4de246cabd4": {
+      "items": "s4c0895b67a12"
+    },
+    "sc600e6ccf3b8": {
+      "objects": [
+        {
+          "authenticated_inputs.json": "s1e94169c4d6e",
+          "integrity.json": "s1e94169c4d6e"
+        }
+      ]
+    },
+    "sc69d5bdf9c4a": {
+      "items": "s37825b595279"
+    },
+    "sc9eb89d54918": {
+      "items": "s12f6727541eb"
+    },
+    "scb627690733f": {
+      "literals": [
+        "source_open_plus_4h_plus_60s_assumed"
+      ]
+    },
+    "scf473a0760f6": {
+      "literals": [
+        "2024-12-31T23:00:00Z"
+      ]
+    },
+    "sd201ea3d3267": {
+      "literals": [
+        "stage-04b2e5c-fabricated-economic-evidence-v1"
+      ]
+    },
+    "sd4c7f0e5ac49": {
+      "objects": [
+        {
+          "accounts": "s3fce60f7d9a0",
+          "adverse_slippage_bps": "s1e5893d13ec5",
+          "availability": "scb627690733f",
+          "buy_and_hold_inception": "sad760ea8d5be",
+          "end_exclusive": "sc4d72619f479",
+          "execution": "sd661bc57fbff",
+          "fee_bps": "s1e5893d13ec5",
+          "fee_quantum_round_up": "se59a48182ddb",
+          "forced_final_liquidation": "s50e6449154df",
+          "funding_each_usdt": "se59a48182ddb",
+          "half_spread_bps": "s1e5893d13ec5",
+          "hourly_marks_per_available_account": "s1e5893d13ec5",
+          "independent_portfolios": "s50e6449154df",
+          "last_mark": "scf473a0760f6",
+          "ledger_prefix_checks": "s50e6449154df",
+          "markets": "s379885fd93a2",
+          "marks": "s2c680bdb5bd6",
+          "money": "sa9786ba05393",
+          "quantity_step": "se59a48182ddb",
+          "ratios_and_wac": "sedab17c934ff",
+          "refit_reforecast_search": "s50e6449154df",
+          "research_status": "s985a23473122",
+          "source_forecasts_per_market": "s1e5893d13ec5",
+          "start_inclusive": "sad760ea8d5be",
+          "sticky_exits": "s50e6449154df",
+          "strategy": "sdd1ba5bdb6f8",
+          "threshold": "se59a48182ddb"
+        }
+      ]
+    },
+    "sd51f45407854": {
+      "items": "s0c199748d20f"
+    },
+    "sd646ac300df9": {
+      "literals": [
+        "matches_separately_supplied_pin_independence_not_proven"
+      ]
+    },
+    "sd661bc57fbff": {
+      "literals": [
+        "strictly_next_native_minute_12:01_to_12:02"
+      ]
+    },
+    "sd92452a80efc": {
+      "objects": [
+        {
+          "config_sha256": "s28260b70f185",
+          "inception_at": "s3f1b3c3e9d53",
+          "key": "s711468a6dcb5",
+          "market_type": "s425321039ae2",
+          "model_recipe_sha256": "s28260b70f185",
+          "protocol_sha256": "s28260b70f185",
+          "strategy_id": "s144c500f4288",
+          "strategy_version": "se59a48182ddb",
+          "symbol": "s3d162377e830",
+          "venue": "s7c1d2737c41c"
+        }
+      ]
+    },
+    "sd9fe86d7d072": {
+      "literals": [
+        "available"
+      ]
+    },
+    "sdd1ba5bdb6f8": {
+      "literals": [
+        "ridge_sign"
+      ]
+    },
+    "sdd701e6b5526": {
+      "objects": [
+        {
+          "account_fingerprint": "s28260b70f185",
+          "account_id": "s711468a6dcb5",
+          "fingerprint_status": "sd646ac300df9",
+          "ledger_verification": "s665c40519f67",
+          "replay_fingerprint": "s28260b70f185",
+          "report_id": "s28260b70f185",
+          "signed_ledger": "s29f23897e2aa",
+          "summary": "sa663fa943960"
+        }
+      ]
+    },
+    "se04e4d493dc2": {
+      "objects": [
+        {
+          "forecast": "s9ed456292f56",
+          "minute": "se9eba1297d08",
+          "parity": "s31ed8c7f6afe"
+        }
+      ]
+    },
+    "se0fc153f7d7a": {
+      "objects": [
+        {
+          "complete": "s50e6449154df",
+          "economic_results": "s50e6449154df",
+          "files": "sc600e6ccf3b8",
+          "genuine_execution_authorised": "s50e6449154df",
+          "kind": "s5eb89c9d3794",
+          "schema": "sbe7bcc663bb9",
+          "source_kind": "s6250699d8911",
+          "status": "s071cbce1a2ec"
+        }
+      ]
+    },
+    "se28a2533c246": {
+      "items": "s691c01d46bd2"
+    },
+    "se49cf218c503": {
+      "literals": [
+        "ridge"
+      ]
+    },
+    "se5961e916c22": {
+      "items": "s80b3997ddd2c"
+    },
+    "se59a48182ddb": {
+      "patterns": [
+        "decimal"
+      ]
+    },
+    "se79a60ee0232": {
+      "objects": [
+        {
+          "at": "s3f1b3c3e9d53",
+          "file_sha256": "s28260b70f185",
+          "interval_seconds": "s1e5893d13ec5",
+          "market_type": "s425321039ae2",
+          "price": "se59a48182ddb",
+          "record_id": "s0a4a25c46708",
+          "source_sha256": "s28260b70f185",
+          "symbol": "s3d162377e830",
+          "venue": "s7c1d2737c41c"
+        }
+      ]
+    },
+    "se9eba1297d08": {
+      "objects": [
+        {
+          "manifest.json": "s1e94169c4d6e",
+          "minute_opens.csv": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-01.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-01.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-02.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-02.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-03.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-03.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-04.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-04.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-05.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-05.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-06.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-06.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-07.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-07.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-08.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-08.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-09.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-09.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-10.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-10.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-11.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-11.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-12.zip": "s1e94169c4d6e",
+          "raw/BTCUSDT-1m-2024-12.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-01.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-01.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-02.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-02.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-03.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-03.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-04.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-04.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-05.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-05.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-06.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-06.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-07.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-07.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-08.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-08.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-09.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-09.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-10.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-10.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-11.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-11.zip.CHECKSUM": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-12.zip": "s1e94169c4d6e",
+          "raw/ETHUSDT-1m-2024-12.zip.CHECKSUM": "s1e94169c4d6e"
+        }
+      ]
+    },
+    "sea74b9b69a0a": {
+      "literals": [
+        "observed_hourly_mark_to_mark"
+      ]
+    },
+    "sedab17c934ff": {
+      "literals": [
+        "Decimal_80_digits_HALF_EVEN"
+      ]
+    },
+    "sf04a3f18a34f": {
+      "objects": [
+        {
+          "assumed_available_at": "s3f1b3c3e9d53",
+          "file_sha256": "s28260b70f185",
+          "hypothetical_minute_at": "s3f1b3c3e9d53",
+          "model": "sb5a517e76617",
+          "prediction": "se59a48182ddb",
+          "record_id": "s0a4a25c46708",
+          "source_open": "s3f1b3c3e9d53",
+          "symbol": "s3d162377e830"
+        }
+      ]
+    },
+    "sf6eda5f9d300": {
+      "literals": [
+        "analytical_buy_and_hold",
+        "ridge_sign"
+      ]
+    },
+    "sf78bffc4dd84": {
+      "patterns": [
+        "decision",
+        "inception"
+      ]
+    },
+    "sf7feedc1201b": {
+      "patterns": [
+        "commit"
+      ]
+    },
+    "sfbc229a81755": {
+      "objects": [
+        {
+          "code_sha256": "sb0f03c1ce106",
+          "original_files": "se04e4d493dc2",
+          "pins": "s539ea83e22e0"
+        }
+      ]
+    },
+    "sfc093a3ed5a8": {
+      "items": "s8c163ccb4260"
+    },
+    "sfce65bb927c7": {
+      "objects": [
+        {
+          "action": "s54d29116b0ee",
+          "at": "s3f1b3c3e9d53",
+          "forecast": "s812b95804bd8",
+          "identity": "s9f897ebd904b",
+          "miss": "s8fc8919921c4",
+          "missed_streak": "s1e5893d13ec5",
+          "reason": "s62e3119f3112",
+          "source_open": "s3f1b3c3e9d53",
+          "symbol": "s3d162377e830",
+          "target": "s1e5893d13ec5"
+        }
+      ]
+    }
+  },
+  "patterns": {
+    "account": "genuine_publication_hypothetical_minute_replay:(?:BTCUSDT|ETHUSDT):(?:ridge|cash|buy_and_hold)",
+    "commit": "[0-9a-f]{40}",
+    "decimal": "-?[0-9]+(?:\\.[0-9]+)?(?:[Ee][+-]?[0-9]+)?",
+    "decision": "genuine_publication_hypothetical_minute_replay:(?:BTCUSDT|ETHUSDT):ridge:202[34]-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+00:00(?::trade)?",
+    "inception": "genuine_publication_hypothetical_minute_replay:(?:BTCUSDT|ETHUSDT):buy_and_hold:inception",
+    "reference": "binance:spot:(?:BTCUSDT|ETHUSDT):(?:60|14400):[0-9TZ:+.-]+(?::(?:ridge|zero|training_mean|gradient_boosting))?",
+    "sha256": "[0-9a-f]{64}",
+    "utc": "\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?\\+00:00"
+  },
+  "root": "s377835755abb",
+  "schema": "stage-04b2e5d-fabricated-report-allowlist-v1"
+}

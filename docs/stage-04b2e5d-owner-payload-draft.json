@@ -1,0 +1,345 @@
+{
+  "current_execution_authorised": false,
+  "draft_status": "BLOCKED_NOT_AN_APPROVAL_OR_IMPLEMENTED_SCHEMA",
+  "payload": {
+    "attempt": {
+      "attempt_id": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "clock_contract_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "consumption": "durable_protected_reservation_before_any_economic_calculation",
+      "expires_at_utc": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "maximum_attempts": 1,
+      "not_before_utc": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "preflight_consumes": false,
+      "replacement_without_new_review": false,
+      "reserved_started_or_uncertain": "terminal_for_any_new_execution",
+      "resume": false,
+      "retry": false
+    },
+    "authorisation_kind": "distinct_from_D_verification_E4_compatibility_and_historical_signoff",
+    "custody": {
+      "authenticated_receipt_contract_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "custodian_implementation_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "executor_can_replace_records_or_parents": false,
+      "executor_principal": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "independent_custodian_principal": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "isolation_and_threat_model_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "missing_history_policy": "unknown_terminal_never_unspent",
+      "namespace": [
+        "approval_payload_sha256",
+        "attempt_id"
+      ],
+      "protected_attempt_store_absolute_location": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "protected_retention_absolute_location": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "receipt_trust_anchor_identity": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "retention_after_reporting": [
+        "six_ordered_report_identities",
+        "whole_replay_account_associations"
+      ],
+      "retention_before_reporting": [
+        "whole_replay_identity",
+        "six_ordered_account_identities"
+      ],
+      "retention_claim": "integrity_custody_not_independent_strategy_reexecution"
+    },
+    "forbidden_operations": [
+      "D_series_acquisition_or_verification_rerun",
+      "minute_ZIP_or_CSV_reads",
+      "original_model_reads",
+      "private_signing_material_reads",
+      "database_access",
+      "provider_or_other_remote_access",
+      "real_trading",
+      "public_website_publication",
+      "forecast_refit_or_regeneration",
+      "cost_threshold_or_strategy_changes"
+    ],
+    "historical_provenance": {
+      "identity_origin": "retained_E5_declarations_not_reverified_in_E5d",
+      "published_flags": {
+        "economic_results": false,
+        "genuine_execution_authorised": false
+      },
+      "signer_identity_is_not_source_authentication": true,
+      "verification_ci_run_id": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "verification_commit": "94584dc4b08f06441cff3bcd7983bba1ca0afe8d"
+    },
+    "implementation": {
+      "checkout_absolute_path": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "ci": {
+        "commit": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "conclusion": "success",
+        "independent_retained_evidence_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        },
+        "run_id": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "status": "completed"
+      },
+      "clean_checkout_required": true,
+      "closure_verifier_contract_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "code_inventory": {
+        "complete_exact_path_hash_length_inventory": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "inventory_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        }
+      },
+      "entrypoint_and_launcher_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "pyproject_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "reviewed_execution_commit": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "runtime": {
+        "complete_installed_distribution_versions": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "dependency_file_inventory_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        },
+        "exact_3_12_patch": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "executable_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        },
+        "immutable_runtime_closure_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        },
+        "implementation": "CPython",
+        "native_library_inventory_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        },
+        "platform_and_architecture": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "stdlib_inventory_identity": {
+          "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+          "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+        }
+      },
+      "uv_lock_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      }
+    },
+    "inputs": {
+      "authenticated_inputs": {
+        "absolute_path": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "bytes": 15272413,
+        "sha256": "2581482b4b8a60fa1a53f7710ed080be7de25d50a76fcae35c8aaf64f2cb2168"
+      },
+      "integrity": {
+        "absolute_path": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "bytes": 74200,
+        "sha256": "23c3d17b2e5b67de701d9a0dd22d6135a907057b9acaeb16bcbdb4cb9c613a8b"
+      },
+      "manifest": {
+        "absolute_path": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "bytes": 560,
+        "sha256": "3d58852c3b837f2853beb6def5350932a25d52dc1373a9fc9d8db5b0d9f31eea"
+      },
+      "signoff": {
+        "absolute_path": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "bytes": 2020,
+        "sha256": "21b04470e861a039750bf7b665b993d332bf998fcc5b9fea47dc2c8b80f334b4"
+      }
+    },
+    "limitations": [
+      "2024_already_inspected_exploratory_not_untouched_OOS",
+      "not_live_or_prospective_paper_trading",
+      "no_evidence_of_tradable_alpha_or_profitability",
+      "native_minute_opens_are_reference_assumptions_not_real_fills",
+      "latency_liquidity_depth_and_market_impact_not_observed",
+      "hourly_observed_drawdown_not_intrabar_or_continuous",
+      "provider_revisions_remain_possible"
+    ],
+    "limits": {
+      "input_max_bytes": {
+        "authenticated_inputs": 33554432,
+        "integrity": 1048576,
+        "manifest": 4096,
+        "signoff": 1048576
+      },
+      "limit_failure_policy": "terminal_preserve_incomplete_no_retry",
+      "max_cpu_seconds": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "max_output_bytes_per_file": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "max_receipt_wait_seconds": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "max_rss_bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "max_total_output_bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "max_wall_seconds": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "minimum_free_disk_bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+    },
+    "method": {
+      "accounts": [
+        "ridge",
+        "cash",
+        "buy_and_hold"
+      ],
+      "adverse_slippage_bps": 2,
+      "availability": "source_open_plus_4h_plus_60s_assumed",
+      "buy_and_hold_inception": "2024-01-01T00:00:00Z",
+      "end_exclusive": "2025-01-01T00:00:00Z",
+      "execution": "strictly_next_native_minute_12:01_to_12:02",
+      "fee_bps": 10,
+      "fee_quantum_round_up": "0.00000001",
+      "forced_final_liquidation": false,
+      "funding_each_usdt": "10000",
+      "half_spread_bps": 1,
+      "hourly_marks_per_available_account": 8784,
+      "independent_portfolios": true,
+      "last_mark": "2024-12-31T23:00:00Z",
+      "ledger_prefix_checks": true,
+      "markets": [
+        "BTCUSDT",
+        "ETHUSDT"
+      ],
+      "marks": "native_minute_HH:00_trade_before_mark",
+      "money": "Decimal_160_digits_Inexact_trapped",
+      "quantity_step": "0.000001",
+      "ratios_and_wac": "Decimal_80_digits_HALF_EVEN",
+      "refit_reforecast_search": false,
+      "research_status": "previously_inspected_exploratory_validation_not_untouched_OOS",
+      "source_forecasts_per_market": 2195,
+      "start_inclusive": "2024-01-01T00:00:00Z",
+      "sticky_exits": true,
+      "strategy": "ridge_sign",
+      "threshold": "0.000000000001"
+    },
+    "output": {
+      "absolute_directory": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+      "complete_recursive_output_schema_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "directory_mode": "0700",
+      "exact_readback_required": true,
+      "exclude": [
+        "private_approval_payload",
+        "signature_material",
+        "private_source_roots",
+        "credentials",
+        "raw_operational_integrity",
+        "unreviewed_nested_metadata"
+      ],
+      "file_mode": "0600",
+      "filesystem_and_durability_contract_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "fresh_exclusive_creation": true,
+      "fsync_files_and_parent_directories": true,
+      "manifest_last_commit_marker": true,
+      "no_replace": true,
+      "no_symlink_traversal": true,
+      "outside_all_original_source_and_evidence_trees": true,
+      "partial_or_uncertain_policy": "preserve_incomplete_no_retry_no_promotion",
+      "private_nonpublic": true,
+      "proposed_filenames": [
+        "evidence.json",
+        "integrity.json",
+        "manifest.json"
+      ],
+      "public_fields_for_authority": [
+        "attempt_id",
+        "approval_payload_identity",
+        "signer_key_id",
+        "custody_receipt_identity"
+      ],
+      "publication_and_readback_contract_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      },
+      "recursive_privacy_allowlist_identity": {
+        "bytes": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE",
+        "sha256": "UNRESOLVED_REQUIRES_REVIEW_DO_NOT_EXECUTE"
+      }
+    },
+    "portfolios": [
+      {
+        "account": "ridge",
+        "independent_funding": true,
+        "initial_usdt": "10000",
+        "market": "BTCUSDT"
+      },
+      {
+        "account": "cash",
+        "independent_funding": true,
+        "initial_usdt": "10000",
+        "market": "BTCUSDT"
+      },
+      {
+        "account": "buy_and_hold",
+        "independent_funding": true,
+        "initial_usdt": "10000",
+        "market": "BTCUSDT"
+      },
+      {
+        "account": "ridge",
+        "independent_funding": true,
+        "initial_usdt": "10000",
+        "market": "ETHUSDT"
+      },
+      {
+        "account": "cash",
+        "independent_funding": true,
+        "initial_usdt": "10000",
+        "market": "ETHUSDT"
+      },
+      {
+        "account": "buy_and_hold",
+        "independent_funding": true,
+        "initial_usdt": "10000",
+        "market": "ETHUSDT"
+      }
+    ],
+    "protocol": {
+      "sha256": "c8e2d3134f4e475da5bdb589e3344550bf08a8d17fdb2e7a18457f3b91ed898b",
+      "version": "historical-minute-execution-v1"
+    },
+    "purpose": "one_exploratory_2024_historical_evaluation",
+    "reporting": {
+      "adapter_schema": "native-minute-economic-reporting-v1",
+      "daily_and_monthly_are_alternative_flow_aggregations": true,
+      "final_day": "2024-12-31_00:00_to_23:00_partial_excluded_from_complete_day_statistics",
+      "final_month": "December_partial_one_hour_short",
+      "ledger_verifier": "backtest_badger.paper_minute_historical:verify_minute_account",
+      "new_metrics_or_strategy_selection": false,
+      "reporter": "backtest_badger.paper_minute_reporting:minute_reporting_summary",
+      "terminal_liquidation": false,
+      "whole_replay_bound_to_all_six_accounts_and_reports": true
+    },
+    "schema": "stage-04b2e5d-one-shot-execution-intent-v1"
+  },
+  "proposed_envelope": {
+    "algorithm": "Ed25519",
+    "canonicalisation": "review_reuse_of_canonical_approval_bytes_UTF8_NFC_sorted_compact_no_newline",
+    "domain": "BACKTEST_BADGER_ONE_SHOT_HISTORICAL_EXECUTION_V1\n",
+    "key_id": "sha256:503ebad4f2d36152e2fdc8d71a9b8cbaf2cede3804e6293d7a939f65578abe43",
+    "key_origin": "independently_enrolled_owner_key_in_reviewed_source_not_runtime_injection",
+    "schema": "stage-04b2e5d-one-shot-owner-signature-v1",
+    "signature_status": "ABSENT_DO_NOT_SIGN_THIS_DRAFT",
+    "signed_fields": [
+      "schema",
+      "key_id",
+      "payload"
+    ]
+  },
+  "schema": "stage-04b2e5d-owner-payload-review-draft-v1"
+}

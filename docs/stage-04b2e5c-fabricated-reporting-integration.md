@@ -167,6 +167,16 @@ Final test counts and preservation results are recorded below after completion.
 
 ## Remaining execution-authority work
 
+Current E.5d status: [operator review stopped at the custody boundary](stage-04b2e5d-operator-review.md).
+Independent retention and protected one-attempt state are unresolved; no E.5d
+operator is complete and E.5e is not ready for authorisation. The E.5c implementation
+and its fabricated-only guarantees below remain unchanged.
+
+2026-10-24 continuation: the [E.5d report](stage-04b2e5d-operator-review.md) now
+records a fabricated supervisor/worker custody implementation and validation. The
+preceding five-line status is preserved as the earlier checkpoint; actual macOS
+isolation, installation/runtime closure and genuine authorisation remain gated.
+
 Owner review, separately authorised commit/push and CI on that resulting commit
 remain outstanding. A future genuine runner still requires an independently
 reviewed implementation/runtime closure, exact authorised original input reads,
