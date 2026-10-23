@@ -37,3 +37,5 @@ jobs:
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
       - run: uv run --locked pytest
+      - name: E.5 guarded fabricated preparation tests (87 required)
+        run: uv run --locked --no-sync --python 3.12 python -I -S -B tests/run_e5_guarded.py

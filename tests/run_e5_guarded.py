@@ -8,7 +8,9 @@ Python hooks are procedural protection, not an OS sandbox against hostile code.
 import os
 import sys
 
-ROOT = "/Users/owencrew/Code/backtest-badger"
+# Lexical only: do not resolve links, scan parents or read configuration.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EXPECTED_TESTS = 87  # 84 preparation cases plus three harness regressions.
 ALLOWED = frozenset(
     ROOT + "/" + name
     for name in (
@@ -103,8 +105,21 @@ for name in ("stat", "lstat"):
 os.environ.pop("BADGER_TEST_ADMIN_DSN", None)
 os.environ.pop("DATABASE_URL", None)
 
+
+def suite_succeeded(result):
+    """An incomplete or skipped suite is not a successful CI gate."""
+    return (
+        result.wasSuccessful()
+        and result.testsRun == EXPECTED_TESTS
+        and not result.skipped
+    )
+
+
 if __name__ == "__main__":
     import types
+
+    if sys.version_info[:2] != (3, 12):
+        raise SystemExit("E.5 guarded tests require Python 3.12")
 
     if sys.argv[1:] == ["--candidate"]:
         candidate = types.ModuleType("e5_candidate")
@@ -122,9 +137,18 @@ if __name__ == "__main__":
     module.__file__ = ROOT + "/tests/test_genuine_backtest_preparation.py"
     module.E5_GUARDED = True
     module.E5_CHECK_PATH = check_path
+    module.E5_SUITE_SUCCEEDED = suite_succeeded
     sys.modules[module.__name__] = module
     with open(module.__file__, "rb") as stream:
         exec(compile(stream.read(), module.__file__, "exec"), module.__dict__)
     suite = unittest.defaultTestLoader.loadTestsFromModule(module)
+    if suite.countTestCases() != EXPECTED_TESTS:
+        raise SystemExit(
+            f"E.5 collected {suite.countTestCases()} tests; expected {EXPECTED_TESTS}"
+        )
     result = unittest.TextTestRunner(verbosity=1).run(suite)
-    raise SystemExit(not result.wasSuccessful())
+    sys.stderr.write(
+        f"E.5 guarded tests: ran {result.testsRun}, expected {EXPECTED_TESTS}, "
+        f"skipped {len(result.skipped)}\n"
+    )
+    raise SystemExit(not suite_succeeded(result))

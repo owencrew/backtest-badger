@@ -18,7 +18,7 @@ from datetime import timedelta
 from decimal import Decimal
 from hashlib import sha256
 
-ROOT = "/Users/owencrew/Code/backtest-badger"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_exact(name, relative):
@@ -535,6 +535,94 @@ class PreparationTests(unittest.TestCase):
     def test_guard_denies_network_before_socket_creation(self):
         with self.assertRaises(PermissionError):
             socket.socket()
+
+    def test_guard_roots_are_lexical_on_macos_and_linux(self):
+        for relative in (
+            "tests/run_e5_guarded.py",
+            "tests/test_genuine_backtest_preparation.py",
+        ):
+            with open(ROOT + "/" + relative, "rb") as stream:
+                tree = ast.parse(stream.read())
+            assignments = [
+                node
+                for node in tree.body
+                if isinstance(node, ast.Assign)
+                and any(
+                    isinstance(target, ast.Name) and target.id == "ROOT"
+                    for target in node.targets
+                )
+            ]
+            self.assertEqual(len(assignments), 1)
+            code = compile(
+                ast.Module(body=assignments, type_ignores=[]), relative, "exec"
+            )
+            for checkout in (
+                "/Users/TEST_ONLY/Code/backtest-badger",
+                "/home/runner/work/TEST_ONLY/TEST_ONLY",
+            ):
+                with self.subTest(relative=relative, checkout=checkout):
+                    namespace = {"os": os, "__file__": checkout + "/" + relative}
+                    exec(code, namespace)
+                    self.assertEqual(namespace["ROOT"], checkout)
+        self.assertEqual(ROOT, globals()["E5_CHECK_PATH"].__globals__["ROOT"])
+
+    def test_guard_protected_paths_precede_metadata_in_portable_checkouts(self):
+        check = globals()["E5_CHECK_PATH"]
+        namespace = check.__globals__
+        original = namespace["ORIGINAL_LSTAT"]
+
+        def no_metadata(path):
+            raise AssertionError("Rejected path reached filesystem metadata")
+
+        namespace["ORIGINAL_LSTAT"] = no_metadata
+        try:
+            for checkout in (
+                "/Users/TEST_ONLY/Code/backtest-badger",
+                "/home/runner/work/TEST_ONLY/TEST_ONLY",
+            ):
+                for component in (
+                    "artifacts",
+                    "BacktestBadgerEvidence",
+                    "crypto-trading-platform",
+                    ".ssh",
+                    ".aws",
+                    ".env",
+                    ".codex",
+                ):
+                    for metadata in (False, True):
+                        with (
+                            self.subTest(checkout=checkout, component=component),
+                            self.assertRaisesRegex(PermissionError, "Protected path"),
+                        ):
+                            check(
+                                checkout + "/" + component + "/TEST_ONLY",
+                                metadata=metadata,
+                            )
+                with self.assertRaisesRegex(PermissionError, "Non-allowlisted path"):
+                    check(checkout + "/tests/test_genuine_backtest_preparation.py")
+            with self.assertRaisesRegex(PermissionError, "Non-allowlisted path"):
+                check(ROOT + "/tests/TEST_ONLY_UNLISTED.py")
+        finally:
+            namespace["ORIGINAL_LSTAT"] = original
+
+    def test_guard_suite_requires_every_case_without_skips_or_failures(self):
+        succeeded = globals()["E5_SUITE_SUCCEEDED"]
+        for count, successful, skipped, expected in (
+            (87, True, [], True),
+            (0, True, [], False),
+            (84, True, [], False),
+            (86, True, [], False),
+            (88, True, [], False),
+            (87, False, [], False),
+            (87, True, [("TEST_ONLY", "skipped")], False),
+        ):
+            with self.subTest(count=count, successful=successful, skipped=skipped):
+                result = types.SimpleNamespace(
+                    testsRun=count,
+                    skipped=skipped,
+                    wasSuccessful=lambda successful=successful: successful,
+                )
+                self.assertEqual(succeeded(result), expected)
 
     def test_guard_denies_discovery_and_writes(self):
         with self.assertRaises(PermissionError):

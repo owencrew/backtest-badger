@@ -334,3 +334,82 @@ profitability or tradable alpha even after a later authorised evaluation.
 
 FABRICATED TESTS ONLY · NO ORIGINAL EVIDENCE ACCESS · NO GENUINE REPLAY ·
 NO ECONOMIC PUBLICATION · NO COMMIT OR PUSH.
+
+## Stage 4B.2E.5a — mandatory guarded CI coverage
+
+Prepared 2026-10-23 (Europe/London), against verified local HEAD and `main`
+`88723d3bd0dd30ad3803aef48b7c6f3bf13502a0`. The owner reports baseline CI run
+`39946128295`: 2,681 passed and 85 skipped, including the 84 E.5 cases that
+ordinary pytest deliberately skips. That run was not queried and does not
+validate this change. **Owner-review-ready only; acceptance requires successful
+CI on the subsequent owner-created commit.** No commit or push was performed.
+
+The launcher and test module now derive their checkout roots lexically from
+their respective `__file__` values; the launcher injects the test module's exact
+filename. No directory scanning, configuration reads or symlink resolution is
+used to construct either root. Exact allowed-file policy, protected-path denial,
+symlink checks and network/process/write denial are unchanged. The owner
+explicitly approved the existing guarded AST-only reads of
+`genuine_minute_publication.py` and `genuine_minute_replay.py` for this task.
+Their modules are not imported, and no parser or replay core is executed.
+
+All **84 original test cases and their assertions are preserved**. Three harness
+regressions bring the guarded total to **87**: lexical root construction for
+invented Mac/Linux checkout paths, protected-path denial before metadata access,
+and rejection of zero/incomplete/excess counts, failures and skips. Invented
+paths are strings only; the protected-path regression substitutes a metadata
+function that raises if reached. The existing mocked-symlink test is retained.
+
+CI appends one named, mandatory step after the unchanged ordinary checks:
+
+```sh
+uv run --locked ruff check .
+uv run --locked ruff format --check .
+uv run --locked pytest
+uv run --locked --no-sync --python 3.12 python -I -S -B tests/run_e5_guarded.py
+```
+
+The preceding `uv sync --locked` supplies the project environment. The new step
+requests Python 3.12, avoids another sync, and uses isolated startup with site
+initialisation and bytecode writes disabled. The launcher also rejects other
+Python minor versions. Its no-argument test route requires exactly 87 collected
+cases, then exactly 87 executed cases with a successful result and zero skips;
+any mismatch exits nonzero. Unittest reports the actual execution count and the
+launcher prints actual/expected/skipped counts. There is no nonblocking option
+or unrestricted discovery. The existing `--candidate` route remains separate;
+CI does not invoke it.
+
+Ordinary pytest still skips this class. With the three additional harness cases,
+the expected ordinary count is **88 skipped** (87 E.5 plus the one unrelated
+baseline skip), while the separate guarded step must execute **87, zero skipped**.
+These are distinct counts; pytest alone does not execute the E.5 cases. The
+expected full-suite counts await the new commit's CI.
+
+Local verification uses Python 3.12.13 and the following exact commands:
+
+```sh
+python3.12 -I -S -B tests/run_e5_guarded.py
+ruff check --isolated --no-cache --no-respect-gitignore --select E,F,I,UP,B --target-version py312 tests/run_e5_guarded.py tests/test_genuine_backtest_preparation.py
+ruff format --check --isolated --no-cache --no-respect-gitignore --target-version py312 tests/run_e5_guarded.py tests/test_genuine_backtest_preparation.py
+git diff --check HEAD -- tests/run_e5_guarded.py tests/test_genuine_backtest_preparation.py .github/workflows/ci.yml docs/stage-04b2e5-one-shot-backtest-preparation.md
+git diff --exit-code HEAD -- AGENTS.md src/backtest_badger/genuine_backtest_preparation.py docs/stage-04b2e5-run-contract.json prompts/stage-04-paper/019-one-shot-genuine-backtest-preparation.md
+```
+
+The guarded suite passed **87 tests, zero failures and zero skips**. Scoped lint
+and formatting passed with locally available **Ruff 0.12.0**. Initial lint and
+format findings in the new harness code were corrected. Local uv reports
+**0.13.0**, but the exact project-mode uv command and locked Ruff were not run:
+they would inspect project configuration/lockfiles excluded from this task's
+read allowlist. No dependency fetch/sync, full pytest run or repository-wide
+Ruff scan was attempted. Locked-runtime and Linux execution remain CI gates,
+not local verification claims.
+
+Preservation checks against the frozen baseline confirmed exact source text for
+every original test member and generated-case table, the launcher's allowed-file
+policy and path/audit/stat guards, and the entire original workflow prefix.
+The four read-only allowlisted paths above have no Git diff; this document's
+baseline text is preserved with this section appended. Scoped whitespace checks
+pass. No out-of-scope source or original evidence bytes were audited. The public
+replay gate, scientific contracts and economic code were not edited. No genuine
+input access, verification rerun, economic computation, signing, publication,
+attempt-consumption implementation or production operation was performed.
