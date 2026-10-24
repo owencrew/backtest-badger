@@ -4,38 +4,44 @@
 
 This is the **current-state** production runbook, distinct from the historical [Lightsail foundation](lightsail-foundation.md), [migration plan](lightsail-migration-runbook.md) and [D2A rehearsal](lightsail-d2a-rehearsal.md). The migration documents describe earlier gates and may contain statements about Mac-only operation that are now historical. **Inspect the actual host and AWS configuration before making changes**; this document is not a live inventory.
 
-### Observed on 24 October, 16:28–16:33 UTC
+### Release promoted on 24 October, 20:58 UTC
 
-The authorised [D3A reconciliation](lightsail-d3a-release-reconciliation.md) used
-`ssh Ubuntu-1` and verified the following. Detailed 16 October observations below
-remain historical where explicitly dated; external AWS configuration and alert
-delivery were not independently rechecked in D3A.
+The authorised [D3B.1 retry](lightsail-d3b1-release-retry.md) activated
+`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1` at **20:58:48.203002841 UTC**.
+`current` resolves to that exact immutable release directory. The previous release
+`e0d622d51e1edc120fb4f1b5229e46907ed6219d` and its environment remain available.
+Exact-candidate CI passed. The earlier [D3B incident](lightsail-d3b-release-promotion.md)
+remains preserved; its helper import collision was corrected and the real staged
+commands were tested before the retry. No rollback occurred.
 
-- Active release remains `e0d622d51e1edc120fb4f1b5229e46907ed6219d`.
-  Candidate `cceb6509edbb6e6a9fb577c112bf9c648e81c5a1` is prepared **inactive**
-  under `/opt/backtest-badger/releases/`; exact-commit CI passed. No promotion occurred.
-- Ubuntu 24.04.5 LTS x86_64; Python 3.12.15, uv 0.13.1, NTP synchronised;
-  PostgreSQL 17.11 healthy on the existing production volume, Alembic **0001**.
-- All six timers enabled/active and latest services successful. Retained worker
-  journals account for every scheduled tick from 17 October through 24 October
-  16:30 UTC. Both releases' offline checks found no missed forecast horizons,
-  invalid evidence or mature-unscored backlog: **122 scored, 2 pending**.
-- Daily shared-snapshot backups and local four-to-three checkpoint retention
-  succeeded unattended on **17–24 October**. Latest backup completed **24 October
-  02:40:29 UTC**, snapshot `cd970a1e…`; all nine local bundle hashes rechecked.
-  Read-only restic inventory confirmed **12** remote snapshots.
-- The **18 October 06:00 UTC** unattended restore passed all nine hashes and exact
-  four-table fingerprints (40,114 candles). Its successful transient container
-  and volume were removed; compact result/audit evidence remains. The latest
-  backup itself has not been restored during D3A.
-- Three local checkpoints remain, dated 22–24 October (~565 MiB total). Root disk
-  was **10% used**, with **69 GiB available** before the 269 MiB candidate was
-  staged. Storage monitoring completed all due runs from 17 October to inspection.
-  Historical recovery resources were retained, not pruned.
+- Both runtime validators and DB health passed before and after activation.
+  PostgreSQL **17.11** remains healthy on its existing volume, Alembic **0001**;
+  the schema fingerprint is unchanged. Python **3.12.15**, synchronised NTP,
+  root disk **10% used / 69 GiB free** were rechecked.
+- Only collection/scoring timers paused, for approximately **23.9 seconds**;
+  they resumed at **20:58:57 UTC**, before their next **21:01 / 21:02** ticks.
+  Natural collection completed **21:01:06** and scoring **21:02:12**, both
+  `success / exit 0`. All six timers remain scheduled; backup lock released.
+- All **250** original forecast/outcome files retained their exact hashes.
+  Post-worker checks at **21:02 UTC** found **124 scored, 2 pending**, with no invalid evidence,
+  missed horizons or mature-unscored backlog. One pre-existing late issuance per
+  market remains classified as late.
+- Latest off-machine backup: **24 October 02:40:29 UTC**, checkpoint
+  `checkpoint-20261024T024008Z`, snapshot `cd970a1e…`; all nine local hashes and
+  remote presence/freshness rechecked. Latest fingerprint-verified isolated
+  restore: **18 October 06:00 UTC**, snapshot `44b3a070…`, within seven days.
+  No manual backup or restore was initiated. Next regular drill: **25 October 06:00**.
+- The next new dependency-provenance issuance is expected **25 October 00:01 UTC**;
+  its actual publication/hash check and subsequent scoring remain **pending**.
+  Earliest target scoring eligibility: **04:01 UTC**, scheduled check **04:02**.
+  Preserve both runtimes for exact replay; historical provenance was not rewritten.
 
-No production writes, worker invocations, timer changes, service restarts, policy
-changes or research replay were performed by D3A. See its report for exact SHAs,
-snapshot identities, provenance implications, validation and the proposed D3B plan.
+The [D3A review](lightsail-d3a-release-reconciliation.md) retains the detailed
+17–24 October unattended backup/retention and 18 October restore observations.
+Detailed 16 October infrastructure observations below remain historical where
+explicitly dated. External AWS configuration and alert delivery were not
+independently rechecked during D3B.1. No permanent infrastructure or scientific
+methodology changed.
 
 ## 1. Architecture and responsibility boundaries
 
@@ -233,4 +239,4 @@ Any destructive operation should have an explicit target list, a fresh backup, a
 6. Address the automatic local-cleanup exactly-four-checkpoints limitation before a prolonged unattended period.
 7. Document and version-control reviewed operational script/unit templates separately, without copying host secrets.
 
-**Last host review:** 2026-10-24, D3A. **Last independently documented external AWS configuration review:** 2026-10-16. Update observations after later runs or changes; inactive preparation is not deployment.
+**Last host review:** 2026-10-24, D3B.1 promotion. **Last independently documented external AWS configuration review:** 2026-10-16. Update observations after later runs or changes; future forecast/scoring observations remain pending as stated above.

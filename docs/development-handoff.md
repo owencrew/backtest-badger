@@ -13,20 +13,25 @@ Read [AGENTS.md](../AGENTS.md), [README](../README.md),
 [architecture](architecture.md), [roadmap](roadmap.md), the
 [E.5g genuine backtest report](stage-04b2e5g-first-genuine-historical-backtest.md)
 and the [production runbook](deployment/production-infrastructure.md).
-The latter is a verified **16 October 2026 snapshot**, not a live inventory.
-Never infer that GitHub HEAD is deployed.
+The production runbook now includes the **24 October D3B.1 promotion**:
+`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1` is active on Lightsail.
+See the [retry report](deployment/lightsail-d3b1-release-retry.md) for verified
+operations and pending forecast-provenance observations. Never infer that a newer
+GitHub HEAD is deployed.
 
-Starting branch for this documentation reconciliation: `main`, clean at
+Historical E.5h starting branch: `main`, clean at
 `ed69f8b3f18592bec183e058c6659e59a0641f42` (E.5g report).
-The latest implementation explicitly identified as reviewed in the
+The implementation explicitly identified as reviewed in the
 [E.5f record](stage-04b2e5f-genuine-preflight.md) and E.5g report is
 `c39f572c046253b196c12b476c9170d71b0468bb` (E.5e local runner).
-GitHub's Actions API was checked on 24 October: [CI run 40084535405](https://github.com/owencrew/backtest-badger/actions/runs/40084535405)
-completed successfully for that exact implementation commit. The latest report
+At the earlier E.5h review, GitHub's Actions API was checked on 24 October: [CI run 40084535405](https://github.com/owencrew/backtest-badger/actions/runs/40084535405)
+completed successfully for that exact implementation commit. That report
 commit's [CI run 40105024756](https://github.com/owencrew/backtest-badger/actions/runs/40105024756)
 was still in progress when checked; success and separate review approval for that
-commit are not inferred. These CI records do not validate this uncommitted
-E.5h documentation diff.
+commit are not inferred. These were dated E.5h observations. D3B.1 subsequently rechecked
+[CI run 40106649560](https://github.com/owencrew/backtest-badger/actions/runs/40106649560):
+`completed / success` for the exact now-active candidate. Deployment does not
+validate later uncommitted documentation changes.
 
 This file describes current capabilities and next work. Detailed stage guides
 preserve the authorisations, limitations and tests at their original stage;
@@ -90,22 +95,34 @@ established successful genuine execution. Neither is still pending.
 
 ## 4. Production boundary and remaining operational evidence
 
-The [production runbook](deployment/production-infrastructure.md) records Lightsail
-Ubuntu, PostgreSQL 17 and six active timers as of **16 October**: collection,
-scoring, encrypted S3 backup, isolated restore drill, storage monitoring and local
-checkpoint retention. Supervised backup/restore and exact database fingerprints
-were verified. The migration-era release was
-`e0d622d51e1edc120fb4f1b5229e46907ed6219d`; it is not a current-release assertion.
-No production inspection or change was performed for E.5h, and deployment of
-later research code is unconfirmed.
+The [production runbook](deployment/production-infrastructure.md) records the
+successful **24 October 20:58 UTC** promotion from
+`e0d622d51e1edc120fb4f1b5229e46907ed6219d` to
+`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1`. The old environment remains available.
+The [D3B incident](deployment/lightsail-d3b-release-promotion.md) is unchanged;
+[D3B.1](deployment/lightsail-d3b1-release-retry.md) corrected the temporary helper
+collision, tested real staged commands and completed one authorised retry.
 
-The runbook still lists first unattended backup/monitor/cleanup runs scheduled
-for 17 October and the 18 October restore drill as unverified. Those dates have
-passed; no new observation is recorded here. Its exactly-four-checkpoint cleanup
-restriction, missing-invocation monitoring gap and disabled remote restic pruning
-remain open items. Timer activation alone is not execution success. A later,
-explicitly authorised operations task must update that evidence. Do not restart
-old Mac schedulers or change production to reconcile documentation.
+Both worker runtime validators and DB health passed. PostgreSQL 17.11 remains
+healthy at Alembic **0001**, with unchanged schema fingerprint. A **23.9-second**
+timer pause missed no scheduled ticks. Natural collection completed **21:01:06 UTC**
+and scoring **21:02:12 UTC**, both successfully with exit **0**. All **250** original forecast/outcome files
+retained their hashes; offline checks found **124 scored, 2 pending**, no invalid
+evidence, missed horizons or mature-unscored backlog. Existing late classifications
+remain. These are operational counts, not performance claims.
+
+The first new candidate-era four-hour issuance is expected **25 October 00:01 UTC**.
+Actual publication/dependency hashes and subsequent scoring (earliest eligibility
+**04:01 UTC**, scheduled check **04:02**) remain pending. Keep both runtimes and
+original records: dependency-file changes create a new recipe-fingerprint epoch.
+No manual cycles, backfilling, historical research or website deployment occurred.
+
+Daily off-machine backups and local retention succeeded unattended on 17–24 October;
+the 18 October isolated restore matched exact database fingerprints. Their freshness
+and evidence were rechecked before promotion. External AWS alert delivery,
+missing-invocation monitoring, the exactly-four-checkpoint cleanup restriction and
+disabled remote restic pruning remain separate operational items. Do not restart
+old Mac schedulers or alter production to reconcile historical documentation.
 
 ## 5. Next product milestone — the public website
 
@@ -154,8 +171,8 @@ of this stage. Maintain a concise current handoff; retain historical details in
 the linked reports and Git history.
 
 Remaining documentation work: review the draft articles for publication, prepare
-dated public forward-statistics content, and update operational observations only
-after an authorised check. Older guides deliberately retain their original gates;
+dated public forward-statistics content, and complete the pending forward
+provenance/scoring observations in the D3B.1 report. Older guides deliberately retain their original gates;
 use the architecture/roadmap current summaries to interpret them.
 
 E.5h validation: 150 local Markdown links/anchors (including incoming links to

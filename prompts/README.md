@@ -37,3 +37,16 @@ Markdown, is preserved verbatim at
 [`deployment/003-lightsail-release-reconciliation.md`](deployment/003-lightsail-release-reconciliation.md).
 It authorises a read-only production audit and one inactive release preparation,
 while reserving activation and all production changes for separately approved work.
+
+Stage D3B's complete original request is preserved verbatim at
+[`deployment/004-lightsail-release-promotion.md`](deployment/004-lightsail-release-promotion.md).
+It authorises one supervised activation attempt, guarded source-only recovery and
+sanitised reporting. The [execution report](../docs/deployment/lightsail-d3b-release-promotion.md)
+records the pre-switch failure and recovery; another promotion needs fresh owner
+authorisation.
+
+Stage D3B.1's complete original request is preserved verbatim at
+[`deployment/005-lightsail-release-promotion-retry.md`](deployment/005-lightsail-release-promotion-retry.md).
+It authorises one additional supervised attempt against the same prepared SHA,
+after correcting the temporary helper collision and testing the exact staged
+commands. See the [retry report](../docs/deployment/lightsail-d3b1-release-retry.md).
