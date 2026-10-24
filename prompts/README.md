@@ -13,3 +13,8 @@ Review every prompt for credentials, personal data and other sensitive informati
 before committing. Remove sensitive material before archiving it. Archived prompts
 are historical context, not authoritative specifications when they conflict with
 current code or project documentation.
+
+Stage 4B.2E.5e's complete original request is preserved at
+[`stage-04-paper/stage-04b2e5e-simple-local-historical-backtest-runner.md`](stage-04-paper/stage-04b2e5e-simple-local-historical-backtest-runner.md),
+using the filename explicitly requested by the owner. Continue archiving future
+substantive development requests under their appropriate stage directory.
