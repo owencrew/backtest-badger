@@ -18,3 +18,7 @@ Stage 4B.2E.5e's complete original request is preserved at
 [`stage-04-paper/stage-04b2e5e-simple-local-historical-backtest-runner.md`](stage-04-paper/stage-04b2e5e-simple-local-historical-backtest-runner.md),
 using the filename explicitly requested by the owner. Continue archiving future
 substantive development requests under their appropriate stage directory.
+
+Stage 4B.2E.5f's complete original request is preserved at
+[`stage-04-paper/stage-04b2e5f-genuine-historical-preflight.md`](stage-04-paper/stage-04b2e5f-genuine-historical-preflight.md),
+using the filename explicitly requested by the owner.
