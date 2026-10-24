@@ -1,8 +1,41 @@
 # Production infrastructure and operations
 
-**Backtest Badger — operational state as reported and verified on 16 October 2026 (UTC).**
+**Backtest Badger — host observations updated on 24 October 2026 (UTC).**
 
 This is the **current-state** production runbook, distinct from the historical [Lightsail foundation](lightsail-foundation.md), [migration plan](lightsail-migration-runbook.md) and [D2A rehearsal](lightsail-d2a-rehearsal.md). The migration documents describe earlier gates and may contain statements about Mac-only operation that are now historical. **Inspect the actual host and AWS configuration before making changes**; this document is not a live inventory.
+
+### Observed on 24 October, 16:28–16:33 UTC
+
+The authorised [D3A reconciliation](lightsail-d3a-release-reconciliation.md) used
+`ssh Ubuntu-1` and verified the following. Detailed 16 October observations below
+remain historical where explicitly dated; external AWS configuration and alert
+delivery were not independently rechecked in D3A.
+
+- Active release remains `e0d622d51e1edc120fb4f1b5229e46907ed6219d`.
+  Candidate `cceb6509edbb6e6a9fb577c112bf9c648e81c5a1` is prepared **inactive**
+  under `/opt/backtest-badger/releases/`; exact-commit CI passed. No promotion occurred.
+- Ubuntu 24.04.5 LTS x86_64; Python 3.12.15, uv 0.13.1, NTP synchronised;
+  PostgreSQL 17.11 healthy on the existing production volume, Alembic **0001**.
+- All six timers enabled/active and latest services successful. Retained worker
+  journals account for every scheduled tick from 17 October through 24 October
+  16:30 UTC. Both releases' offline checks found no missed forecast horizons,
+  invalid evidence or mature-unscored backlog: **122 scored, 2 pending**.
+- Daily shared-snapshot backups and local four-to-three checkpoint retention
+  succeeded unattended on **17–24 October**. Latest backup completed **24 October
+  02:40:29 UTC**, snapshot `cd970a1e…`; all nine local bundle hashes rechecked.
+  Read-only restic inventory confirmed **12** remote snapshots.
+- The **18 October 06:00 UTC** unattended restore passed all nine hashes and exact
+  four-table fingerprints (40,114 candles). Its successful transient container
+  and volume were removed; compact result/audit evidence remains. The latest
+  backup itself has not been restored during D3A.
+- Three local checkpoints remain, dated 22–24 October (~565 MiB total). Root disk
+  was **10% used**, with **69 GiB available** before the 269 MiB candidate was
+  staged. Storage monitoring completed all due runs from 17 October to inspection.
+  Historical recovery resources were retained, not pruned.
+
+No production writes, worker invocations, timer changes, service restarts, policy
+changes or research replay were performed by D3A. See its report for exact SHAs,
+snapshot identities, provenance implications, validation and the proposed D3B plan.
 
 ## 1. Architecture and responsibility boundaries
 
@@ -149,7 +182,7 @@ Approximate reference sizes on 16 October: Lightsail root disk 9% used; three lo
 
 ## 6. Local and remote retention
 
-**Local (enabled):** `/usr/local/sbin/backtest-badger-local-retention-auto` is invoked daily at 05:30 UTC by `backtest-badger-local-retention.service`. It acts only when there are **exactly four** correctly named checkpoint directories. It checks that the newest three are represented by remote production snapshots and invokes `/usr/local/sbin/backtest-badger-local-retention` with an explicit `--delete --confirm checkpoint-NAME` for the oldest. The guarded script acquires the **same exclusive backup lock**, checks remote restic snapshot paths and required recovery file entries, and deletes **only that local directory**, not any remote snapshot. The guarded deletion was tested manually on 16 October; the wrapper was tested successfully with only three directories (**no deletion**). The **first unattended four-checkpoint deletion is still pending**.
+**Local (enabled):** `/usr/local/sbin/backtest-badger-local-retention-auto` is invoked daily at 05:30 UTC by `backtest-badger-local-retention.service`. It acts only when there are **exactly four** correctly named checkpoint directories. It checks that the newest three are represented by remote production snapshots and invokes `/usr/local/sbin/backtest-badger-local-retention` with an explicit `--delete --confirm checkpoint-NAME` for the oldest. The guarded script acquires the **same exclusive backup lock**, checks remote restic snapshot paths and required recovery file entries, and deletes **only that local directory**, not any remote snapshot. The guarded deletion was tested manually on 16 October; the wrapper was tested successfully with only three directories (**no deletion**). **Verified on 24 October:** the first unattended deletion succeeded on 17 October at 05:30, followed by successful daily deletions through 24 October; three local checkpoints remain. The exactly-four guard is still present.
 
 **Fail-closed limitation:** if more than four checkpoints accumulate (e.g. a missed cleanup day), the automated wrapper refuses to clean any. This is safer than mass deletion but **not** a bounded-storage guarantee. Disk monitoring at 5 GiB provides a separate warning. The local script checks remote snapshot existence/file listing; it does **not** independently restore the candidate just before deletion.
 
@@ -192,12 +225,12 @@ Any destructive operation should have an explicit target list, a fresh backup, a
 
 **Still to verify or implement:**
 
-1. First unattended **17 October 02:40 UTC** backup with the permanently activated shared-snapshot script, subsequent **04:00** external monitor, and **05:30** automatic *four-checkpoint deletion*.
-2. First unattended Sunday **18 October 06:00 UTC** fingerprint-verified restore drill.
+1. Independently verify the external **04:00** AWS monitor's invocations and alert delivery. **Closed on 24 October:** host evidence confirms the first 17 October shared-snapshot backup and automatic four-checkpoint deletion, plus all daily runs through 24 October.
+2. Continue checking weekly fingerprint-verified restores. **Closed on 24 October:** the first unattended Sunday **18 October 06:00 UTC** drill passed, with result/audit retained and successful transient resources cleaned up. Next scheduled drill: **25 October 06:00 UTC**.
 3. Independent alarm for *missing* backup-monitor Lambda invocations and, if desired, failures of storage/retention monitoring itself.
 4. Safe, supervised remote restic retention/pruning after adequate recovery history accumulates; avoid aggressive S3 object lifecycle deletion.
 5. Decide whether to require source audit manifests for all nonlegacy backups; update checks when new core tables/schema are introduced.
 6. Address the automatic local-cleanup exactly-four-checkpoints limitation before a prolonged unattended period.
 7. Document and version-control reviewed operational script/unit templates separately, without copying host secrets.
 
-**Last reviewed:** 2026-10-16. Update observations and the open-items list after unattended runs, resource changes or infrastructure deployment.
+**Last host review:** 2026-10-24, D3A. **Last independently documented external AWS configuration review:** 2026-10-16. Update observations after later runs or changes; inactive preparation is not deployment.

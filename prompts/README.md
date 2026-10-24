@@ -31,3 +31,9 @@ Stage 4B.2E.5h's complete original request is preserved verbatim at
 [`stage-04-paper/stage-04b2e5h-research-narrative-documentation.md`](stage-04-paper/stage-04b2e5h-research-narrative-documentation.md),
 scoping documentation reconciliation, Field Notes 003/004 and the future website
 handoff without new research execution or infrastructure changes.
+
+Stage D3A's complete request, including its SSH authorisation and original escaped
+Markdown, is preserved verbatim at
+[`deployment/003-lightsail-release-reconciliation.md`](deployment/003-lightsail-release-reconciliation.md).
+It authorises a read-only production audit and one inactive release preparation,
+while reserving activation and all production changes for separately approved work.
