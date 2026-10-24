@@ -3,217 +3,82 @@
 **A little badger. A lot of backtests.**
 
 Backtest Badger is an open-source quantitative research platform for market-data
-engineering, machine learning, backtesting and paper-trading analytics.
-It begins with cryptocurrency spot markets and is intended to support other asset
-classes as research develops. [backtestbadger.com](https://backtestbadger.com)
+engineering, machine learning, backtesting and paper-trading analytics. It starts
+with Binance Spot BTCUSDT and ETHUSDT, with other asset classes left for future
+research. [backtestbadger.com](https://backtestbadger.com)
 
 The principle is **minimum complexity, maximum correctness**: readable Python,
-few dependencies, reproducible research, causal features, chronological evaluation
-and realistic transaction costs. Economic viability is a question to investigate,
-not a promise of profitability. Simulated results will remain distinct from live
-predictions and paper trading.
+exact financial accounting, versioned SQL data, causal features, chronological
+evaluation and reproducible evidence. Profitability is a question to investigate.
 
-## Status
+## Latest research: a working pipeline, a losing strategy
 
-Stage 0 provides the Python package, environment configuration, CLI health checks,
-local PostgreSQL service, tests and lint workflow. Stage 1B.1 adds Alembic migrations
-and tested persistence of exact, versioned market candles. Validation and future
-acceptance criteria are in the [roadmap](docs/roadmap.md).
+The first genuine **2024 native-minute historical backtest** completed on
+24 October 2026. Six independently funded portfolios passed ledger verification.
+Each began with 10,000 USDT; returns below include the frozen transaction costs.
 
-Historical archive ingestion, incomplete frozen research exports and
-[recent REST synchronization](docs/stage-01c1-rest-tail-and-refresh.md) and
-[controlled historical revalidation](docs/stage-01c2-historical-revalidation.md)
-are implemented. [Stage 2A](docs/stage-02a-research-dataset.md) adds verified frozen
-inputs, causal features, a 4h research target and chronological splits.
-[Stage 2B](docs/stage-02b-predictive-baselines.md) adds fixed Ridge and gradient
-boosting experiments with train-only fitting and validation-only baseline comparisons.
-[Stage 2C](docs/stage-02c-execution-backtesting.md) implements historical validation
-backtesting with independent hourly references and explicit transaction costs.
-[Stage 2D](docs/stage-02d-economic-diagnostics.md) adds a reproducible economic
-postmortem of those fixed simulations, including monthly results and cost budgets.
-[Stage 3A](docs/stage-03a-forward-predictions.md) adds manual forward prediction
-recording with strict freshness/timing checks, immutable input evidence and offline
-verification. [Stage 3B](docs/stage-03b-automated-forward-collection.md) adds
-reliable collection cycles, operational history and an opt-in macOS scheduler.
-[Stage 3C](docs/stage-03c-forward-evaluation.md) adds a preregistered manual
-outcome scorer and offline prospective accuracy reports. Genuine outcomes have
-not been scored during implementation; no model has demonstrated economic
-viability. Paper trading and the public dashboard remain **planned, not implemented**. The future product sections are
-The Burrow (dashboard), The Dig (research) and Field Notes (experiment history).
+| Market | Ridge strategy | Cash | Buy & Hold |
+| --- | ---: | ---: | ---: |
+| BTCUSDT | −60.69% | 0.00% | +120.81% |
+| ETHUSDT | −57.96% | 0.00% | +46.18% |
 
-## Local setup
+Ridge substantially underperformed both benchmarks. Frequent position changes
+incurred approximately 9,932.12 USDT of costs for BTC and 9,239.49 USDT for ETH.
+The useful result is an inspectable account of an unsuccessful strategy, not a
+claim of trading skill.
+
+These are exploratory simulations on previously inspected history. Final values
+are marked at 2024-12-31 23:00 UTC; Buy & Hold retains unsold assets without an
+invented exit cost. Archive opening prices and assumed costs do not prove actual
+fillability. The different holding rules mean this is **not** a controlled
+execution-frequency comparison with the earlier Stage 2C study.
+Read the [full research report](docs/stage-04b2e5g-first-genuine-historical-backtest.md)
+or [The Price of Changing Your Mind](docs/field-notes/003-the-price-of-changing-your-mind.md).
+
+## What works today
+
+- **Market-data engineering:** checksum-verified archives, recent REST refresh,
+  version-preserving PostgreSQL storage, disclosed gaps and immutable exports.
+- **Historical research:** causal features, train-only model fitting, chronological
+  evaluation, authenticated native-minute references and verified independent
+  strategy/benchmark accounting.
+- **Live forward evidence:** actual forecast issuance, automated collection,
+  immutable outcome scoring and prospective accuracy reports. Forecast errors
+  are not trading returns.
+- **Paper-trading foundations:** deterministic strategy, execution and accounting
+  primitives, exercised synthetically and reused for historical replay. A complete
+  prospective paper-trading service is **not implemented**.
+
+Historical backtests simulate past decisions. Live forward predictions record
+forecasts before their outcomes. Prospective paper trading will simulate orders
+and portfolios as new evidence arrives. Real trading places actual orders and is
+outside the current scope. No model has demonstrated economic viability.
+
+The next product milestone is a **polished public website**: The Burrow (dashboard),
+The Dig (research and backtests), and Field Notes (research journal). The website
+and public API remain planned; research summaries and draft articles are ready
+for editorial and product work. See the [roadmap](docs/roadmap.md).
+
+## Local development
 
 Prerequisites: Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/)
-and Docker with Compose (Docker Desktop on macOS). Run from the repository root:
+and Docker with Compose. Run from the repository root:
 
 ```sh
-uv python install 3.12  # only needed if Python 3.12 is not installed
+uv python install 3.12  # only if needed
 uv sync --locked
 cp .env.example .env
 docker compose up -d --wait
 uv run --locked --env-file .env badger health
 uv run --locked --env-file .env badger db-health
-```
-
-`uv.lock` pins dependencies for development and CI and should be tracked in Git.
-The CLI reads process environment variables; `uv --env-file` loads `.env`
-explicitly, while Compose reads `.env` automatically. Existing shell environment
-variables take precedence. `POSTGRES_DB`, `POSTGRES_USER` and `POSTGRES_PASSWORD`
-are required; host defaults to `127.0.0.1`, port to `5432`, and log level to `INFO`.
-`LOG_LEVEL` accepts DEBUG, INFO, WARNING, ERROR and CRITICAL.
-
-The example credentials are **for local development only**. `.env` is ignored.
-PostgreSQL binds only to `127.0.0.1` and stores data in a named Docker volume.
-If port 5432 is occupied, change `POSTGRES_PORT` in `.env` before starting Compose.
-Credentials initialise a new volume; changing `.env` does not change the credentials
-of an existing database. Compose does not create application tables. Apply the
-schema and seed the two initial market identities explicitly:
-
-```sh
 uv run --locked --env-file .env alembic upgrade head
-uv run --locked --env-file .env alembic current
 ```
 
-See the [persistence guide](docs/stage-01b1-persistence.md) for the Python API,
-revision policy, SQL inspection and isolated PostgreSQL testing.
-
-`badger health` validates configuration without connecting to PostgreSQL.
-`badger db-health` also connects and executes `SELECT 1`, with a five-second
-connection timeout and five-second statement timeout. Exit codes are 0 for success,
-1 for database failure and 2 for invalid configuration or command usage. Errors go
-to stderr without printing credentials or driver diagnostics.
-
-```sh
-docker compose down  # stops local PostgreSQL; retains its data volume
-```
-
-## Offline research preparation
-
-Use the existing frozen export, without database configuration or network access:
-
-```sh
-uv run --locked badger prepare-research \
-  --output artifacts/research/stage-2a-v1 \
-  --acknowledge-incomplete
-```
-
-Each run requires a new output directory. The source is explicitly incomplete;
-gap-spanning windows are excluded. Feature availability includes a 60-second
-settling delay, and the close-to-close target is not an executable trading return.
-See the [Stage 2A guide](docs/stage-02a-research-dataset.md) for definitions,
-reproduction, split counts and holdout policy.
-
-Evaluate the fixed models on 2024 validation data, preserving the test holdout:
-
-```sh
-uv run --locked badger evaluate-models \
-  --source artifacts/research/stage-2a-v1 \
-  --output artifacts/experiments/stage-2b-v1
-```
-
-Use a new output directory each time. The [Stage 2B guide](docs/stage-02b-predictive-baselines.md)
-records actual results, metrics, hashes and limitations. Small forecast error
-reductions do not establish trading profitability.
-
-## Manual forward observations
-
-Refresh local data separately, then record all four fixed model predictions for
-the current eligible horizon:
-
-```sh
-uv run --locked --env-file .env badger sync-recent --symbol BTCUSDT --interval 4h
-uv run --locked --env-file .env badger record-forward --symbol BTCUSDT
-# Use ETHUSDT in both commands for Ether.
-uv run --locked badger verify-forward --record artifacts/forward-predictions/RECORD.json
-```
-
-Replace `RECORD.json` with the printed path. Recording fails on stale or incomplete
-data, expired horizons and duplicates; it never refreshes data automatically.
-The [Stage 3A guide](docs/stage-03a-forward-predictions.md) documents retained
-provenance, deterministic training-only refits, local-clock limitations and the
-actual stale-database check. These observations are not trading recommendations.
-
-## Automated forward collection
-
-Stage 3B adds an idempotent two-market collection cycle and offline status report:
-
-```sh
-uv run --locked --env-file .env badger forward-cycle
-uv run --locked badger forward-status
-```
-
-New forecasts require complete, fresh observations and publication within 15 minutes
-of candle-close-plus-60-seconds. Existing records are skipped; expired windows are
-reported as missed. The [Stage 3B guide](docs/stage-03b-automated-forward-collection.md)
-covers failure evidence, backups and the opt-in five-minute macOS LaunchAgent.
-The scheduler is not installed automatically, and a development Mac does not provide
-24/7 availability. Predictions remain unscored observations, separate from trading.
-
-## Prospective forecast evaluation
-
-Stage 3C is implemented; the first four genuine observations have been scored.
-Read the [frozen protocol](docs/stage-03c-forward-evaluation-protocol.md) before
-manually scoring a forecast. The [evaluation guide](docs/stage-03c-forward-evaluation.md)
-contains manual scoring commands, statuses, provenance safeguards and tests.
-The standalone module leaves the existing collector and its fingerprints unchanged:
-
-```sh
-# Manual scoring of an existing genuine record; never downloads or synchronises data.
-uv run --locked --env-file .env python -m backtest_badger.forward_evaluation score \
-  --record artifacts/forward-predictions/RECORD.json
-
-# Offline evidence report; no database configuration needed.
-uv run --locked python -m backtest_badger.forward_evaluation report
-```
-
-Replace `RECORD.json` with an existing original filename. Timely automated and late
-manual observations stay separate. Outcomes use the original retained source close
-and the exact next native 4h target, captured no earlier than close + 60 seconds.
-These are forecast errors in log-return units, not executable trading returns.
-Stage 3D adds opt-in scoring automation below. No model promotion or paper trading
-is implemented.
-
-## Automated forward outcome scoring
-
-Stage 3D calls the unchanged Stage 3C scorer in bounded, process-locked cycles:
-
-```sh
-uv run --locked --env-file .env python -m backtest_badger.forward_scoring_operations cycle
-uv run --locked python -m backtest_badger.forward_scoring_operations status
-```
-
-Existing outcomes are validated offline; unexpired and missing targets remain
-pending. A rotating queue retries older work after downtime without creating
-forecasts. The separate five-minute LaunchAgent was supplied opt-in; the operator
-now reports both collection and scoring LaunchAgents running on the Mac. See the
-[Stage 3D guide](docs/stage-03d-automated-outcome-scoring.md) for installation,
-failure diagnostics, stopping, recovery and backups. Future backups must preserve
-predictions, outcomes, collection operations and scoring operations together.
-
-## Lightsail deployment preparation
-
-[Stage D1](docs/deployment/lightsail-foundation.md) supplies pinned host releases,
-persistent artifact paths, private loopback PostgreSQL 17 Compose, independent
-systemd workers/timers, deployment validation and a full-size synthetic benchmark.
-The guide includes exact initial installation commands and optional swap setup.
-The operator reports D1 installed at commit
-`556e3a9b80066b2d83cf1e1e4ee5795fc6ec290f`. Both Mac LaunchAgents continue running;
-server workers remain disabled and the server has no migrated research database
-or evidence. These operational facts were supplied by the operator.
-
-The separate [D2 migration runbook](docs/deployment/lightsail-migration-runbook.md)
-covers coherent backups, checksums, restore rehearsal, Mac/Linux replay limitations,
-server performance gates, exactly one collector at cutover and recovery. Original
-forecasts/outcomes and frozen scientific code remain unchanged. D2 requires separate
-authorisation; no website or trading service is deployed.
-
-[Stage D2A rehearsal tooling](docs/deployment/lightsail-d2a-rehearsal.md) prepares
-read-only online exports, complete checksummed evidence/source archives, isolated
-PG17 restoration and offline validation. An online copy is explicitly
-nonauthoritative; no remote rehearsal or final cutover was executed during this
-implementation. D2B requires a quiescent final checkpoint and separate approval.
-
-## Development
+The example credentials are for local development only; `.env` is ignored.
+PostgreSQL binds to loopback and persists in a named volume. The CLI reads process
+environment variables; `uv --env-file` loads `.env` explicitly. Existing shell
+variables take precedence. See the [persistence guide](docs/stage-01b1-persistence.md)
+for configuration, migrations and isolated database tests.
 
 ```sh
 uv run --locked ruff check .
@@ -222,19 +87,34 @@ uv run --locked pytest
 uv build
 ```
 
-Unit tests need no database or secrets. PostgreSQL integration tests skip unless
-`BADGER_TEST_ADMIN_DSN` explicitly names an isolated local PostgreSQL server's
-`postgres` maintenance database. The fixtures create fresh random test databases;
-they never migrate, truncate or drop the development database. Follow the
-[test instructions](docs/stage-01b1-persistence.md#isolated-integration-tests).
-GitHub Actions runs the full suite against an isolated PostgreSQL 17 service,
-plus lint and formatting checks. There is no deployment automation.
+PostgreSQL integration tests skip without an explicit isolated
+`BADGER_TEST_ADMIN_DSN`. GitHub Actions supplies PostgreSQL 17 and runs lint,
+formatting and test suites, including guarded historical-runner checks. There is
+no deployment automation.
 
-See [architecture](docs/architecture.md), [roadmap](docs/roadmap.md),
-[agent guidelines](AGENTS.md) and the [prompt archive](prompts/README.md).
+## Research and operations guides
 
-[Field Notes](docs/field-notes/README.md) is the curated technical research journal,
-with draft stories intended for the future website's Field Notes section.
+- [Architecture](docs/architecture.md) and [development handoff](docs/development-handoff.md)
+  describe current components, evidence boundaries and next work.
+- [Research preparation](docs/stage-02a-research-dataset.md),
+  [predictive baselines](docs/stage-02b-predictive-baselines.md) and
+  [earlier execution study](docs/stage-02c-execution-backtesting.md) retain the
+  original methodology and results.
+- [Local historical runner](docs/stage-04b2e5e-simple-local-historical-runner.md):
+  one process, four explicit pinned inputs, preflight, explicit execution and
+  verified outputs in fresh directories. The [local execution decision](docs/stage-04b2e5e-local-execution-decision.md)
+  supersedes E.5d's supervisor, custody and protected-installation prerequisites
+  for this route; frozen research assumptions remain unchanged.
+- [Forward collection](docs/stage-03b-automated-forward-collection.md) and
+  [outcome scoring](docs/stage-03d-automated-outcome-scoring.md) explain prospective
+  evidence, missed horizons and operational limits.
+- [Production runbook](docs/deployment/production-infrastructure.md): the verified
+  **16 October 2026 snapshot** records Lightsail PostgreSQL, active collection and
+  scoring, backups, restore drills and monitoring. It is not a live inventory or
+  evidence that the latest research code is deployed. Unattended verification
+  items remain recorded there; no host recheck was performed for this update.
+- [Field Notes](docs/field-notes/README.md), [agent guidelines](AGENTS.md) and the
+  [prompt archive](prompts/README.md) explain the research and development process.
 
 ## License
 

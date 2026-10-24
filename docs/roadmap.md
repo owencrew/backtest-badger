@@ -1,56 +1,64 @@
 # Roadmap
 
-Each stage is scoped independently. Planned capabilities are not current features.
+**Current summary: 24 October 2026.** Each stage is scoped independently. Planned
+capabilities are not current features. The first genuine native-minute 2024
+backtest is complete; the next product milestone is **Stage 5: a polished public
+website**, using research and forward evidence already available. It need not
+wait for prospective paper-trading implementation.
+
+[E.5g](stage-04b2e5g-first-genuine-historical-backtest.md) records verified independent
+Ridge, Cash and Buy & Hold accounts for each market. Ridge lost **60.69% on BTCUSDT
+and 57.96% on ETHUSDT**, versus Cash at 0% and Buy & Hold at **+120.81% / +46.18%**.
+These are exploratory historical results after fixed costs, marked through
+December 31 23:00 UTC, not live or prospective paper-trading performance.
+
+Historical simulations, live forward forecasts and their scored outcomes are
+implemented evidence streams. Prospective paper trading will simulate orders as
+new observations arrive; its service is still planned. Real trading is outside
+scope.
 
 | Stage | Status | Acceptance criteria |
 | --- | --- | --- |
 | **0 — Foundation** | Complete | Python 3.12 package installs from the uv lockfile; configuration and both CLI checks work; local PostgreSQL connectivity is demonstrated when Docker is available; pytest and Ruff pass; CI, license and concise documentation exist. |
 | **1A — Market Data Feasibility and Design** | Complete; schema decisions refined in 1B.1 | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). Schema implemented in 1B.1; bounded monthly archives implemented in 1B.2. |
-| **1B.1 — Schema and Persistence** | Implemented; awaiting review | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests; ingestion added separately in 1B.2. |
-| **1B.2 — Bounded Archive Ingestion** | Implemented; awaiting review | Explicit monthly native 1h/4h CLI; bounded checksum/parser validation; atomic conflict-rejecting backfill; local raw evidence and manifests. January 2025 live 4h import: 186 candles per market, zero gaps/revisions. |
+| **1B.1 — Schema and Persistence** | Implemented | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests; ingestion added separately in 1B.2. |
+| **1B.2 — Bounded Archive Ingestion** | Implemented | Explicit monthly native 1h/4h CLI; bounded checksum/parser validation; atomic conflict-rejecting backfill; local raw evidence and manifests. January 2025 live 4h import: 186 candles per market, zero gaps/revisions. |
 | **1B.3 — Full Historical Coverage and Research Dataset** | Implemented; acquired with known gaps | All 220 market-months through September 2026 inspected and committed; 19,955 candles and 36 disclosed gaps per market. Frozen 39,910-row export is explicitly incomplete. See [results](stage-01b3-full-history.md). |
-| **1C.1 — REST Tail and Recent Refresh** | Implemented; awaiting review | Fixed eligible cutoff, strict native 4h REST, seven-day refresh, bounded catch-up, atomic page revisions and stored-grid diagnostics. Live: 75 new candles per market, 20,030 total each; zero recent gaps/revisions, historical gaps and frozen export preserved. See [guide](stage-01c1-rest-tail-and-refresh.md). |
-| **1C.2 — Historical Revalidation** | Implemented; awaiting review | Explicit maximum-30-day REST review and approved exact-response replay; locked snapshot checks, atomic version history, invalid-page rejection and frozen export preservation. Live reviews: no economic revisions; zero-duration 2017 rows rejected for both markets. See [guide](stage-01c2-historical-revalidation.md). |
-| **2A — Reproducible Research Dataset and Causal Features** | Implemented; awaiting review | Pinned frozen-source verification, explicit incomplete acknowledgement, gap/anomaly-safe causal features and one 4h target; availability-based chronological splits and label purging; train-only no-skill references; deterministic 39,609-row artifact and untouched holdout. See [guide](stage-02a-research-dataset.md). |
-| **2B — Predictive Modelling** | Implemented; awaiting review | Pinned Stage 2A input validation; separate-market zero/mean, Ridge and shallow boosting comparisons; training-only preprocessing/fitting, 2024 validation metrics and untouched test outcomes. Two byte-identical runs. See [results](stage-02b-predictive-baselines.md). |
-| **2C — Backtesting** | Implemented; awaiting review | Independent native 2024 1h references from 24 verified archives; offline pinned validation forecasts, delayed three-hour long/cash simulation, explicit two-sided costs and independent Decimal accounts. All trading accounts lose under base/stress assumptions; zero stays cash. Four byte-identical output files across two runs. See [results](stage-02c-execution-backtesting.md). |
-| **2D — Economic Diagnostics and Robustness** | Implemented; awaiting review | Read-only postmortem of pinned Stage 2C accounts: scenario-specific costs, all twelve months, geometric cost budgets and existing baseline comparisons. Annual and monthly reconciliation, deterministic artifacts and untouched holdout. See [results](stage-02d-economic-diagnostics.md). |
-| **3A — Forward Prediction Recording** | Implemented; awaiting review | Manual current-horizon forecasts from seven validated native 4h candles; fixed pre-2024 fits, strict live UTC checks, immutable shared evidence and offline replay. First genuine BTC/ETH records were subsequently issued on 2026-10-14 and verified. See [guide](stage-03a-forward-predictions.md). |
-| **3B — Automated Forward Collection** | Implemented; local collector running | Independent idempotent BTC/ETH cycles, strict 15-minute promptness, exclusive publication, offline status and missed-horizon evidence; separately installed macOS LaunchAgent and backup guidance. See [guide](stage-03b-automated-forward-collection.md). |
+| **1C.1 — REST Tail and Recent Refresh** | Implemented | Fixed eligible cutoff, strict native 4h REST, seven-day refresh, bounded catch-up, atomic page revisions and stored-grid diagnostics. Live: 75 new candles per market, 20,030 total each; zero recent gaps/revisions, historical gaps and frozen export preserved. See [guide](stage-01c1-rest-tail-and-refresh.md). |
+| **1C.2 — Historical Revalidation** | Implemented | Explicit maximum-30-day REST review and approved exact-response replay; locked snapshot checks, atomic version history, invalid-page rejection and frozen export preservation. Live reviews: no economic revisions; zero-duration 2017 rows rejected for both markets. See [guide](stage-01c2-historical-revalidation.md). |
+| **2A — Reproducible Research Dataset and Causal Features** | Implemented | Pinned frozen-source verification, explicit incomplete acknowledgement, gap/anomaly-safe causal features and one 4h target; availability-based chronological splits and label purging; train-only no-skill references; deterministic 39,609-row artifact and untouched holdout. See [guide](stage-02a-research-dataset.md). |
+| **2B — Predictive Modelling** | Implemented | Pinned Stage 2A input validation; separate-market zero/mean, Ridge and shallow boosting comparisons; training-only preprocessing/fitting, 2024 validation metrics and untouched test outcomes. Two byte-identical runs. See [results](stage-02b-predictive-baselines.md). |
+| **2C — Backtesting** | Implemented | Independent native 2024 1h references from 24 verified archives; offline pinned validation forecasts, delayed three-hour long/cash simulation, explicit two-sided costs and independent Decimal accounts. All trading accounts lose under base/stress assumptions; zero stays cash. Four byte-identical output files across two runs. See [results](stage-02c-execution-backtesting.md). |
+| **2D — Economic Diagnostics and Robustness** | Implemented | Read-only postmortem of pinned Stage 2C accounts: scenario-specific costs, all twelve months, geometric cost budgets and existing baseline comparisons. Annual and monthly reconciliation, deterministic artifacts and untouched holdout. See [results](stage-02d-economic-diagnostics.md). |
+| **3A — Forward Prediction Recording** | Implemented | Manual current-horizon forecasts from seven validated native 4h candles; fixed pre-2024 fits, strict live UTC checks, immutable shared evidence and offline replay. First genuine BTC/ETH records were subsequently issued on 2026-10-14 and verified. See [guide](stage-03a-forward-predictions.md). |
+| **3B — Automated Forward Collection** | Implemented; Lightsail snapshot 2026-10-16 | Independent idempotent BTC/ETH cycles, strict 15-minute promptness, exclusive publication, offline status and missed-horizon evidence; separately installed macOS LaunchAgent and backup guidance. See [guide](stage-03b-automated-forward-collection.md). |
 | **3C — Prospective Forecast Evaluation** | Implemented; first four genuine observations scored | Frozen protocol, standalone manual scorer with read-only exact-target snapshots, immutable outcome evidence and matched offline metrics; separate timely automated/late manual cohorts, missingness and sample warnings. Original implementation validated synthetically; subsequent manual scoring verified four genuine observations. See [guide](stage-03c-forward-evaluation.md). |
-| **3D — Automated Forward Outcome Scoring** | Implemented; local scorer running (operator reported) | Independent bounded cycles reuse the frozen scorer; no-DB pending/existing checks, fair retry cursor, exclusive publication, operational history and offline status. Existing collector/evidence preserved. See [guide](stage-03d-automated-outcome-scoring.md). |
-| **D1 — Lightsail Deployment Foundation** | Installed, operator reported | Pinned releases and persistent artifact layout, private loopback PG17 Compose, disabled independent systemd timers, synthetic performance/validation tools and [installation guide](deployment/lightsail-foundation.md). Both Mac workers remain running; scientific evidence unchanged. |
-| **D2A — Migration Rehearsal** | Tooling prepared; remote execution pending | [Rehearsal guide](deployment/lightsail-d2a-rehearsal.md): nonauthoritative online exports, full manifests, isolated PG17 restore and immutable evidence validation; Mac workers unchanged. |
-| **D2B — Migration and Scheduler Cutover** | Planned; separate authorisation required | [Runbook](deployment/lightsail-migration-runbook.md): coherent full backups, verified restores, runtime compatibility and real-server performance gates, exactly one collector, evidence preservation and recovery. |
+| **3D — Automated Forward Outcome Scoring** | Implemented; Lightsail snapshot 2026-10-16 | Independent bounded cycles reuse the frozen scorer; no-DB pending/existing checks, fair retry cursor, exclusive publication, operational history and offline status. Existing collector/evidence preserved. See [guide](stage-03d-automated-outcome-scoring.md). |
+| **D1 — Lightsail Deployment Foundation** | Installed; superseded operating snapshot | Host Python, loopback PostgreSQL and pinned releases. The [production runbook](deployment/production-infrastructure.md) records active Lightsail collection/scoring as of 16 October; the original foundation guide is historical. |
+| **D2A — Migration Rehearsal** | Tooling implemented; later recovery verified | Original [rehearsal guide](deployment/lightsail-d2a-rehearsal.md) preserves preparation gates; the production runbook records supervised restore/fingerprint verification and remaining unattended checks. |
+| **D2B — Migration and Scheduler Cutover** | Lightsail operation recorded 2026-10-16 | Production PostgreSQL and collection/scoring are recorded active in the [runbook](deployment/production-infrastructure.md). No fresh host check or latest-research deployment is implied. |
 | **4A — Paper-Trading Architecture and Prospective Protocol** | **Approved (2026-10-16); design only** | [Technical specification](stage-04a-paper-trading-spec.md) and [prospective evaluation protocol](stage-04a-prospective-evaluation-protocol.md) approved; no application implementation, migrations or deployment. |
-| **4B.1 — Deterministic Paper Primitives** | Implemented locally; awaiting review | Synthetic pure-function strategy transitions, quote/filter execution, paired Decimal accounting, replay and immutable-mark valuation. See [guide](stage-04b1-deterministic-paper-primitives.md); no live integration or persistence. |
-| **4B.2A — Historical Replay Mechanics** | Reviewed and approved; synthetic-only | Pure supplied-input continuous holdings, shared exact accounting, separate historical references and 111 new synthetic cases. See [guide](stage-04b2a-historical-replay-engine.md) and [approved protocol](stage-04b2-historical-validation-protocol.md); no actual 2024 replay. |
-| **4B.2B — Historical Integration and Reporting** | Accepted; synthetic-only | Full supplied-loader adapter, independently funded cash/B&H controls, exact reporting and exclusive manifest-last temporary publication. See [guide](stage-04b2b-historical-evaluation-integration.md). Real 2024 input access, calculation and publication require separate explicit approval. |
-| **4B.2C — Minute Design and Source Engineering** | Reviewed and approved; synthetic-only | Separate [approved/frozen protocol](stage-04b2c-minute-execution-protocol.md), bounded isolated 24-month native 1m source validator/publisher and offline replay with synthetic fixtures. See [guide](stage-04b2c-minute-data-engineering.md). No genuine source release authenticated/frozen; no minute replay authorised. Actual acquisition requires separate approval. |
+| **4B.1 — Deterministic Paper Primitives** | Implemented locally | Synthetic pure-function strategy transitions, quote/filter execution, paired Decimal accounting, replay and immutable-mark valuation. See [guide](stage-04b1-deterministic-paper-primitives.md); no live integration or persistence. |
+| **4B.2A — Historical Replay Mechanics** | Implemented; synthetic validation | Supplied-input hourly continuous holdings and exact accounting. The [engine guide](stage-04b2a-historical-replay-engine.md) preserves its stage scope; the later genuine result uses the separate minute path. |
+| **4B.2B — Historical Integration and Reporting** | Implemented; synthetic validation | Supplied-loader integration, independently funded benchmarks and immutable reporting. See [guide](stage-04b2b-historical-evaluation-integration.md); genuine minute execution followed separately in E.5g. |
+| **4B.2C — Minute Design and Source Engineering** | Implemented; genuine source release verified/frozen | [Frozen methodology](stage-04b2c-minute-execution-protocol.md) and [18 October source pins](stage-04b2c-minute-source-pins.md); earlier synthetic-only status is historical. |
+| **4B.2D — Minute Replay, Parity and Authentication** | Implemented; genuine parity completed | [D.1 audit](stage-04b2d1-genuine-price-parity-audit.md): 17,568 exact hourly/minute opening-price pairs, zero discrepancies. Later retained publication/sign-off supplies the local runner; parity itself is not economic evidence. |
+| **4B.2E.1–5d — Replay/Reporting Integration and Guarded Operator** | Implemented; fabricated development evidence | Reusable replay/reporting components remain; E.5d installation/custody blockers are not prerequisites for the separate [E.5e local route](stage-04b2e5e-local-execution-decision.md). |
+| **4B.2E.5e–5g — Local Execution and Genuine Backtest** | Complete | One-process pinned-input runner, successful genuine preflight, one genuine 2024 replay and six verified accounts. See [E.5g results](stage-04b2e5g-first-genuine-historical-backtest.md); no tuning or model promotion. |
+| **4B.2E.5h — Research Narrative** | Documentation prepared for review | Current summaries reconciled; [Field Notes 003 and 004](field-notes/README.md) drafted; website evidence handoff added. No new research or deployment. |
 | **4C–4E — Paper Persistence, Prospective Integration and Reporting** | Future, gated | Independently approve isolated database integrity, prospective quote/worker activation and reporting. No production changes authorised. |
-| **5 — Polished Website and Public Launch** | Planned | The Burrow, The Dig and Field Notes present understandable analytics; public database access is read-only; simulation disclosures, security and deployment checks pass before authorised launch. |
+| **5 — Polished Website and Public Launch** | **Next product milestone; not implemented** | Present verified research, benchmark comparisons, forward accuracy evidence and Field Notes with methodology/limitations. Label simulations clearly; use read-only public data access and separately authorise launch. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
 
 Real-money trading is outside this roadmap and requires explicit approval.
 
-## Stage 1A findings and proposed direction
-
-On 2026-10-13, public Binance access from the Mac succeeded after the sandbox's
-initial DNS failure. Ten ZIP checksums and 998 archive rows passed validation;
-60 overlapping archive/REST candles matched exactly after timestamp normalization.
-Both markets' first returned 1h/4h candle was 2017-08-17 04:00 UTC. These bounded
-samples do not establish complete historical continuity. The October 12 daily
-archive was still unavailable at 00:44 UTC on October 13, so REST must cover the
-tail without assuming midnight archive publication.
-
-The selected design uses native UTC 4h candles, independent native 1h only when
-needed, and three tables (`market`, `candle`, `candle_revision`). A 60-second
-settling delay and seven-day overlap are initial project defaults, not provider
-finality guarantees. Stage 1B/1C scopes, acceptance criteria and unresolved risks
-are in the [design document](stage-01a-market-data-design.md). Stage 1B.1 implements
-the schema and persistence; later increments await implementation review.
-
 ## Stage 5 — Planned website design
+
+The first website can present the genuine 2024 result, independent benchmarks,
+existing prospective forecast/outcome evidence, methodology and limitations.
+Use the [website handoff](development-handoff.md#5-next-product-milestone--the-public-website)
+for content and acceptance criteria. Paper portfolio screens depend on later
+Stage 4C–4E implementation; no framework or hosting change is selected here.
 
 **Field Notes journal**
 
@@ -74,6 +82,30 @@ The animation should eventually:
 - Avoid interfering with chart readability or performance.
 - Respect reduced-motion accessibility preferences.
 - Work appropriately on desktop and mobile.
+
+## Historical milestone records
+
+The records below preserve implementation-time results and gates. Statements such
+as “awaiting review”, “unimplemented”, “no genuine run” or “next approval” refer to
+that increment, not today's project status. The current table above supersedes
+those pending-stage summaries; detailed reports and frozen protocols are unchanged.
+
+## Stage 1A findings and proposed direction
+
+On 2026-10-13, public Binance access from the Mac succeeded after the sandbox's
+initial DNS failure. Ten ZIP checksums and 998 archive rows passed validation;
+60 overlapping archive/REST candles matched exactly after timestamp normalization.
+Both markets' first returned 1h/4h candle was 2017-08-17 04:00 UTC. These bounded
+samples do not establish complete historical continuity. The October 12 daily
+archive was still unavailable at 00:44 UTC on October 13, so REST must cover the
+tail without assuming midnight archive publication.
+
+The selected design uses native UTC 4h candles, independent native 1h only when
+needed, and three tables (`market`, `candle`, `candle_revision`). A 60-second
+settling delay and seven-day overlap are initial project defaults, not provider
+finality guarantees. Stage 1B/1C scopes, acceptance criteria and unresolved risks
+are in the [design document](stage-01a-market-data-design.md). Stage 1B.1 implements
+the schema and persistence; later increments await implementation review.
 
 ## Stage 0 validation
 

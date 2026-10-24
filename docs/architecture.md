@@ -1,5 +1,67 @@
 # Architecture
 
+## Current architecture — 24 October 2026
+
+The repository now supports genuine historical research and prospective forecast
+collection/scoring. A complete prospective paper-trading service and public
+website remain planned. The next product milestone is the polished website,
+using existing research and forward evidence with explicit labels.
+
+| Evidence stream | Implemented path | Interpretation |
+| --- | --- | --- |
+| Market data | Binance archives/REST → validation → versioned PostgreSQL candles and retained source evidence | Missing data and revisions remain visible; source validity is not proof of tradability. |
+| Historical research | Frozen exports → causal features → train-only fixed models → retained validation forecasts → independent simulated portfolios | Retrospective research; the inspected 2024 period is not untouched out-of-sample evidence. |
+| Live forward predictions | Fresh native 4h inputs → timestamped predictions → immutable outcomes → prospective accuracy reports | Predictions issued before outcomes; no orders, fills or trading returns. |
+| Prospective paper trading | Strategy/execution/accounting primitives exist; persistence, quote ingestion, worker integration and reporting remain future work | Will simulate orders and portfolios as evidence arrives; not yet an operating service. |
+| Real trading | Not implemented | Actual order placement is outside current scope. |
+
+### Local historical execution
+
+[Stage E.5e](stage-04b2e5e-simple-local-historical-runner.md) provides
+`backtest_badger.local_historical_backtest`: a single local process with explicit
+paths to four retained publication/sign-off files. Preflight checks their sizes,
+hashes, associations and frozen methodology. Explicit `run --execute` reuses the
+existing minute replay, Decimal accounting and reporting. Fresh run directories
+retain summaries and private evidence; `COMPLETE.json` binds four output files,
+and `verify-output` checks completion and file identities.
+
+The [owner-approved local execution model](stage-04b2e5e-local-execution-decision.md)
+protects against ordinary mistakes, corrupt/substituted inputs and inconsistent
+or incomplete outputs. E.5d's privileged supervisor, custody separation, signed
+approval and protected OS installation are no longer prerequisites for this
+separate local route. Its historical fabricated contracts and legacy refusal
+gates remain intact. The simpler execution boundary did not change the model,
+causal timing, costs, independent funding or frozen scientific method.
+
+The [E.5f preflight](stage-04b2e5f-genuine-preflight.md) passed, followed by the
+[E.5g genuine run](stage-04b2e5g-first-genuine-historical-backtest.md) on 24 October.
+All six accounts passed ledger verification and independent output verification
+returned exit 0. Ridge returned **−60.69% BTCUSDT / −57.96% ETHUSDT**, versus Cash
+at 0% and Buy & Hold at **+120.81% / +46.18%**. Each account began with 10,000 USDT;
+final marks are December 31 23:00 UTC, with no forced liquidation. This is
+exploratory historical simulation, distinct from Stage 2C's fixed-window round
+trips and from prospective paper trading. No new execution occurred in this
+documentation reconciliation.
+
+### Deployment boundary
+
+The [production runbook](deployment/production-infrastructure.md) is the
+operational reference: its **16 October 2026** snapshot records Lightsail
+PostgreSQL, active collection/scoring timers, encrypted S3 backups, isolated
+restore drills and monitoring. Earlier D1/D2A descriptions below record their
+implementation-time state; disabled server workers and Mac-only scheduling are
+not the latest documented operating state. Unattended-run checks remain open in
+the runbook. No current host inspection or deployment of the later research code
+is asserted. Public dashboard queries must use read-only access.
+
+## Stage-by-stage implementation history
+
+The following records describe what each increment introduced and what was still
+pending **at that stage**. Their review, authorisation and deployment statements
+are historical, not the current task queue. Use the current summary above and
+[handoff](development-handoff.md) to resume work. Frozen technical reports and
+original research evidence are preserved unchanged.
+
 ## Implemented in Stage 0
 
 - **Python 3.12** and a conventional `src/backtest_badger` package keep development
@@ -254,17 +316,18 @@ serialization/validation helpers suffice; no dependency or architecture refactor
 was introduced. See the [Stage 2D guide](stage-02d-economic-diagnostics.md) for
 results, reconciliation, reproduction and scientific limits.
 
-## Intended direction (not implemented)
+## Design context and remaining work
 
 Add modules only when a development stage needs them.
-Later stages add robustness research, locked holdout evaluation,
-forward predictions and separately accounted paper trading.
+Forward prediction collection/scoring and historical economic diagnostics are now
+implemented. Locked holdout evaluation, further robustness research and a complete
+prospective paper-trading service remain separately scoped future work.
 
 Stage 1A's [market-data design](stage-01a-market-data-design.md)
 selects Binance Spot native UTC 4h candles for BTCUSDT and ETHUSDT: Vision
 archives for historical data and the public market-data-only REST API for the
-recent tail. Native 1h candles may be added independently when needed. Three
-implemented application tables (`market`, `candle`, `candle_revision`) keep current
+recent tail. Native 1h references and a separate native 1m execution release are
+now available. Three implemented application tables (`market`, `candle`, `candle_revision`) keep current
 values and superseded versions. Frozen versioned dataset exports can preserve
 research inputs. Stage 1B.3 processes explicit historical ranges in bounded resumable
 increments; actual completeness is reported from stored data, not assumed.
@@ -276,9 +339,9 @@ no automated historical scans, derived-candle tables, parent invalidation machin
 or generic provider abstractions exist.
 
 The eventual public dashboard must use read-only database access and clearly label
-research, forward predictions and simulated trading. AWS Lightsail on Ubuntu is a
-deployment target; Stage D1 prepares templates without accessing or installing on
-the server (see below).
+research, forward predictions and simulated trading. Lightsail on Ubuntu hosts
+collection/scoring according to the dated production snapshot above; D1/D2A below
+describe earlier preparation stages.
 The historical `crypto-trading-platform` repository is outside this project's
 implementation boundary and is not required by any component.
 

@@ -26,3 +26,8 @@ using the filename explicitly requested by the owner.
 Stage 4B.2E.5g's complete original request is preserved at
 [`stage-04-paper/stage-04b2e5g-first-genuine-historical-backtest.md`](stage-04-paper/stage-04b2e5g-first-genuine-historical-backtest.md),
 authorising one local genuine historical execution and its research analysis.
+
+Stage 4B.2E.5h's complete original request is preserved verbatim at
+[`stage-04-paper/stage-04b2e5h-research-narrative-documentation.md`](stage-04-paper/stage-04b2e5h-research-narrative-documentation.md),
+scoping documentation reconciliation, Field Notes 003/004 and the future website
+handoff without new research execution or infrastructure changes.

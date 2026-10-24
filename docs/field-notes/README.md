@@ -56,3 +56,5 @@ later corrections, add a dated correction explaining what changed.
 | --- | --- | --- | --- |
 | [001 — When Market Data Isn't Complete](001-when-market-data-isnt-complete.md) | 2026-10-13 | 1B.3 | Draft |
 | [002 — When a Backtest Meets Trading Costs](002-when-a-backtest-meets-trading-costs.md) | 2026-10-14 | 2C | Draft |
+| [003 — The Price of Changing Your Mind](003-the-price-of-changing-your-mind.md) | 2026-10-24 | 4B.2E.5g | Draft |
+| [004 — One Minute Can Change a Backtest](004-one-minute-can-change-a-backtest.md) | 2026-10-24 | 4B.2C–4B.2D.1 | Draft |
