@@ -41,5 +41,5 @@ jobs:
         run: uv run --locked --no-sync --python 3.12 python -I -S -B tests/run_e5_guarded.py
       - name: E.5c guarded fabricated integration tests (55 required)
         run: uv run --locked --no-sync --python 3.12 python -I -S -B tests/run_e5c_guarded.py
-      - name: E.5d guarded fabricated custody tests (117 required)
+      - name: E.5d guarded fabricated custody and preparation tests (153 required)
         run: uv run --locked --no-sync --python 3.12 python -I -S -B tests/run_e5d_guarded.py

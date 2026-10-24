@@ -184,19 +184,33 @@ def verify_approval(document, *, now, expected, public_key=None):
 
 
 @contextmanager
-def directory(path):
+def directory(path, *, trusted_uid=None):
     """Walk every component by descriptor; never traverse symlinks."""
     fd = os.open("/", os.O_RDONLY | os.O_DIRECTORY)
     try:
+        if trusted_uid is not None:
+            check_ancestor(os.fstat(fd), trusted_uid)
         for part in path_parts(str(path)):
             child = os.open(
                 part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd
             )
             os.close(fd)
             fd = child
+            if trusted_uid is not None:
+                check_ancestor(os.fstat(fd), trusted_uid)
         yield fd
     finally:
         os.close(fd)
+
+
+def check_ancestor(metadata, trusted_uid):
+    """POSIX prerequisite only; ACL/MAC and mount review remain separate gates."""
+    require(
+        stat.S_ISDIR(metadata.st_mode)
+        and metadata.st_uid in (0, trusted_uid)
+        and not metadata.st_mode & 0o022,
+        "Untrusted or writable ancestor.",
+    )
 
 
 def snapshot(s):
@@ -314,7 +328,7 @@ def verify_closure(inventory, *, supervisor_uid, mocked=False):
         path_parts(root)
         require(type(expected) is dict and expected, "Exact closure files required.")
         observed = {}
-        with directory(root) as fd:
+        with directory(root, trusted_uid=None if mocked else supervisor_uid) as fd:
 
             def walk(parent, prefix, expected=expected, observed=observed):
                 s = os.fstat(parent)
@@ -326,6 +340,10 @@ def verify_closure(inventory, *, supervisor_uid, mocked=False):
                     relative = prefix + name
                     item = os.stat(name, dir_fd=parent, follow_symlinks=False)
                     if stat.S_ISDIR(item.st_mode):
+                        require(
+                            any(p.startswith(relative + "/") for p in expected),
+                            "Unreviewed runtime directory.",
+                        )
                         child = os.open(
                             name,
                             os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,

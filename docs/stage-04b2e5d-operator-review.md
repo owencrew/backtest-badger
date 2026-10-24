@@ -1,3 +1,313 @@
+# Stage 4B.2E.5d — fixed-bootstrap / macOS rehearsal preparation
+
+2026-10-24, Europe/London. **Preparation only; real OS rehearsal BLOCKED. No
+installed executable bootstrap, genuine execution, original-input authority or
+E.5e activation is provided.** The earlier implementation and initial blocker
+records below remain historical records; their HEAD/test statements are not
+claims about this continuation.
+
+## Baseline and scope
+
+Local `git rev-parse HEAD` returned
+`48794dd2a32a7acf6561a7fd082f05cb66b52124`; the starting worktree was clean. The
+owner reports GitHub Actions **40040696312** green for that commit: 2,967 ordinary
+passes, E.5 **87/87**, E.5c **55/55**, E.5d **117/117**. These are the current
+owner-supplied verified CI references, not a remote attestation performed here.
+Historical verification remains commit
+`94584dc4b08f06441cff3bcd7983bba1ca0afe8d`, run **39668530849**, green. Neither
+original verification nor genuine 2024 economics was rerun. This uncommitted
+continuation has no new CI run.
+
+The substantive request is archived verbatim at
+[`stage-04b2e5d-fixed-bootstrap-macos-rehearsal-preparation.md`](../prompts/stage-04-paper/stage-04b2e5d-fixed-bootstrap-macos-rehearsal-preparation.md).
+There was one procedural deviation: a filename-only repository search and status
+check ran before reading root `AGENTS.md`. It returned repository filenames,
+including deployment filenames, but none of those deployment files was opened.
+The exact root guidance was then read; subsequent source access was scoped.
+
+## Review findings and direct fixes
+
+| Boundary | Finding / disposition |
+| --- | --- |
+| Signature and intent | The execution domain signs canonical schema/key/payload, rejects verification domains and schemas, requires literal `fabricated_only=True`, one attempt, no resume, protected-review equality, and rejects original four-file identities before input I/O. Added tests use a valid ephemeral test signature AND matching review for each historical pin, so mismatch with the review cannot mask this lockout. |
+| Consumption | A pre-enrolled installation/slot/eligibility record is required; `O_EXCL` consumption is file/directory synced before worker launch. Empty/partial consumption blocks reuse. No runtime enrolment, reset or retry path was added. |
+| Retention / reporting | Supervisor derives replay and six ordered account fingerprints, retains replay/handoff before ACK, reconciles six report IDs and persists them before publication. It authenticates retained producer bytes, not economic truth independently of a malicious worker. |
+| Completion | Evidence and integrity precede manifest; exact readback precedes protected completed receipt. Readback needs protected consumption/completion/report receipts and output hashes, performs no writes or replay, and never repairs partial output. |
+| Worker FDs | **Fixed:** fd 2 previously inherited a supervisor capability despite `close_fds=True`. Worker stderr now goes to `/dev/null`; stdin/stdout are anonymous protocol pipes. A launch-options regression covers supplementary group removal, fixed environment and absence of extra passed FDs. OS observation is still required. |
+| Runtime ancestry | **Fixed:** non-mocked closure checks now reject non-root/non-supervisor ownership and group/other-write permission on every ancestor, including the root. Symlinks remain rejected. This is a POSIX prerequisite, not an ACL/MAC or mount attestation. |
+| Runtime exactness | **Fixed:** the existing closure verifier now rejects unlisted empty directories. Previously its file-only comparison silently accepted them. |
+| Output schema | **Fixed:** exact typed boolean constants now lock TEST/authority flags, including nested publication/sign-off flags. Previously the recursive schema allowed either boolean, although report reconciliation already rejected top-level authority claims. Existing recursive literal/pattern/key restrictions reject private paths; no arbitrary path field was introduced. The allowlist has 135 definitions now. Its hash changes, so any fresh approval must bind the new bytes. |
+| Genuine routes | Both public `run_genuine_historical_operator` and `replay_genuine_minute_historical` still refuse unconditionally, before argument inspection. No bootstrap, signing fixture, environment variable or command option activates either. |
+
+The four inputs remain bounded, pinned and opened with no-follow descriptor walks;
+preflight and pre-consumption rechecks precede replay. Frozen strategy, parser,
+sign-off, monetary core and reporting are unchanged. Known genuine pins and
+fabricated recipe markers are defense in depth, **not a permission system for
+arbitrary paths**: the internal test callback API must never be exposed as a
+privileged service accepting user paths. A future fixed installation must bind
+its exact four newly fabricated input locations before any input open. Fabricated
+markers alone do not establish provenance.
+
+## Stop condition and fixed-bootstrap contract
+
+There is no reviewed installed MAC/network/process policy for this Mac in the
+available evidence. Local read-only host observations were **macOS 26.5.2 build
+25F84, Darwin 25.5.0, arm64**, with **CPython 3.12.13**, build string
+`main, Mar 3 2026, 12:39:30`, compiler
+`Clang 21.0.0 (clang-2100.0.123.102)`. These are observations of this preparation
+host, not a selected immutable runtime or attestation. No installed policy,
+entitlements, accounts, service configuration or private directories were probed.
+
+The local `/usr/share/man/man1/sandbox-exec.1` explicitly labels the command
+**DEPRECATED** and directs developers to App Sandbox. The local
+`/usr/share/man/man7/sandbox.7` describes inheritance and acquisition-time checks,
+including the fact that previously opened descriptors remain usable. No sandbox
+command was executed. A deprecated profile command, chmod, a separate PID, a
+same-UID child, Python hooks or a worker-reported success flag cannot close this
+review gate.
+
+**Do not install or run the supervisor on the basis of this preparation.** A fixed
+executable bootstrap is intentionally not implemented around an unproved policy.
+There is no `--run`, `--install`, key/path override, mock-policy switch or success
+marker that bypasses the blocker. The existing `_run_fabricated(launch=...)` and
+test guard remain test harness seams only. The new preparation tool never calls
+them, consumes a slot, reads an approval/input or starts a worker.
+
+The separately reviewed bootstrap must satisfy all of the following before it
+can replace that stop condition:
+
+1. An administrator installs a reviewed, immutable runtime and minimal native
+   entry executable beneath a fixed root-owned path, with every ancestor protected
+   against worker replacement/rename and ACL grants, on a reviewed mount. The
+   service definition is also protected. The user checkout and Homebrew/venv
+   symlinks are not installation trust roots. Administrator compromise/rollback
+   remains outside the stated threat model.
+2. The service invokes one absolute executable/launcher with a fixed argument
+   vector, sanitized environment, working directory `/`, no inherited private
+   descriptors, no restart and no user-controlled Python startup/import hooks.
+   OS policy must apply before loading Python or any untrusted worker code.
+   Runtime code cannot self-certify the interpreter that already loaded it.
+3. Literal reviewed source identities bind project commit plus successful CI,
+   CPython executable/build/patch, machine/OS build, inventory bytes, fixed
+   supervisor and worker launchers, output-schema bytes, and a protected review
+   identity. This binding is installed independently of the worker and approval
+   transport. Do not accept an arbitrary caller-supplied expected hash as authority.
+4. At a fixed protected review location, load only a fresh fabricated review and
+   ephemeral rehearsal **public** key bound by the administrator's review. Reject
+   all other input roots, known genuine pins and genuine schemas before I/O.
+   Fixed code selects the command, principal IDs, four fabricated inputs, schema,
+   inventory and review; CLI/env/worker fields cannot select them. The separately
+   approved operator creates/signs the synthetic intent outside the worker. No
+   real owner private key or original input is needed for this rehearsal.
+5. Exact protected contents and metadata must be rechecked before consumption;
+   OS protection must bridge the last check to launch. A second snapshot alone
+   does not remove the race. Only then can the unchanged one-shot state machine
+   run with real principals and a fixed transport, without a callback exposed to
+   users. Any uncertain consumption is terminal and quarantined.
+
+In that **proposed** installation, denying the worker write/delete/rename rights
+on the service, launcher, runtime, protected review and every ancestor prevents
+it substituting the bootstrap or its expectations; MAC and descriptor/process
+isolation must prevent alternate routes. This is a conditional argument, **not
+an enforced fact on this host**. Real negative probes are the remaining evidence.
+
+## Read-only preparation tool and exact inventory
+
+`ops/e5d_rehearsal_preflight.py` uses only the standard library. Default invocation
+prints the blocked plan and exits **2**, without installation/path reads or
+process launch. `--preflight` is a separate manual action after installation
+approval; it only examines the fixed fabricated staging location:
+
+`/Library/Application Support/BacktestBadger/E5dRehearsal/v1`
+
+It accepts no path, environment, worker command, approval or key override. The
+root-controlled expected snapshot is always `review/runtime-snapshot.json`, and
+the observed tree is always `runtime/`. It never scans original evidence, home,
+credentials or the repository. Only deliberately staged runtime code/config may
+be placed there. Its forbidden-name checks are additional guards, not a substitute
+for the administrator's exact staging review.
+
+The reusable `snapshot_tree` utility streams SHA-256 of every regular file and
+records the exact directory set, owner/group, mode and BSD flags. Empty package
+files/directories are represented explicitly. It rejects symlinks (including
+ancestors), hardlinked/nonregular files, unknown/writable ancestors, unexpected
+private names, within-read replacement/change and directory-set changes. Bounds
+are 50,000 entries, 512 MiB/file and 4 GiB total. These are preparation bounds,
+not genuine runtime limits. Snapshot ordering is deterministic; inode/timestamps
+are used for within-read stability, not retained as reproducible content identity.
+
+Preflight compares the complete snapshot to the fixed canonical reviewed file,
+requires all seven role directories, and compares a second observation. Missing,
+extra or changed bytes/metadata refuse. It can report actual UID/EUID/GID/groups,
+PID/parent, import paths and loaded Python file paths, plus `ls -lde` observations
+of the installation ancestors. ACL text is **not interpreted as proof**; internal
+runtime ACLs and process/native images still require separate review. Even a
+matching snapshot returns **BLOCKED / exit 2**, never installation success.
+
+The installer/reviewer must stage and pin actual content for these roles:
+
+| Role | Required actual content / independent binding |
+| --- | --- |
+| `python/` | Real CPython 3.12 executable and libpython, exact patch/build/compiler, executable hash, architecture; no venv interpreter symlink shortcut. |
+| `stdlib/` | Full selected stdlib including encodings/import machinery, lib-dynload and any zip payload. Disable uncontrolled user/site startup hooks. |
+| `packages/` | Actual wheel-installed package bytes and dist-info/RECORD; reject editable installs and unreviewed `.pth`/startup hooks. RECORD/version lists alone do not attest contents. |
+| `native/` | Non-system extensions and transitive shared libraries; observe real loaded-image paths after imports and full fabricated work, not merely names from a self-reported list. |
+| `project/` | Exact transitive source closure of the frozen replay/reporter and supervisor; no original data, private configuration or evidence directories. |
+| `launcher/` | Fixed native policy launcher and fixed Python entry sources, reviewed together with service definition and public trust roots. |
+| `config/` | Exact lockfile, project configuration, output schema and non-secret installed configuration. |
+
+External trust roots include macOS kernel/build and architecture, boot/security
+configuration, mounts/APFS, dyld and its shared cache, code-signing/entitlement
+policy, launchd service/environment, ACL semantics, system libraries and their
+loaded images, clock, and administrator-controlled installation. They are not
+covered by a hash of copied runtime files. CPython version, inventory roles,
+stdlib/package filenames and loaded modules printed by the running interpreter
+are observations, not trusted host attestation. No complete installed runtime was
+inventoried here.
+
+**Integration gap:** this richer snapshot is intentionally not accepted as an
+execution approval's existing `closure` object. That older format requires
+positive-size files, omits empty directories, uses bounded 1 MiB canonical JSON,
+and does not bind executing-host identities. Converting it by dropping empty
+files/directories or collapsing trust roots would be unsafe. A reviewed format
+and bootstrap integration (with real runtime size measurements) remain necessary;
+this preparation does not declare closure complete because role names match.
+
+## Separately approved real-principal rehearsal
+
+The owner must first authorise a disposable installation and the specific probe
+plan. A macOS security reviewer must select and validate a supported policy. An
+App Sandbox native launcher/bundle with reviewed entitlements is a candidate
+suggested by the local manual; compatibility with this Python/native runtime,
+network denial, process/debug restrictions and policy inheritance is **unverified**.
+It is not a drop-in wrapper implemented here. Do not fall back to sandbox-exec.
+If the supported Mac policy cannot meet every boundary, stop. A safer alternative
+for separate review is a disposable worker VM with no network device, no host
+shared directories/clipboard/credentials, immutable runtime disk, and only a
+bounded serial-style IPC channel to independently protected custody. Its exact
+hypervisor, host-custodian boundary and guest MAC/process controls also need review;
+a VM product name alone is not approval.
+
+| Actor | Manual responsibility after separate owner approval |
+| --- | --- |
+| Owner | Approve exact disposable host, threat model, policy, runtime/public-key identities, fabricated inputs, resource envelope and fresh attempt; no genuine pins. |
+| Administrator | Create dedicated non-login worker UID/GID (no admin/supplementary groups); install protected fixed runtime/service/review and separate private custody/publication roots; remove inherited capabilities; configure policy/watchdog with no restart. No such action occurred here. |
+| Independent reviewer/operator | Review byte inventories, ancestors/ACLs/mounts and policy; generate a fresh ephemeral TEST approval outside worker control; exclusively pre-enrol installation/attempt with durable history; independently retain identities and observations. Never reconstruct spent/missing history. |
+| Worker principal, observed by administrator | Run the specific negative probes below against disposable fabricated sentinels only. Record numeric identity, all results/errno, before/after hashes, process/FD/network observations. Any unexpected success stops the rehearsal. |
+| Operator | Only after every denial passes, run one fixed fabricated supervisor publication. Check durable ordering and read-only completion; retain logs outside worker control. Each fault scenario needs a new reviewed attempt. |
+
+No attack probe is bundled as an executable automatic script. The print-only
+preparation tool deliberately cannot perform destructive probes. A separately
+reviewed probe harness must record the following actual results; **none has been
+executed in this continuation**:
+
+| Probe target / operation | Required denial or observation |
+| --- | --- |
+| Fabricated private-original stand-ins, source tree and custody | As real worker UID: traverse, read-open, write-open, truncate, rename, unlink, replace and hardlink fail; test each ancestor as well as leaves. Use harmless sentinels, never real original directories. Include fabricated outside-root source paths. |
+| Fixed bootstrap/runtime/review/service and prior receipts | Write/chmod/ACL alteration/rename/unlink/link or parent replacement fail; hashes and ACLs unchanged. Runtime read/execute is allowed only as required by the selected policy. Retained receipts must not become worker-owned. |
+| Supervisor process | Signal probes (including permission-only signal 0, then approved termination probes on a sacrificial supervisor), debugger/task-port attachment and process-memory access fail. Different UID is only one prerequisite; validate privileged-helper/debug entitlement routes. |
+| Network | Raw IPv4/IPv6, TCP/UDP, loopback, DNS and relevant local socket/IPC routes are denied by the chosen policy. Use administrator-controlled disposable endpoints after approval, never external services. A connection error without policy evidence is not proof of denial. |
+| Inherited FDs | Supervisor starts with a fabricated private sentinel open; administrator observes worker FD types/targets and demonstrates no private descriptor is accessible. Only protocol stdin/stdout and `/dev/null` stderr are allowed. Include child-process inheritance. |
+| Process context / imports | Record real/effective IDs, groups, parent/session, flags, ACLs and parent directories, actual Python import origins and loaded native images throughout the run. Snapshot and policy evidence are retained independently of worker reports. |
+
+Record the same tests on an explicitly disposable same-UID control to show why
+ordinary fixtures cannot prove independent custody. Do not weaken a prohibition
+because the real worker cannot reproduce a same-UID test helper.
+
+## Resources, interruption and retention envelope
+
+Keep the earlier measured baseline below: parent lifetime peak **992,854,016 B**,
+child peak **716,652,544 B**, publication **60,157,542 B**, slot **53,890,719 B**.
+These are independent lifetime high-water observations with test overhead; their
+sum is not a simultaneous RSS measurement. Current test ceilings remain **128
+MiB/frame, 256 MiB publication, 600 s IPC**. They are not genuine limits.
+
+For the first separately approved sparse fabricated OS measurement, plan **one
+attempt at a time**, at least **4 GiB available memory**, **2 GiB free disposable
+output/custody space beyond the installed runtime**, and **two CPU cores**. Keep
+BLAS/OMP at one thread. Reserve additional space for all retained interrupted
+attempts and administrator logs; never rely on cleanup of prior receipts or
+original publications. These are provisional scheduling/headroom recommendations,
+not enforced budgets or evidence of worst-case sufficiency. Measure concurrent
+supervisor+worker memory, actual per-stage CPU/wall/disk, native thread counts,
+higher-turnover fabricated cases and resource-denial behavior before selecting
+hard limits. A provisional outside-supervisor **900 s wall watchdog** may be
+reviewed for that first run; timeout must terminate the entire worker process
+tree, quarantine the consumed attempt and never restart it. The current Python
+transport's direct-child kill is not such an OS process-tree watchdog.
+
+Fresh-attempt scenario matrix: (1) concurrent launch into one enrolled slot, one
+winner; (2) worker and supervisor death before/after consumption-file creation,
+file sync and directory sync; (3) lost retention ACK before/after six-account
+receipt; (4) crash at each replay/report/output write and sync; (5) injected fsync
+failure and real disposable-volume exhaustion; (6) partial manifest and missing
+completed receipt; (7) completed readback after process restart, with execution
+still refused; (8) planned OS reboot at reviewed durable boundaries and readback
+only afterwards. Keep every resulting receipt/output in place. No retry or slot
+repair after uncertainty, even if an unsynced entry vanishes. Real reboot/storage
+observations do not establish universal power-loss guarantees; mocked exceptions
+establish ordering/refusal only. Physical power-loss tests require separate scope.
+
+## This continuation's validation and file inventory
+
+Current local commands/results (all fabricated, offline; CPython 3.12.13):
+
+| Executed command/check | Result |
+| --- | --- |
+| `python3.12 -I -S -B tests/run_e5d_guarded.py` | **153 passed**, zero skips, **711.48 s**; confirmed from the owner-supplied completed local log after Codex usage ended. |
+| `python3.12 -I -S -B tests/run_e5d_guarded.py --preparation` | **27 passed**, zero skips, **0.15 s** final rerun (initial run: 27 passed in 0.18 s). |
+| `python3.12 -I -S -B tests/run_e5_guarded.py` | **87 passed**, zero skips, **34.207 s**. |
+| `python3.12 -I -S -B tests/run_e5c_guarded.py` | **55 passed**, zero skips, **128.71 s**. |
+| `python3.12 -I -S -B ops/e5d_rehearsal_preflight.py` | Printed **BLOCKED**, exit **2**, as designed; no installed-tree preflight or probe executed. |
+| Scoped Ruff check / format check | **Passed**, all six changed/new Python files; 6 already formatted. An initial lint run found one long string, corrected before the passing checks. |
+| Preservation, schema and archive checks | **Passed:** 45 exact frozen source/config/test paths unchanged; earlier review preserved as byte-exact suffix; archived request byte-exact; all 135 schema definitions/references resolve. |
+| `git diff --check` | **Passed**. |
+
+Lint uses the existing installed `.venv/bin/ruff` with `--isolated --no-cache
+--no-respect-gitignore --select E,F,I,UP,B --target-version py312`; format check
+uses the same isolation flags and target. Exact file arguments were the custody
+and operator modules, the E.5d guard and operator tests, the new preparation test
+module, and the preparation utility. No package installation, full ordinary/DB
+suite, historical verification or remote CI was run. The required CI gate must
+still run on a future reviewed commit.
+
+The successful complete-supervisor case within the current E.5d run observed
+29.814 s supervisor wall, 1,046,855,680 B parent lifetime peak, 680,591,360 B child
+peak and 37.255 s combined child CPU (both workers). Publication/slot sizes remain
+60,157,542 / 53,890,719 B. Its fixture worker took 24.921 s. These include test
+harness overhead and overlap with other fabricated regression commands; they
+are not isolated worst-case or simultaneous-memory measurements. The earlier
+baseline numbers remain preserved above/below.
+
+Changed/new files relative to `48794dd2a32a7acf6561a7fd082f05cb66b52124`:
+
+- `src/backtest_badger/genuine_backtest_custody.py` — ancestor prerequisites and empty-directory rejection.
+- `src/backtest_badger/genuine_backtest_operator.py` — exact schema constants and closed stderr.
+- `src/backtest_badger/genuine_backtest_output_schema.json` — TEST boolean constants.
+- `ops/e5d_rehearsal_preflight.py` — new blocked, read-only preparation/inventory utility.
+- `tests/test_genuine_backtest_operator.py` — nine additional signature/schema cases.
+- `tests/test_e5d_rehearsal_preparation.py` — 27 new nonprivileged preparation cases.
+- `tests/run_e5d_guarded.py` — exact source allowlist extended by two files, mandatory **153** cases (126 custody + 27 preparation); `--preparation` focuses the 27 cases and is not the CI command. Skips, incomplete collection and failed calls fail the gate.
+- `.github/workflows/ci.yml` — E.5d label updated to 153; same required no-argument command. E.5 87 and E.5c 55 gates unchanged.
+- `docs/stage-04b2e5d-operator-review.md` — this continuation prepended; history preserved.
+- `prompts/stage-04-paper/stage-04b2e5d-fixed-bootstrap-macos-rehearsal-preparation.md` — verbatim request archive.
+
+Source access: exact files named by the request, root AGENTS, pyproject,
+`tests/run_e5c_guarded.py`, `tests/run_e5_guarded.py`, and direct signature,
+fabricated integration and public-replay dependencies. Guarded tests import the
+33 exact source modules and seven test/helper modules declared in
+`run_e5c_guarded.py`, plus the E.5d source/test/schema files and this preparation
+utility. No repository discovery is allowed inside those guards. OS-only reads
+were kernel/version facts and the two named local manual files. No original
+evidence contents, credentials/private signing keys, deployment config, production, remote
+systems or sibling repository was read. No account creation, sudo, OS install,
+service/ACL change, network, migrations, live signing, commit or push occurred.
+Only ephemeral in-memory fabricated test keys were generated.
+
+---
+
+## Preserved earlier E.5d implementation and initial blocker records
+
 # Stage 4B.2E.5d — fabricated custody implementation review
 
 Updated 2026-10-24, Europe/London. **Fabricated implementation only. Genuine

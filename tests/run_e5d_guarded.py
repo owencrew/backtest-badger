@@ -23,14 +23,17 @@ FILES = (
     }
     | {
         ROOT + "/tests/test_genuine_backtest_operator.py",
+        ROOT + "/tests/test_e5d_rehearsal_preparation.py",
+        ROOT + "/ops/e5d_rehearsal_preflight.py",
         __file__,
         ROOT + "/src/backtest_badger/genuine_backtest_output_schema.json",
     }
 )
 WORKER = sys.argv[1:] == ["--worker"]
 MEASURE = sys.argv[1:] == ["--measure"]
-if sys.argv[1:] not in ([], ["--worker"], ["--measure"]):
-    raise SystemExit("Only no arguments, --worker or --measure is allowed")
+PREPARATION = sys.argv[1:] == ["--preparation"]
+if sys.argv[1:] not in ([], ["--worker"], ["--measure"], ["--preparation"]):
+    raise SystemExit("Only no arguments, --worker, --measure or --preparation")
 E5D_TEMP = None if WORKER else tempfile.mkdtemp(prefix="e5d-fabricated-", dir="/tmp")
 # /tmp is a symlink on macOS; all actual approved fixture paths use /private/tmp.
 if E5D_TEMP:
@@ -197,7 +200,7 @@ def main():
 
     class ExactModule(pytest.Module):
         def _getobj(self):
-            return __import__("test_genuine_backtest_operator")
+            return __import__(self.path.stem)
 
         def collect(self):
             items = list(super().collect())
@@ -215,17 +218,25 @@ def main():
         skipped = 0
 
         def pytest_sessionstart(self, session):
+            names = ["test_genuine_backtest_operator"]
+            if not MEASURE:
+                names.append("test_e5d_rehearsal_preparation")
+            if PREPARATION:
+                names = ["test_e5d_rehearsal_preparation"]
             session.collect = lambda: iter(
                 [
                     ExactModule.from_parent(
                         session,
-                        path=Path(ROOT + "/tests/test_genuine_backtest_operator.py"),
+                        path=Path(ROOT + "/tests/" + name + ".py"),
                     )
+                    for name in names
                 ]
             )
 
         def pytest_collection_finish(self, session):
-            expected = 1 if MEASURE else EXPECTED_TESTS
+            expected = (
+                1 if MEASURE else (PREPARATION_TESTS if PREPARATION else EXPECTED_TESTS)
+            )
             if len(session.items) != expected:
                 raise pytest.UsageError(f"Expected {expected} E.5d cases")
 
@@ -256,6 +267,7 @@ def main():
     )
 
 
-EXPECTED_TESTS = 117
+PREPARATION_TESTS = 27
+EXPECTED_TESTS = 126 + PREPARATION_TESTS
 if __name__ == "__main__":
     raise SystemExit(main())

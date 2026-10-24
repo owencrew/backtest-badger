@@ -50,6 +50,12 @@ def validate_output(value, schema):
         require(depth <= 32 and count <= 8_000_000, "Output traversal bound.")
         spec = schema["definitions"][reference]
         kind = type(item)
+        if "constant" in spec:
+            require(
+                kind is type(spec["constant"]) and item == spec["constant"],
+                "Fabricated output constant changed.",
+            )
+            continue
         if kind is dict:
             shape = next(
                 (s for s in spec.get("objects", []) if s.keys() == item.keys()), None
@@ -305,7 +311,8 @@ class PipeWorker:
             command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=None,
+            # Inheriting fd 2 could give the worker a private log/file capability.
+            stderr=subprocess.DEVNULL,
             close_fds=True,
             cwd="/",
             env={

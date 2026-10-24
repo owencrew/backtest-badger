@@ -95,8 +95,8 @@
       "objects": [
         {
           "checks": "sc4de246cabd4",
-          "economic_results": "s50e6449154df",
-          "genuine_execution_authorised": "s50e6449154df",
+          "economic_results": "test_false",
+          "genuine_execution_authorised": "test_false",
           "independent_manifest_sha256": "s28260b70f185",
           "limitations": "s7232b10a51b8",
           "original_execution_commit": "sf7feedc1201b",
@@ -291,18 +291,18 @@
       "objects": [
         {
           "accounting_status": "s3909e2ec3942",
-          "economic_publication": "s50e6449154df",
+          "economic_publication": "test_false",
           "evidence": "s45a230f123a0",
-          "execution_authorised": "s50e6449154df",
-          "external_independence_proven": "s50e6449154df",
-          "fabricated_only": "s50e6449154df",
+          "execution_authorised": "test_false",
+          "external_independence_proven": "test_false",
+          "fabricated_only": "test_true",
           "handoff_pins": "s186a08b35da9",
           "limitations": "sfc093a3ed5a8",
           "method": "sd4c7f0e5ac49",
           "protocol": "s277d917e2ca7",
           "reports": "s63437f50eb80",
           "schema": "sd201ea3d3267",
-          "source_authentication_proven": "s50e6449154df"
+          "source_authentication_proven": "test_false"
         }
       ]
     },
@@ -992,9 +992,9 @@
       "objects": [
         {
           "complete": "s50e6449154df",
-          "economic_results": "s50e6449154df",
+          "economic_results": "test_false",
           "files": "sc600e6ccf3b8",
-          "genuine_execution_authorised": "s50e6449154df",
+          "genuine_execution_authorised": "test_false",
           "kind": "s5eb89c9d3794",
           "schema": "sbe7bcc663bb9",
           "source_kind": "s6250699d8911",
@@ -1157,6 +1157,12 @@
           "target": "s1e5893d13ec5"
         }
       ]
+    },
+    "test_false": {
+      "constant": false
+    },
+    "test_true": {
+      "constant": true
     }
   },
   "patterns": {

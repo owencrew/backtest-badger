@@ -775,3 +775,35 @@ def test_expiry_rechecked_at_consumption(scratch, invented):
             mocked_principals=True,
         )
     assert not (slot / "consumed.json").exists()
+
+
+@pytest.mark.parametrize("name", custody.INPUT_LIMITS)
+def test_test_key_and_matching_review_cannot_authorise_original_pins(
+    scratch, invented, name
+):
+    p, _, key = setup(scratch, invented)
+    p["inputs"][name]["identity"] = custody.preparation.HISTORICAL_PINS[name]
+    with pytest.raises(ValueError):
+        custody.verify_approval(
+            signed(p, key),
+            now=NOW,
+            expected=p,
+            public_key=key.public_key().public_bytes_raw(),
+        )
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "fabricated_only",
+        "execution_authorised",
+        "economic_publication",
+        "source_authentication_proven",
+        "external_independence_proven",
+    ],
+)
+def test_schema_itself_locks_test_flags(full_wire, name):
+    value = operator.decode(full_wire[2])
+    value[name] = not value[name]
+    with pytest.raises(ValueError, match="constant"):
+        operator.validate_output(value, operator.output_schema()[0])
