@@ -22,3 +22,7 @@ substantive development requests under their appropriate stage directory.
 Stage 4B.2E.5f's complete original request is preserved at
 [`stage-04-paper/stage-04b2e5f-genuine-historical-preflight.md`](stage-04-paper/stage-04b2e5f-genuine-historical-preflight.md),
 using the filename explicitly requested by the owner.
+
+Stage 4B.2E.5g's complete original request is preserved at
+[`stage-04-paper/stage-04b2e5g-first-genuine-historical-backtest.md`](stage-04-paper/stage-04b2e5g-first-genuine-historical-backtest.md),
+authorising one local genuine historical execution and its research analysis.
