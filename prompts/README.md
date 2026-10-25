@@ -1,5 +1,10 @@
 # Prompt archive
 
+Stage 5A's complete original request is preserved verbatim at
+[`stage-05-web/001-website-design-and-local-prototype.md`](stage-05-web/001-website-design-and-local-prototype.md).
+It scopes the local website prototype, verified research presentation and draft
+publication safeguards, without production access or deployment.
+
 This directory records prompts supplied to Codex so development intent can be
 reviewed over time. Organise prompts by stage, such as `stage-00-foundation/`,
 and use increasing three-digit prefixes within each stage:

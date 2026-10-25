@@ -54,10 +54,12 @@ forecasts before their outcomes. Prospective paper trading will simulate orders
 and portfolios as new evidence arrives. Real trading places actual orders and is
 outside the current scope. No model has demonstrated economic viability.
 
-The next product milestone is a **polished public website**: The Burrow (dashboard),
-The Dig (research and backtests), and Field Notes (research journal). The website
-and public API remain planned; research summaries and draft articles are ready
-for editorial and product work. See the [roadmap](docs/roadmap.md).
+The **Stage 5A local website prototype** now lives in [`web/`](web/README.md):
+The Burrow (forward research preview), The Dig (verified historical comparisons),
+Field Notes, The Field Guide and About/Methodology. Run `pnpm dev` from `web/` to
+review the design and editorial drafts. Production builds exclude unapproved
+articles. Public launch and the public API remain planned. See the
+[design and validation report](docs/stage-05a-website-design.md).
 
 ## Local development
 
