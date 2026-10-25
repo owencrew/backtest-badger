@@ -72,3 +72,17 @@ test("Markdown research sources point to pinned public repository files", () => 
     /\/blob\/[a-f0-9]{40}\/docs\/stage-01b3-full-history\.md#final-live-results-and-verification$/,
   );
 });
+
+test("local preview features latest eligible note 004, with remaining notes newest first", (t) => {
+  const env: Record<string, string | undefined> = process.env;
+  const before = env.NODE_ENV;
+  env.NODE_ENV = "development";
+  t.after(() => {
+    if (before === undefined) delete env.NODE_ENV;
+    else env.NODE_ENV = before;
+  });
+  assert.deepEqual(
+    readArticles("fieldNotes").map((a) => a.slug.slice(0, 3)),
+    ["004", "003", "002", "001"],
+  );
+});

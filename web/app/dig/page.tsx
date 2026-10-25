@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { RidgeExplainer } from "@/components/ridge-explainer";
 import { DigExplorer } from "@/components/dig-explorer";
 import {
   PageIntro,
@@ -37,6 +38,7 @@ export default function Dig() {
       </div>
       <DigExplorer />
       <SourceNote />
+      <RidgeExplainer />
       <section className="finding-panel">
         <p className="eyebrow">What we learned</p>
         <h2>

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 export default function FieldNotes() {
   const notes = readArticles("fieldNotes");
-  const featured = notes.find((a) => a.slug.startsWith("003")) ?? notes[0];
+  const featured = notes[0];
   return (
     <>
       <PageIntro section="Field Notes" title="The discoveries along the way.">
@@ -27,17 +27,27 @@ export default function FieldNotes() {
         <>
           <div className="journal-feature">
             <div className="journal-art" aria-hidden="true">
-              <span className="eyebrow">Field Note / 003</span>
-              <div className="journal-bars">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
+              <span className="eyebrow">
+                Field Note / {featured.slug.slice(0, 3)}
+              </span>
+              <div className="journal-illustration">
+                <svg viewBox="0 0 280 160" fill="none">
+                  <path
+                    d="M25 130H255M55 120V92M110 120V62M165 120V32M220 120V12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <circle cx="110" cy="62" r="10" fill="currentColor" />
+                  <path
+                    d="M120 62H165V32"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeDasharray="5 5"
+                  />
+                </svg>
+                <strong>{featured.slug.slice(0, 3)}</strong>
               </div>
-              <span>THE COST OF CHANGING COURSE</span>
+              <span>{featured.title}</span>
             </div>
             <ArticleCard article={featured} featured />
           </div>

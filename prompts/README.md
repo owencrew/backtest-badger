@@ -1,5 +1,8 @@
 # Prompt archive
 
+Stage 5B's complete request is preserved verbatim at
+[`stage-05-web/003-market-dashboard-and-research-explanations.md`](stage-05-web/003-market-dashboard-and-research-explanations.md).
+
 Stage 5A's complete original request is preserved verbatim at
 [`stage-05-web/001-website-design-and-local-prototype.md`](stage-05-web/001-website-design-and-local-prototype.md).
 It scopes the local website prototype, verified research presentation and draft

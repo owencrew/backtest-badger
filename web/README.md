@@ -1,7 +1,8 @@
 # Backtest Badger website
 
-Stage 5A is a local Next.js / React / TypeScript prototype. It is independent of
-the Python package and needs no database, credentials or research artifacts.
+Stages 5A–5B form a local Next.js / React / TypeScript static website. The frontend
+needs no database, credentials or private research artifacts. The Burrow fetches
+genuine Binance Spot market data directly from the browser.
 
 ## Run locally
 
@@ -69,3 +70,40 @@ chart uses a shared linear scale and HTML/CSS; no charting package is needed.
 
 See the [Stage 5A design and validation report](../docs/stage-05a-website-design.md)
 for scientific limits, technology choices, validation and next steps.
+
+## Stage 5B market and forward feeds
+
+The Burrow supports BTCUSDT/ETHUSDT, candlestick/line views and 1D/7D/30D/90D
+ranges. Lightweight Charts 5.2.1 is attributed on the chart with licence files under
+`public/licenses/`. Public Binance requests refresh about every five minutes only
+while visible, with manual refresh, cancellation and explicit loading/error/stale
+states. All displayed times use UTC. Network/region restrictions can block Binance;
+there is no fabricated fallback.
+
+Forward forecasts are unavailable by default. After owner approval of a genuine
+public snapshot, set `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` to a same-origin JSON path
+or HTTPS URL **before building**. This is a public value, never a secret. The static
+browser client polls and validates that snapshot without a server or database.
+Do not connect `tests/fixtures/` to any running site or production export.
+
+`lib/forecast.ts` defines the version 1 contract and strict validation. The separate
+Python utility `scripts/public_forward_export.py` prepares a private candidate from
+validated retained evidence using the existing frozen evaluator. It needs the
+repository's locked Python environment; the website itself does not. It is not
+installed or scheduled on Lightsail. See the [Stage 5B report](../docs/stage-05b-market-dashboard.md)
+for exact local preparation commands, field definitions, inspected release,
+publishing proposal and operational impact.
+
+Additional focused exporter checks, from the repository root:
+
+```sh
+.venv/bin/pytest -q web/tests/test_public_export.py
+.venv/bin/ruff check web/scripts/public_forward_export.py web/tests/test_public_export.py
+.venv/bin/ruff format --check web/scripts/public_forward_export.py web/tests/test_public_export.py
+```
+
+The regular frontend checks remain `pnpm lint`, `pnpm typecheck`, `pnpm build`,
+then `pnpm test`. Tests use synthetic fixtures only. The production output check
+expects the default unconnected forward feed. No article approvals were added;
+004 leads local Field Notes and the home journal feature, while production remains
+fail-closed. Historical figures in `lib/research.ts` are unchanged.

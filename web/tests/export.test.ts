@@ -20,6 +20,10 @@ test(
   },
   () => {
     const forbidden = [
+      "SYNTHETIC_PRIVATE_PATH",
+      "SYNTHETIC-TEST-IDENTITY",
+      "DO_NOT_PUBLISH",
+      "Synthetic Binance-shaped unit data",
       "A strategy can hold a position across several forecasts",
       "A price can be recorded correctly and still be the wrong price",
       "The archive downloaded successfully",
@@ -41,5 +45,16 @@ test(
           );
       }
     }
+  },
+);
+
+test(
+  "production Burrow contains an honest unavailable forecast state",
+  { skip: !existsSync(output) },
+  () => {
+    const html = readFileSync(path.join(output, "burrow/index.html"), "utf8");
+    assert.match(html, /Forward forecasts are not published yet/);
+    assert.match(html, /No successful refresh yet/);
+    assert.doesNotMatch(html, /synthetic-candidate|SYNTHETIC/);
   },
 );

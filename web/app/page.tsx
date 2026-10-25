@@ -13,9 +13,7 @@ import { readArticles } from "@/lib/content";
 import { markets } from "@/lib/research";
 
 export default function Home() {
-  const notes = readArticles("fieldNotes")
-    .filter((a) => a.slug.startsWith("003") || a.slug.startsWith("004"))
-    .reverse();
+  const notes = readArticles("fieldNotes").slice(0, 2);
   const guides = readArticles("guides").slice().reverse().slice(0, 3);
   return (
     <>
