@@ -7,7 +7,9 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # 26.04 uses quota-limited tmpfs for /tmp; guarded fixtures also use /tmp
+    # explicitly, so TMPDIR alone cannot move all of their data onto disk.
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:17
@@ -36,7 +38,25 @@ jobs:
       - run: uv sync --locked
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
-      - run: uv run --locked pytest
+      - name: Storage before Python tests
+        run: |
+          df -h / /tmp "$RUNNER_TEMP"
+          df -i / /tmp "$RUNNER_TEMP"
+          findmnt -T /tmp
+      # Clean at session exit: per-test cleanup ("failed") conflicts with
+      # scientific I/O guards that are still active during fixture teardown.
+      - run: uv run --locked pytest -o tmp_path_retention_policy=none
+      - name: Storage after Python tests
+        if: always()
+        # Some system-owned /tmp directories may not be readable.
+        continue-on-error: true
+        run: |
+          df -h / /tmp "$RUNNER_TEMP"
+          df -i / /tmp "$RUNNER_TEMP"
+          du -h --max-depth=1 /tmp | sort -h | tail -20
+          if [ -d "/tmp/pytest-of-$(id -un)" ]; then
+            du -h --max-depth=2 "/tmp/pytest-of-$(id -un)" | sort -h | tail -30
+          fi
       - name: E.5 guarded fabricated preparation tests (87 required)
         run: uv run --locked --no-sync --python 3.12 python -I -S -B tests/run_e5_guarded.py
       - name: E.5c guarded fabricated integration tests (55 required)

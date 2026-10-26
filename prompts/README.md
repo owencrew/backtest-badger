@@ -58,3 +58,7 @@ Stage D3B.1's complete original request is preserved verbatim at
 It authorises one additional supervised attempt against the same prepared SHA,
 after correcting the temporary helper collision and testing the exact staged
 commands. See the [retry report](../docs/deployment/lightsail-d3b1-release-retry.md).
+
+The CI disk-exhaustion repair request is preserved verbatim at
+[`ci/001-fix-pytest-disk-exhaustion.md`](ci/001-fix-pytest-disk-exhaustion.md).
+See the [investigation and validation report](../docs/ci-disk-exhaustion-fix.md).
