@@ -54,10 +54,19 @@ test("publication requires published metadata and approval of the exact source b
     true,
   );
 });
-test("all existing editorial entries are excluded without approval", () => {
-  assert.deepEqual(approvals, { fieldNotes: [], guides: [] });
-  assert.equal(readArticles("fieldNotes").length, 0);
-  assert.equal(readArticles("guides").length, 0);
+test("production loader includes only sources with exact publication approval", () => {
+  for (const collection of ["fieldNotes", "guides"] as const) {
+    for (const article of readArticles(collection)) {
+      assert.equal(article.status, "Published");
+      assert.ok(
+        approvals[collection].some(
+          (approval: { slug: string; sha256: string }) =>
+            approval.slug === article.slug &&
+            approval.sha256 === article.sha256,
+        ),
+      );
+    }
+  }
 });
 test("Markdown research sources point to pinned public repository files", () => {
   assert.equal(

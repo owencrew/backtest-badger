@@ -51,16 +51,18 @@ export default function FieldNotes() {
             </div>
             <ArticleCard article={featured} featured />
           </div>
-          <section className="section-block">
-            <h2>More from the notebook</h2>
-            <div className="article-grid">
-              {notes
-                .filter((a) => a.slug !== featured.slug)
-                .map((article) => (
-                  <ArticleCard key={article.slug} article={article} />
-                ))}
-            </div>
-          </section>
+          {notes.length > 1 && (
+            <section className="section-block">
+              <h2>More from the notebook</h2>
+              <div className="article-grid">
+                {notes
+                  .filter((a) => a.slug !== featured.slug)
+                  .map((article) => (
+                    <ArticleCard key={article.slug} article={article} />
+                  ))}
+              </div>
+            </section>
+          )}
         </>
       ) : (
         <EmptyState title="The notebook is under review">

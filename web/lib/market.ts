@@ -5,6 +5,8 @@ export const ranges = {
   "7D": { days: 7, interval: "30m", step: 1_800_000 },
   "30D": { days: 30, interval: "1h", step: 3_600_000 },
   "90D": { days: 90, interval: "4h", step: 14_400_000 },
+  "1Y": { days: 365, interval: "1d", step: 86_400_000 },
+  ALL: { days: 0, interval: "1w", step: 604_800_000 },
 } as const;
 export type Range = keyof typeof ranges;
 export const BINANCE = "https://data-api.binance.vision";
@@ -45,10 +47,25 @@ function decimal(value: unknown, positive = true): number {
   );
   return n;
 }
+// Both supported markets have a first partial listing week labelled by Binance
+// with its normal Monday opening, not the first trade timestamp.
+export const LISTING_WEEK = Date.parse("2017-08-14T00:00:00Z");
+const MONDAY_OFFSET = 4 * 86_400_000; // 1970-01-05, not Unix epoch Thursday
+export const HISTORY_TTL_MS = 86_400_000;
+export function candleStart(range: Range, time: number) {
+  const offset = range === "ALL" ? MONDAY_OFFSET : 0;
+  return (
+    Math.floor((time - offset) / ranges[range].step) * ranges[range].step +
+    offset
+  );
+}
 export function windowFor(range: Range, now: number) {
-  const { days, step } = ranges[range];
+  const { days } = ranges[range];
   return {
-    start: Math.floor((now - days * 86_400_000) / step) * step,
+    start:
+      range === "ALL"
+        ? LISTING_WEEK
+        : candleStart(range, now - days * 86_400_000),
     end: now,
   };
 }
@@ -59,6 +76,7 @@ export function validateMarket(
   raw: unknown,
   serverTime: number,
   observedAt: number,
+  requestedStart = windowFor(range, serverTime).start,
 ): MarketSnapshot {
   requireValue(
     symbols.includes(symbol) && range in ranges,
@@ -66,6 +84,7 @@ export function validateMarket(
   );
   requireValue(
     Number.isSafeInteger(serverTime) &&
+      Number.isSafeInteger(observedAt) &&
       serverTime > 0 &&
       Math.abs(serverTime - observedAt) < 60_000,
     "Binance clock differs from this device; check your clock.",
@@ -84,7 +103,12 @@ export function validateMarket(
     "No usable Binance candles returned.",
   );
   const { step } = ranges[range];
-  const { start, end } = windowFor(range, serverTime);
+  const { start: windowStart, end } = windowFor(range, serverTime);
+  const start = requestedStart;
+  requireValue(
+    start >= windowStart && start <= end && candleStart(range, start) === start,
+    "Invalid Binance request boundary.",
+  );
   let previous = start - step;
   let missing = 0;
   const candles = raw.map((r): Candle => {
@@ -95,7 +119,7 @@ export function validateMarket(
     const [time, o, h, l, c, v, closeTime, q, trades, tb, tq] = r;
     requireValue(
       Number.isSafeInteger(time) &&
-        time % step === 0 &&
+        candleStart(range, time) === time &&
         time >= start &&
         time <= end &&
         time > previous,
@@ -131,7 +155,7 @@ export function validateMarket(
       complete: closeTime < serverTime,
     };
   });
-  missing += Math.floor(serverTime / step) - previous / step;
+  missing += (candleStart(range, serverTime) - previous) / step;
   return { symbol, range, price, observedAt, serverTime, candles, missing };
 }
 export async function fetchJson(
@@ -149,6 +173,12 @@ export async function fetchJson(
     );
   return response.json();
 }
+// Per-tab memory only: four bounded entries (two symbols × two long ranges).
+// Raw rows are retained only after validation; no private data or disk storage.
+const history = new Map<
+  string,
+  { rows: unknown[][]; checkedAt: number; serverTime: number }
+>();
 export async function fetchMarket(
   symbol: Symbol,
   range: Range,
@@ -163,20 +193,77 @@ export async function fetchMarket(
     "Invalid Binance server clock.",
   );
   const serverTime = clock.serverTime;
+  requireValue(
+    Number.isSafeInteger(serverTime) &&
+      Math.abs(serverTime - Date.now()) < 60_000,
+    "Binance clock differs from this device; check your clock.",
+  );
   const { start, end } = windowFor(range, serverTime);
+  const { step } = ranges[range];
+  // All six ranges currently fit one page. Fail explicitly rather than truncate
+  // ALL history if it eventually outgrows Binance's 1,000-row limit.
+  requireValue(
+    (candleStart(range, end) - start) / step + 1 <= 1000,
+    "This history exceeds the supported Binance request window.",
+  );
+  const key = `${symbol}/${range}`;
+  const cached = history.get(key);
+  if (cached)
+    requireValue(
+      serverTime >= cached.serverTime,
+      "Binance server clock moved backwards.",
+    );
+  const reuse = cached && serverTime - cached.checkedAt < HISTORY_TTL_MS;
+  const requestStart = reuse
+    ? Math.max(start, Number(cached.rows.at(-1)![0]) - step)
+    : start;
   const query = new URLSearchParams({
     symbol,
     interval: ranges[range].interval,
-    startTime: String(start),
+    startTime: String(requestStart),
     endTime: String(end),
     timeZone: "0",
     limit: "1000",
   });
-  const [candles, ticker] = await Promise.all([
+  const [tail, ticker] = await Promise.all([
     fetchJson(`${BINANCE}/api/v3/klines?${query}`, signal),
     fetchJson(`${BINANCE}/api/v3/ticker/price?symbol=${symbol}`, signal),
   ]);
-  return validateMarket(symbol, range, ticker, candles, serverTime, Date.now());
+  const observedAt = Date.now();
+  // Validate the response against its own requested bounds before merging.
+  validateMarket(
+    symbol,
+    range,
+    ticker,
+    tail,
+    serverTime,
+    observedAt,
+    requestStart,
+  );
+  const rows = reuse
+    ? [
+        ...cached.rows.filter(
+          (r) => Number(r[0]) >= start && Number(r[0]) < requestStart,
+        ),
+        ...(tail as unknown[][]),
+      ]
+    : (tail as unknown[][]);
+  const snapshot = validateMarket(
+    symbol,
+    range,
+    ticker,
+    rows,
+    serverTime,
+    observedAt,
+  );
+  signal.throwIfAborted();
+  if (range === "1Y" || range === "ALL")
+    history.set(key, {
+      rows,
+      checkedAt: reuse ? cached.checkedAt : serverTime,
+      serverTime,
+    });
+  return snapshot;
 }
 export const utc = (ms: number) =>
   new Date(ms)

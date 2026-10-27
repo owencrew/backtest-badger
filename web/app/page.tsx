@@ -40,8 +40,12 @@ export default function Home() {
             <Link className="button" href="/dig/">
               Explore The Dig <Arrow />
             </Link>
-            <Link className="button button-secondary" href="/field-notes/">
-              Read Field Notes <Arrow />
+            <Link
+              className="button button-secondary"
+              href={notes.length ? "/field-notes/" : "/burrow/"}
+            >
+              {notes.length ? "Read Field Notes" : "Observe the markets"}{" "}
+              <Arrow />
             </Link>
           </div>
           <div className="hero-footnote">
@@ -160,7 +164,7 @@ export default function Home() {
               "The Burrow",
               "Follow the research",
               "Forward forecasts, scoring and the evidence still to come.",
-              "Snapshot preview",
+              "Public market data",
             ],
             [
               "/dig/",
@@ -176,7 +180,7 @@ export default function Home() {
               "Field Notes",
               "Read the discoveries",
               "The decisions and surprises behind the research.",
-              "Editorial previews",
+              notes.length ? "Research journal" : "Articles in review",
             ],
             [
               "/field-guide/",
@@ -240,7 +244,12 @@ export default function Home() {
                 <span className="mono">0{i + 1}</span>
                 <span>
                   {g.title}
-                  <small>Educational draft · {g.minutes} min</small>
+                  <small>
+                    {g.status === "Published"
+                      ? "Introduction"
+                      : "Educational draft"}{" "}
+                    · {g.minutes} min
+                  </small>
                 </span>
                 <Arrow />
               </Link>

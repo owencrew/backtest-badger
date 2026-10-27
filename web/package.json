@@ -9,11 +9,14 @@
   },
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "next build --webpack",
-    "preview": "serve out -l tcp://127.0.0.1:3000",
+    "build": "next build --webpack && node --import tsx scripts/prepare-static.ts",
+    "preview": "wrangler dev --local --ip 127.0.0.1 --port 8787",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "format:check": "prettier --check app components lib scripts/*.ts tests/*.ts next.config.ts wrangler.jsonc package.json",
+    "test:export": "node --import tsx --test tests/export.test.ts",
+    "test:workers": "node --import tsx scripts/smoke-workers.ts"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.0",
@@ -33,6 +36,7 @@
     "prettier": "^3.9.10",
     "serve": "^14.2.0",
     "tsx": "^4.20.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "wrangler": "4.153.0"
   }
 }

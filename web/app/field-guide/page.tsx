@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ArticleCard } from "@/components/editorial";
 import { PageIntro, EmptyState } from "@/components/ui";
-import { readArticles } from "@/lib/content";
+import { readArticles, isEditorialPreview } from "@/lib/content";
 export const metadata: Metadata = {
   title: "The Field Guide — Learn the fundamentals",
 };
@@ -58,7 +58,9 @@ export default function FieldGuide() {
           <div className="section-heading">
             <h2>Start here</h2>
             <span className="small muted">
-              Introductory drafts · Local editorial preview
+              {isEditorialPreview()
+                ? "Introductory drafts · Local editorial preview"
+                : "Introductions to the research"}
             </span>
           </div>
           <div className="guide-card-grid">
@@ -73,8 +75,8 @@ export default function FieldGuide() {
         </section>
       ) : (
         <EmptyState title="Introductory guides are being reviewed">
-          The learning map below outlines future coverage. Draft explanations
-          are not included in this production build.
+          Start with the methodology and verified historical study in The Dig.
+          New introductions will appear here after editorial review.
         </EmptyState>
       )}
       <section className="section-block">
@@ -88,8 +90,10 @@ export default function FieldGuide() {
                 <p>{desc}</p>
               </div>
               <span className="topic-status">
-                {i < 3 && guides.length > 0
-                  ? "Draft introduction above"
+                {guides.some((guide) => guide.slug.startsWith(`00${i + 1}-`))
+                  ? isEditorialPreview()
+                    ? "Draft introduction above"
+                    : "Introduction above"
                   : "Planned topic"}
               </span>
             </div>

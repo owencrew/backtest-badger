@@ -62,3 +62,9 @@ commands. See the [retry report](../docs/deployment/lightsail-d3b1-release-retry
 The CI disk-exhaustion repair request is preserved verbatim at
 [`ci/001-fix-pytest-disk-exhaustion.md`](ci/001-fix-pytest-disk-exhaustion.md).
 See the [investigation and validation report](../docs/ci-disk-exhaustion-fix.md).
+
+Stage 5B.2's final selected Workers request is archived verbatim at
+[`stage-05-web/004-history-and-workers-launch-readiness.md`](stage-05-web/004-history-and-workers-launch-readiness.md).
+It scopes full market history, local Workers readiness, frontend CI and a launch
+runbook, with no public/remote preview deployment, DNS change or article approval.
+See the [implementation report](../docs/stage-05b2-history-and-launch-readiness.md).

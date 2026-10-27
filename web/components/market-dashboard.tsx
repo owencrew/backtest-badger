@@ -76,6 +76,12 @@ function MarketFeed({
       )}
       {data ? (
         <>
+          <p className="small muted">
+            Available candle openings: {utc(data.candles[0].time)} to{" "}
+            {utc(data.candles.at(-1)!.time)}.
+            {range === "ALL" &&
+              " Weeks begin Monday UTC. The first week includes only listing-era trading from August 2017; its Monday label is not a first-trade date. Weekly bars do not establish uninterrupted trading within each week."}
+          </p>
           <MarketChart data={data} mode={mode} />
           {data.missing > 0 && (
             <p className="feed-error">
@@ -96,6 +102,8 @@ function MarketFeed({
         the latest ticker value received, not a streaming quote; Binance
         supplies no trade timestamp on this endpoint. Candles may be revised by
         the provider.
+        {(range === "1Y" || range === "ALL") &&
+          " Earlier candles are cached in this tab for up to 24 hours; refresh updates the latest two intervals. Reload the page to recheck the full history."}
       </p>
     </>
   );

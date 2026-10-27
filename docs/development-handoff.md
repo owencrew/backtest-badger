@@ -1,11 +1,32 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-24 (Europe/London)
+**Last updated:** 2026-10-27 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Stage 5 — a polished public website using the verified research,
-prospective forecast/outcome evidence and draft Field Notes already available.
+**Next priority:** Owner review and first public launch of www.backtestbadger.com
+on Cloudflare Workers Static Assets. Stage 5B.2 is locally prepared; no public
+deployment or DNS change has occurred.
 Prospective paper-trading integration remains a separate future milestone.
+
+## Website readiness — current handoff
+
+Read the [Stage 5B.2 report](stage-05b2-history-and-launch-readiness.md) and
+[Workers launch/rollback guide](deployment/website-cloudflare-workers.md).
+The existing Next.js static frontend now has six genuine Binance ranges, including
+1Y daily and ALL weekly listing-era history, efficient tail refresh, local Wrangler
+preview and independent frontend CI. Forecast metrics remain unavailable until a
+reviewed public snapshot is connected. Exact historical results are unchanged.
+
+Owner review is needed for articles (recommended Notes 002/003/004 + Guide 001),
+mascot rights, indexing/canonical metadata, first deployment and the DNS inventory.
+No article status/hash was approved. Recommend Workers Builds candidate uploads
+and explicit promotion after exact-SHA green Python/frontend CI. Initial Worker
+creation requires a separately authorised deployment; neither remote previews nor
+automatic production deployment are enabled. Python CI's temporary-storage fix at
+`7b1d7cd57341fbdcd6ce544826fbd98db9eccf67` is preserved.
+
+Sections below retain the earlier research/operations handoff. Its description of
+website planning is historical; use this current section for frontend status.
 
 ## 1. Resume here
 
@@ -49,7 +70,7 @@ preserve the authorisations, limitations and tests at their original stage;
 | Forward evidence | Genuine timestamped forecasts, automated collection, immutable scored outcomes and prospective accuracy reports; timely/late cohorts remain distinct |
 | Paper foundations | Deterministic strategy, execution and Decimal accounting/valuation primitives; no complete prospective order/fill/portfolio service |
 | Hosting | Lightsail PostgreSQL and collection/scoring, plus backups, restore drills and monitoring, in the dated production snapshot |
-| Public product | Website, public API and dashboard remain planned; Field Notes are draft editorial sources |
+| Public product | Local static website and genuine Binance dashboard implemented; Workers launch prepared. Public forecast API/snapshot not connected; Field Notes remain unapproved drafts |
 
 Historical backtests simulate the past. Forward predictions are issued before
 outcomes but do not create orders. Prospective paper trading will simulate

@@ -2308,6 +2308,10 @@ details p {
   align-items: center;
   flex-wrap: wrap;
 }
+.chart-controls .market-selector {
+  flex-wrap: wrap;
+  flex-shrink: 1;
+}
 .chart-controls {
   padding: 8px 0 26px;
   border-bottom: 1px solid var(--color-border);
