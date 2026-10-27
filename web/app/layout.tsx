@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { indexingEnabled, siteOrigin } from "@/lib/seo";
 import "@fontsource-variable/manrope";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/ui";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteOrigin),
   title: {
     default: "Backtest Badger — Dig into the evidence.",
     template: "%s | Backtest Badger",
@@ -12,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "A little badger. A lot of backtests. Open-source quantitative research with transparent methods and honest results.",
   icons: { icon: "/brand/badger-mark.svg" },
-  robots: { index: false, follow: false },
+  robots: { index: indexingEnabled(), follow: indexingEnabled() },
 };
 export default function RootLayout({
   children,

@@ -1,9 +1,13 @@
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
-import type { Metadata } from "next";
 import { PageIntro, Arrow, Disclaimer, SourceNote } from "@/components/ui";
 import { BadgerTrail } from "@/components/badger-trail";
 import { repository } from "@/lib/research";
-export const metadata: Metadata = { title: "About & Methodology" };
+export const metadata = pageMetadata(
+  "About — Methodology & principles",
+  "How Backtest Badger studies markets: causal features, chronological evaluation, reproducible evidence and honest limits on historical and prospective results.",
+  "/about/",
+);
 export default function About() {
   return (
     <>

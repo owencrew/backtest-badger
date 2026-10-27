@@ -1,11 +1,13 @@
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
-import type { Metadata } from "next";
 import { PageIntro, Arrow } from "@/components/ui";
 import { MarketDashboard } from "@/components/market-dashboard";
 import { ForwardDashboard } from "@/components/forward-dashboard";
-export const metadata: Metadata = {
-  title: "The Burrow — Markets & forward research",
-};
+export const metadata = pageMetadata(
+  "The Burrow — Markets & forward research",
+  "Follow genuine Binance Spot Bitcoin and Ether observations. Public forward forecasts remain unavailable; market prices are separate from strategy performance.",
+  "/burrow/",
+);
 export default function Burrow() {
   return (
     <>

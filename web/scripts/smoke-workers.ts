@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
+import { indexingEnabled, siteOrigin } from "../lib/seo";
 
 const base = "http://127.0.0.1:8791";
 const child = spawn(
@@ -70,7 +71,22 @@ try {
     const response = await get(route);
     assert.equal(response.status, 200, route);
     assert.match(response.headers.get("content-type") ?? "", /text\/html/);
-    assert.match(await response.text(), /Backtest Badger/);
+    const html = await response.text();
+    assert.match(html, /Backtest Badger/);
+    assert.ok(
+      html.includes(`<link rel="canonical" href="${siteOrigin}${route}"`),
+      route,
+    );
+    assert.ok(
+      html.includes(
+        `name="robots" content="${indexingEnabled() ? "index, follow" : "noindex, nofollow"}"`,
+      ),
+      route,
+    );
+    assert.doesNotMatch(
+      html,
+      /Draft ·|Local editorial preview|Read the preview/,
+    );
     assert.equal((await get(route)).status, 200, `Refresh ${route}`);
     if (route !== "/") {
       for (const alias of [route.slice(0, -1), `${route}index.html`]) {
@@ -87,6 +103,13 @@ try {
       }
     }
   }
+  const robots = await get("/robots.txt");
+  assert.equal(robots.status, 200);
+  assert.equal((await robots.text()).includes("Sitemap:"), indexingEnabled());
+  assert.equal(
+    (await get("/sitemap.xml")).status,
+    indexingEnabled() ? 200 : 404,
+  );
   for (const route of [
     "/does-not-exist/",
     "/field-notes/unapproved/",

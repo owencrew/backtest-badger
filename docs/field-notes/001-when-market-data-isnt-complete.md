@@ -3,7 +3,7 @@
 - **Date:** 2026-10-13
 - **Stage:** 1B.3 — Historical market data
 - **Topic:** Data quality, historical gaps and research validity
-- **Publication status:** Draft
+- **Publication status:** Published
 
 The archive downloaded successfully. Its checksum matched. The ingestion pipeline
 stopped anyway.

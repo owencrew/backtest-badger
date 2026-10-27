@@ -68,3 +68,9 @@ Stage 5B.2's final selected Workers request is archived verbatim at
 It scopes full market history, local Workers readiness, frontend CI and a launch
 runbook, with no public/remote preview deployment, DNS change or article approval.
 See the [implementation report](../docs/stage-05b2-history-and-launch-readiness.md).
+
+Stage 5B.3's complete request is archived verbatim at
+[`stage-05-web/005-editorial-publication-and-search-readiness.md`](stage-05-web/005-editorial-publication-and-search-readiness.md).
+It authorises all seven exact article approvals, search preparation and local
+Workers checks, while reserving deployment, DNS and indexing activation.
+See the [editorial release record](../docs/stage-05b3-editorial-publication.md).

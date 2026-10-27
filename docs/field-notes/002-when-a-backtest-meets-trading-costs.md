@@ -3,7 +3,7 @@
 - **Date:** 2026-10-14
 - **Stage:** 2C — Execution-aware historical backtesting
 - **Topic:** Execution timing, transaction costs and strategy viability
-- **Publication status:** Draft
+- **Publication status:** Published
 
 One of our first simulated trading strategies nearly doubled its starting capital. Then we included trading costs. The same strategy lost almost nine-tenths of it.
 

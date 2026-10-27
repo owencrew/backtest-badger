@@ -1,3 +1,4 @@
+import { articleMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { readArticles } from "@/lib/content";
 import { ArticleLayout } from "@/components/editorial";
@@ -14,11 +15,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return {
-    title:
-      readArticles("guides").find((a) => a.slug === slug)?.title ??
-      "Guide unavailable",
-  };
+  const article = readArticles("guides").find((a) => a.slug === slug);
+  if (!article) notFound();
+  return articleMetadata(article, "guides");
 }
 export default async function GuidePage({
   params,

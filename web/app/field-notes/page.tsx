@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ArticleCard } from "@/components/editorial";
 import { PageIntro, EmptyState } from "@/components/ui";
 import { readArticles, isEditorialPreview } from "@/lib/content";
-export const metadata: Metadata = {
-  title: "Field Notes — The research journal",
-};
+export const metadata = pageMetadata(
+  "Field Notes — The research journal",
+  "Research discoveries from Backtest Badger: missing market data, trading costs, changing positions and the timing assumptions behind historical backtests.",
+  "/field-notes/",
+);
 export default function FieldNotes() {
   const notes = readArticles("fieldNotes");
   const featured = notes[0];
@@ -14,12 +16,12 @@ export default function FieldNotes() {
         Research rarely follows a straight line. These are the questions,
         surprises and decisions worth writing down.
       </PageIntro>
-      {isEditorialPreview() && (
+      {isEditorialPreview() && notes.some((a) => a.status !== "Published") && (
         <div className="preview-notice">
           <strong>From the editor’s desk</strong>
           <span>
-            All four articles are draft local previews. Their original research
-            conclusions and Markdown sources are preserved.
+            Unpublished articles are shown here for local editorial review. Only
+            explicitly approved source bytes appear in production.
           </span>
         </div>
       )}

@@ -1,10 +1,9 @@
-Publication status: Draft
-
 # The Price of Changing Your Mind
 
 - **Date:** 2026-10-24
 - **Stage:** 4B.2E.5g — Genuine native-minute historical backtest
 - **Topic:** Continuous holdings, turnover and an unsuccessful Ridge strategy
+- **Publication status:** Published
 
 A strategy can hold a position across several forecasts and still change its mind
 far too often. In Backtest Badger's genuine 2024 native-minute backtest, the Ridge

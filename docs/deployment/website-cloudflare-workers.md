@@ -40,9 +40,10 @@ with HTTP 404. See Cloudflare's [SSG configuration](https://developers.cloudflar
 
 Review all six primary routes, approved nested articles, direct reloads, fonts,
 mascot and licence assets; both markets, all six ranges, chart modes and errors;
-and narrow mobile/desktop layouts. Current production has **zero approved
-articles**; nested draft URLs must return 404. Repeat positive nested-article
-checks after owner approval. Keep the forward snapshot URL unset until a genuine
+and narrow mobile/desktop layouts. Stage 5B.3 approves **four notes and three
+guides** by exact source hash; all seven nested routes must return 200, while
+unknown/unapproved and publication-pending routes must return genuine 404s.
+Keep the forward snapshot URL unset until a genuine
 public snapshot is separately reviewed. No website build needs Lightsail access.
 
 ## Release workflow: one build system, explicit promotion
@@ -92,6 +93,7 @@ promotion becomes burdensome.
 | Watch includes | `web/*`, `docs/*`, `.github/workflows/*` |
 | Watch excludes | None |
 | Build variables | `NEXT_TELEMETRY_DISABLED=1`, `WRANGLER_SEND_METRICS=false` |
+| Search indexing | Leave `BADGER_SEARCH_INDEXING` unset for the initial candidate and all previews |
 | Forward snapshot | Leave `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` unset |
 
 There is no assumed separate “install command” setting: disabling automatic
@@ -121,13 +123,12 @@ free build quota rather than enabling a paid plan.
 
 1. Owner signs in to or creates a Cloudflare account, with MFA, and selects the
    Free plan. Review content approvals, artwork rights and the DNS inventory first.
-2. Approve final article bytes and status separately. The recommended small launch
-   set is Field Notes **002, 003, 004** (004 links to 003, which links to 002), plus
-   Guide **001**. Rebuild and inspect the production export. No approvals were
-   added during this stage. Review `web/app/layout.tsx`: it currently retains
-   `noindex,nofollow`. Decide whether to remove that restriction for the launch
-   and add reviewed page-specific canonical URLs under the www hostname; never
-   give every page the homepage canonical. Recheck CI after any such edit.
+2. Reverify the [seven approved article identities](../stage-05b3-editorial-publication.md)
+   and their linked reports. All four notes and three guides are approved for the
+   initial release; any later source edit needs deliberate review and a new exact
+   hash. Rebuild and inspect the production export. Keep indexing disabled on the
+   initial workers.dev release; page-specific canonical URLs already use www.
+   Resolve the original engraving's distribution rights before public deployment.
 3. Obtain a clean, reviewed commit on GitHub and verify **both workflows green for
    that exact SHA**. The starting baseline's green run is not approval of new code.
    Review the local Wrangler production export and record the SHA and build output.
@@ -252,3 +253,47 @@ attach www or announce launch. Disable the public workers.dev exposure if needed
 then fix and reverify. For DNS trouble, compare the preserved inventory and correct
 the specific discrepancy with authorisation; nameserver rollback is slower, must
 coordinate DNSSEC/DS and is not a substitute for a Worker version rollback.
+
+## Search activation after the www launch
+
+Stage 5B.3 prepares search metadata; it does **not** authorise indexing. All public
+pages use page-specific `https://www.backtestbadger.com` canonical and Open Graph
+URLs. Original article dates are retained without declaring a public publication
+date. No social artwork was added; the engraving rights decision is still open.
+
+For initial workers.dev and every preview/version review build, leave
+`BADGER_SEARCH_INDEXING` unset. Exported HTML must contain `noindex, nofollow`.
+`robots.txt` intentionally says `Allow: /`: blocking crawling would prevent robots
+from reading HTML noindex. No sitemap is advertised and static preparation removes
+`out/sitemap.xml`. This is a discovery policy, not private access control.
+
+After www HTTPS, routing, content and external checks pass, obtain explicit owner
+approval to enable indexing. Only for that www release, set the build-time variable
+`BADGER_SEARCH_INDEXING=www-live-owner-approved`, then rebuild and run all frontend
+checks in the same environment. Any other value stays noindex. The sitemap includes
+six existing primary pages plus exact eligible article routes; it omits fabricated
+last-modified dates. Future approvals update the list through the production gate.
+
+Inspect the actual files before uploading:
+
+```sh
+rg -o '<title>[^<]*|<link rel="canonical"[^>]*|<meta (name|property)="(robots|description|og:[^"]+|twitter:[^"]+)"[^>]*' out/index.html out/field-notes/*/index.html out/field-guide/*/index.html
+cat out/robots.txt
+# Candidate: this file must be absent. Approved www build: inspect every <loc>.
+ls out/sitemap.xml
+```
+
+A runtime variable or DNS change cannot alter static metadata. An indexing-enabled
+asset bundle must not be served on workers.dev or public Version URLs: before
+promoting it, separately authorise disabling those alternate public exposures (or
+access-restrict them) and verify that only www can serve the enabled bundle.
+Keep preview build configuration unset; do not globally enable the variable for
+all branches. If candidate URLs cannot be isolated, retain noindex until the owner
+resolves that hosting decision. No dynamic Worker is needed for metadata.
+
+After exact-SHA green Python and Frontend Actions, reviewed output and explicit
+release approval, deploy the intended version using the existing procedure. Check
+www HTML, robots.txt and sitemap.xml externally, then submit the www sitemap to
+search engines if desired. To reverse indexing, rebuild without the variable and
+promote that verified version under owner approval; do not merely change a runtime
+setting. Search engine processing is not immediate or guaranteed.

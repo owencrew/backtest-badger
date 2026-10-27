@@ -1,10 +1,9 @@
-Publication status: Draft
-
 # One Minute Can Change a Backtest
 
 - **Date:** 2026-10-24
 - **Stage:** 4B.2C–4B.2D.1 — Native-minute sources and price parity
 - **Topic:** Causal execution timing, source verification and evidence limits
+- **Publication status:** Published
 
 A price can be recorded correctly and still be the wrong price for a backtest.
 If the signal was not available when that price occurred, assigning it to a trade

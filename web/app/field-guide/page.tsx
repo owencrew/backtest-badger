@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ArticleCard } from "@/components/editorial";
 import { PageIntro, EmptyState } from "@/components/ui";
 import { readArticles, isEditorialPreview } from "@/lib/content";
-export const metadata: Metadata = {
-  title: "The Field Guide — Learn the fundamentals",
-};
 const topics = [
   [
     "01",
@@ -37,6 +34,11 @@ const topics = [
     "Candles, missing observations, reference prices and actual fills.",
   ],
 ];
+export const metadata = pageMetadata(
+  "The Field Guide — Learn the fundamentals",
+  "Plain-language introductions to backtesting, performance metrics and the steps from forecasts to trades. Educational topics with clear evidence boundaries.",
+  "/field-guide/",
+);
 export default function FieldGuide() {
   const guides = readArticles("guides").slice().reverse();
   return (
@@ -58,7 +60,8 @@ export default function FieldGuide() {
           <div className="section-heading">
             <h2>Start here</h2>
             <span className="small muted">
-              {isEditorialPreview()
+              {isEditorialPreview() &&
+              guides.some((a) => a.status !== "Published")
                 ? "Introductory drafts · Local editorial preview"
                 : "Introductions to the research"}
             </span>
@@ -91,7 +94,8 @@ export default function FieldGuide() {
               </div>
               <span className="topic-status">
                 {guides.some((guide) => guide.slug.startsWith(`00${i + 1}-`))
-                  ? isEditorialPreview()
+                  ? guides.find((guide) => guide.slug.startsWith(`00${i + 1}-`))
+                      ?.status !== "Published"
                     ? "Draft introduction above"
                     : "Introduction above"
                   : "Planned topic"}

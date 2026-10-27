@@ -1,5 +1,5 @@
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
-import type { Metadata } from "next";
 import { RidgeExplainer } from "@/components/ridge-explainer";
 import { DigExplorer } from "@/components/dig-explorer";
 import {
@@ -11,7 +11,11 @@ import {
 } from "@/components/ui";
 import { readArticles } from "@/lib/content";
 import { ArticleCard } from "@/components/editorial";
-export const metadata: Metadata = { title: "The Dig — Historical research" };
+export const metadata = pageMetadata(
+  "The Dig — Historical research",
+  "Explore the 2024 Ridge crypto spot backtest against Cash and Buy & Hold, with independent accounts, explicit trading costs and research limitations.",
+  "/dig/",
+);
 export default function Dig() {
   const notes = readArticles("fieldNotes")
     .filter((a) => /^(003|004)/.test(a.slug))

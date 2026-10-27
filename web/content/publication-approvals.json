@@ -1,4 +1,34 @@
 {
-  "fieldNotes": [],
-  "guides": []
+  "fieldNotes": [
+    {
+      "slug": "001-when-market-data-isnt-complete",
+      "sha256": "893b1a8271c54adeec40acc72a6e67e8af133b79c80bdbbe1b5cafdfd40116d4"
+    },
+    {
+      "slug": "002-when-a-backtest-meets-trading-costs",
+      "sha256": "b50c8fb540d9e1027ab3ded6dc1f55e15febdcea04cdcd434001b27c2796eff9"
+    },
+    {
+      "slug": "003-the-price-of-changing-your-mind",
+      "sha256": "4aebfee182e5083721b1ceaf6ac6f7ed650824fd048778541f3d112b3a754bc3"
+    },
+    {
+      "slug": "004-one-minute-can-change-a-backtest",
+      "sha256": "93e87056c6e2510e4d8bbe1189bd012da8438e5ed7306f17166f1430414ca248"
+    }
+  ],
+  "guides": [
+    {
+      "slug": "001-what-is-backtesting",
+      "sha256": "1681b2c8391973ef6faa2bdfcd0c7a58a36a0b8b5cb9d8516a78c679720e4020"
+    },
+    {
+      "slug": "002-understanding-performance-metrics",
+      "sha256": "78dd02de41408c098e837287027ddae794807928baf7d58865d482505008ffd0"
+    },
+    {
+      "slug": "003-from-forecasts-to-trades",
+      "sha256": "b40e76e3838690e3875bd86764fc8f6dc0a3978694d05cfe7b24f03654d5ec89"
+    }
+  ]
 }

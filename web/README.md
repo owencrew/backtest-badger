@@ -1,6 +1,6 @@
 # Backtest Badger website
 
-Stages 5A–5B.2 form a local Next.js / React / TypeScript static website. The frontend
+Stages 5A–5B.3 form a local Next.js / React / TypeScript static website. The frontend
 needs no database, credentials or private research artifacts. The Burrow fetches
 genuine Binance Spot market data directly from the browser.
 
@@ -14,8 +14,8 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open <http://127.0.0.1:3000>. The dev server binds to loopback. Development displays
-explicitly labelled editorial drafts. Do not expose the development server publicly.
+Open <http://127.0.0.1:3000>. The dev server binds to loopback. Development can display
+explicitly labelled future editorial drafts. Do not expose the development server publicly.
 
 On this Mac, Node and pnpm were provided by Codex's bundled runtime. If your
 terminal says either command is missing, the following PATH prefix uses the same
@@ -50,8 +50,8 @@ Never substitute the remote `wrangler preview` command for this local script.
 - `lib/research.ts`: display-only decimal strings from the public E.5g report.
   All six accounts are reconciled against the report in tests.
 - `../docs/field-notes/`: original journal Markdown, read by server components.
-- `content/guides/`: three new educational drafts.
-- `content/publication-approvals.json`: empty, fail-closed publication allowlists.
+- `content/guides/`: three approved introductory educational articles.
+- `content/publication-approvals.json`: four Field Note and three guide SHA-256 approvals.
 - `lib/content.ts`: shared content parsing and publication policy.
 
 Production requires **both** `Publication status: Published` in an article's source
@@ -111,9 +111,8 @@ Additional focused exporter checks, from the repository root:
 
 The regular frontend checks remain `pnpm lint`, `pnpm typecheck`, `pnpm build`,
 then `pnpm test`. Tests use synthetic fixtures only. The production output check
-expects the default unconnected forward feed. No article approvals were added;
-004 leads local Field Notes and the home journal feature, while production remains
-fail-closed. Historical figures in `lib/research.ts` are unchanged.
+expects the default unconnected forward feed. Stage 5B.3 approves all seven articles; 004 leads production Field Notes and
+the home journal feature. Future unapproved sources remain excluded. Historical figures in `lib/research.ts` are unchanged.
 
 ## Stage 5B.2 launch readiness
 
@@ -137,3 +136,32 @@ for exact Workers Builds settings, candidate-only uploads, owner promotion after
 green CI, and the separately authorised GoDaddy-to-Cloudflare DNS migration.
 The [Stage 5B.2 report](../docs/stage-05b2-history-and-launch-readiness.md) records
 coverage, editorial recommendations and validation limits. No deployment has run.
+
+## Stage 5B.3 editorial release and search
+
+All seven existing articles are Published in source and approved by exact SHA-256
+for the next release. Original article dates are unchanged; this is not a claim
+of public deployment. The [release record](../docs/stage-05b3-editorial-publication.md)
+lists the exact identities and source-link inventory. Production includes four
+notes (004 featured, then 003/002/001) and three introductory guides. New articles
+still start as Draft. No build or test automatically refreshes approvals.
+
+All 13 public pages have distinct descriptions, page-specific www canonicals,
+Open Graph and Twitter summary metadata. There is no custom social image or
+invented public publication timestamp. Canonicals always use
+`https://www.backtestbadger.com`, including locally and on workers.dev candidates.
+
+**Default candidate: indexing remains disabled.** Leave `BADGER_SEARCH_INDEXING`
+unset for local review, initial workers.dev and later preview builds. HTML emits
+`noindex,nofollow`. `robots.txt` allows crawling so robots can read that directive;
+it does not advertise a sitemap. The sitemap generator uses only eligible content,
+but the existing post-build preparation removes `out/sitemap.xml` while indexing
+is disabled; `/sitemap.xml` then returns 404 from Wrangler.
+
+Only after www is live, verified and explicitly approved for indexing, build with
+`BADGER_SEARCH_INDEXING=www-live-owner-approved`. This exact build-time value
+emits `index,follow`, retains the 13-route sitemap and advertises it in robots.txt.
+Any other value defaults to noindex. Changing a runtime variable cannot change
+already exported HTML. Follow the [launch runbook](../docs/deployment/website-cloudflare-workers.md)
+for inspection, candidate isolation and deployment approval. Do not submit a
+sitemap until that approved www release is live.

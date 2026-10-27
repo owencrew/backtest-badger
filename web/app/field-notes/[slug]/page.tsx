@@ -1,3 +1,4 @@
+import { articleMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { readArticles } from "@/lib/content";
 import { ArticleLayout } from "@/components/editorial";
@@ -16,7 +17,8 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const article = readArticles("fieldNotes").find((a) => a.slug === slug);
-  return { title: article?.title ?? "Article unavailable" };
+  if (!article) notFound();
+  return articleMetadata(article, "fieldNotes");
 }
 export default async function ArticlePage({
   params,

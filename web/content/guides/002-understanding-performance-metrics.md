@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-25
 - **Topic:** Return, risk and the costs hidden behind a headline number
-- **Publication status:** Draft
+- **Publication status:** Published
 
 A portfolio's final return tells you where it ended. It does not tell you how difficult the journey was, how often the strategy traded or whether the result is likely to repeat.
 

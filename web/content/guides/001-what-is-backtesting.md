@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-25
 - **Topic:** Historical simulation and the questions a backtest can answer
-- **Publication status:** Draft
+- **Publication status:** Published
 
 A backtest applies a specified decision rule to historical observations and accounts for the resulting hypothetical trades. It asks what that rule would have done under stated assumptions, not what an investor actually earned.
 

@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-25
 - **Topic:** Why a better prediction is not automatically a better investment
-- **Publication status:** Draft
+- **Publication status:** Published
 
 A forecast estimates an outcome. A strategy decides what to do about that estimate. Execution determines whether, when and at what price an order might fill. These are separate steps, and each introduces assumptions.
 

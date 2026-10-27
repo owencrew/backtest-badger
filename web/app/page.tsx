@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,6 +13,11 @@ import { ArticleCard } from "@/components/editorial";
 import { readArticles } from "@/lib/content";
 import { markets } from "@/lib/research";
 
+export const metadata = pageMetadata(
+  "Dig into the evidence",
+  "Open-source quantitative research: explore historical backtests, genuine crypto market observations and clear explanations of methods and limitations.",
+  "/",
+);
 export default function Home() {
   const notes = readArticles("fieldNotes").slice(0, 2);
   const guides = readArticles("guides").slice().reverse().slice(0, 3);

@@ -27,12 +27,16 @@ export function publicationAllowed(
 ) {
   if (environment === "development") return true;
   return (
+    environment === "production" &&
     article.status === "Published" &&
     list.some((a) => a.slug === article.slug && a.sha256 === article.sha256)
   );
 }
 
-export function readArticles(collection: Collection): Article[] {
+export function readArticles(
+  collection: Collection,
+  environment: string | undefined = process.env.NODE_ENV,
+): Article[] {
   const directory =
     collection === "fieldNotes"
       ? path.join(process.cwd(), "..", "docs", "field-notes")
@@ -72,7 +76,7 @@ export function readArticles(collection: Collection): Article[] {
       };
     })
     .filter((article) =>
-      publicationAllowed(article, process.env.NODE_ENV, approvals[collection]),
+      publicationAllowed(article, environment, approvals[collection]),
     )
     .sort((a, b) => b.slug.localeCompare(a.slug));
 }
