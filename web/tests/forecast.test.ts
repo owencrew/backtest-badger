@@ -36,6 +36,7 @@ const invalid: [string, (f: ForecastSnapshot) => void][] = [
   ["early issuance", (f) => (f.latest[0].issued_at = "2026-10-15T04:00:59Z")],
   ["late primary", (f) => (f.latest[0].issued_at = "2026-10-15T04:16:00Z")],
   ["early score", (f) => (f.latest[0].scored_at = "2026-10-15T08:00:59Z")],
+  ["future outcome", (f) => (f.latest[0].scored_at = "2026-10-15T13:01:00Z")],
   [
     "nonfinite prediction",
     (f) => (f.latest[0].models.ridge.predicted_log_return_4h = Infinity),
@@ -133,4 +134,153 @@ test("forecast fetch uses credential-free uncached JSON and refuses malformed fe
       new AbortController().signal,
     ),
   );
+});
+
+test("refresh accepts pending → scored → next issuance and rejects clock regression", async (t) => {
+  const { createForecastLoader, forecastIsStale, forecastStatus } =
+    await import("../lib/forecast");
+  const scored = syntheticSnapshot();
+  const pending = structuredClone(scored);
+  pending.as_of = pending.generated_at = "2026-10-15T07:59:00Z";
+  Object.assign(pending.latest[0], {
+    status: "pending_not_settled",
+    scored_at: null,
+    actual_log_return_4h: null,
+  });
+  for (const m of models) {
+    Object.assign(pending.latest[0].models[m], {
+      signed_error: null,
+      absolute_error: null,
+      squared_error: null,
+    });
+    Object.assign(pending.evaluations[0].models[m], {
+      mae: null,
+      rmse: null,
+      forecast_bias: null,
+      directional_correct: 0,
+      directional_denominator: 0,
+      directional_accuracy: null,
+    });
+  }
+  Object.assign(pending.evaluations[0], {
+    matched_count: 0,
+    pending_not_settled: 1,
+  });
+  let response = pending;
+  t.mock.method(globalThis, "fetch", async () => Response.json(response));
+  const load = createForecastLoader("/forward-v1.json");
+  const signal = new AbortController().signal;
+  assert.equal((await load(signal)).latest[0].status, "pending_not_settled");
+  assert.equal(
+    forecastStatus(pending.latest[0], Date.parse("2026-10-15T07:59:00Z")),
+    "Outcome pending",
+  );
+  assert.equal(
+    forecastStatus(pending.latest[0], Date.parse("2026-10-15T08:00:00Z")),
+    "Target closed · settling",
+  );
+  assert.equal(
+    forecastStatus(pending.latest[0], Date.parse("2026-10-15T08:01:00Z")),
+    "Mature · score not published",
+  );
+  response = scored;
+  assert.equal((await load(signal)).latest[0].status, "scored");
+  response = pending;
+  await assert.rejects(load(signal), /regressed/);
+  response = structuredClone(scored);
+  response.generated_at = "2026-10-15T13:01:00Z";
+  await load(signal);
+  response = scored;
+  await assert.rejects(load(signal), /regressed/);
+  response = structuredClone(pending);
+  response.as_of = response.generated_at = "2026-10-15T13:05:00Z";
+  Object.assign(response.latest[0], {
+    source_close_at: "2026-10-15T12:00:00Z",
+    issued_at: "2026-10-15T12:01:00Z",
+    target_close_at: "2026-10-15T16:00:00Z",
+  });
+  Object.assign(response.evaluations[0], {
+    genuine_predictions: 2,
+    matched_count: 1,
+    models: scored.evaluations[0].models,
+  });
+  assert.equal(
+    (await load(signal)).latest[0].target_close_at,
+    "2026-10-15T16:00:00Z",
+  );
+  assert.equal(
+    forecastIsStale(response, Date.parse(response.as_of) + 1_200_000),
+    false,
+  );
+  assert.equal(
+    forecastIsStale(response, Date.parse(response.as_of) + 1_200_001),
+    true,
+  );
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(load(controller.signal), /abort/i);
+});
+
+test("network and invalid JSON failures reject without replacing accepted evidence", async (t) => {
+  const { createForecastLoader } = await import("../lib/forecast");
+  let mode = 0;
+  t.mock.method(globalThis, "fetch", async () => {
+    if (mode === 1) throw new Error("Offline");
+    if (mode === 2) return new Response("{broken");
+    return Response.json(syntheticSnapshot());
+  });
+  const load = createForecastLoader("/forward-v1.json");
+  const signal = new AbortController().signal;
+  await load(signal);
+  mode = 1;
+  await assert.rejects(load(signal));
+  mode = 2;
+  await assert.rejects(load(signal));
+  mode = 0;
+  assert.deepEqual(await load(signal), syntheticSnapshot());
+});
+
+test("isolated forecast renderer shows UTC, all model/cohort labels and undefined accuracy", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { ForecastEvidence } = await import("../components/forward-dashboard");
+  const data = validateForecast(syntheticSnapshot(), now);
+  const html = renderToStaticMarkup(
+    createElement(ForecastEvidence, { data, checkedAt: now }),
+  );
+  for (const text of [
+    "BTCUSDT",
+    "ETHUSDT",
+    "UTC",
+    "Outcome scored",
+    "training mean",
+    "gradient boosting",
+    "ridge",
+    "zero",
+    "Undefined",
+    "Late manual",
+    "Timely automated",
+    "automation unattributed",
+    "Preliminary",
+    "MAE",
+    "RMSE",
+    "Bias",
+    "dimensionless",
+    "recipe",
+  ])
+    assert.ok(html.includes(text), text);
+  assert.doesNotMatch(html, /portfolio value|profit|ranking/i);
+});
+
+test("feed URLs cannot embed credentials or escape same-origin path checks", async () => {
+  for (const url of [
+    "https://user:secret@example.com/feed.json",
+    "//example.com/feed.json",
+    "/\\example.com/feed.json",
+    "relative.json",
+  ])
+    await assert.rejects(
+      fetchForecast(url, new AbortController().signal),
+      /credential-free/,
+    );
 });

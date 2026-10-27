@@ -165,3 +165,40 @@ Any other value defaults to noindex. Changing a runtime variable cannot change
 already exported HTML. Follow the [launch runbook](../docs/deployment/website-cloudflare-workers.md)
 for inspection, candidate isolation and deployment approval. Do not submit a
 sitemap until that approved www release is live.
+
+## Stage 5B.4 mascot, navigation and forward publication preparation
+
+The homepage uses the owner's original mascot as a pixel-identical lossless WebP;
+its PNG source is retained under `design-assets/`, outside the deployed assets.
+Navigation is Home → The Burrow → The Dig → Field Guide → Field Notes → About.
+Article source bytes, slugs, approvals, featured Note 004 and indexing are unchanged.
+
+A genuine private Lightsail candidate passed both validators on 27 October 2026.
+**No public feed is activated.** The default website still shows unavailable
+forecasts. Never copy the private candidate into `public/` or `out/`.
+
+`stage_forward_snapshot.py` wraps the existing exporter with non-overlap, a
+120-second deadline, a 64 KiB limit, TypeScript validation and atomic private output.
+Run from the repository root with explicit private evidence directories:
+
+```sh
+.venv/bin/python web/scripts/stage_forward_snapshot.py \
+  --records /PRIVATE/forward-predictions \
+  --outcomes /PRIVATE/forward-outcomes \
+  --operations /PRIVATE/forward-operations \
+  --output /PRIVATE-STAGING/last-success.json
+```
+
+The output parent must already exist and be private. Node/tsx must be available.
+The optional `--publish-r2-object BUCKET/forward-v1.json` **writes externally and
+requires separate owner approval before execution**. It uses pinned local Wrangler,
+uploads only the validated candidate and never deploys website assets. No cloud
+credentials are needed for default private preparation. Do not install or schedule
+this tool on production without approval. See the
+[Stage 5B.4 report](../docs/stage-05b4-mascot-navigation-forward-feed.md) for the
+candidate identity, host recommendation, exact activation proposal and rollback.
+
+The frontend rejects clock/forecast regression while retaining earlier evidence.
+It distinguishes loading, error, stale publication, pending/settling/unscored and
+scored outcomes. Five-minute visible-page polling is independent of four-hour
+issuance. No fixture or genuine one-off candidate is bundled into the website.

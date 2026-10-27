@@ -317,9 +317,9 @@ time,
   z-index: 2;
 }
 .hero-badger {
-  width: 108%;
+  width: 100%;
   max-width: none;
-  margin: 0 -4%;
+  margin: 0;
   min-height: 0;
   height: 0;
   flex: 1;
@@ -1626,11 +1626,11 @@ details p {
     aspect-ratio: 0.84;
   }
   .art-topline {
-    padding: 23px 12px 0;
+    padding: 23px 32px 0;
   }
   .hero-badger {
-    width: 116%;
-    margin: 0 -8%;
+    width: 100%;
+    margin: 0;
   }
   .art-bottomline {
     font-size: 9px;
@@ -1829,7 +1829,7 @@ details p {
     width: 100%;
     max-width: 390px;
     margin: 0 auto;
-    aspect-ratio: 1.05;
+    aspect-ratio: 0.9;
     padding: 22px;
     border-radius: 46% 46% 6px 6px;
   }
@@ -1838,8 +1838,8 @@ details p {
     font-size: 7px;
   }
   .hero-badger {
-    width: 106%;
-    margin: -12px -3%;
+    width: 100%;
+    margin: 0;
   }
   .art-bottomline {
     padding-top: 10px;
@@ -2213,7 +2213,7 @@ details p {
     font-size: 8px;
   }
   .hero-art {
-    aspect-ratio: 0.98;
+    aspect-ratio: 0.9;
   }
   .destination-card h3 {
     font-size: 20px;

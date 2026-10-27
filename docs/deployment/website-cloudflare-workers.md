@@ -128,7 +128,8 @@ free build quota rather than enabling a paid plan.
    initial release; any later source edit needs deliberate review and a new exact
    hash. Rebuild and inspect the production export. Keep indexing disabled on the
    initial workers.dev release; page-specific canonical URLs already use www.
-   Resolve the original engraving's distribution rights before public deployment.
+   Stage 5B.4 replaces the engraving with the owner-confirmed original mascot;
+   verify only the new mascot is present in deployed brand assets.
 3. Obtain a clean, reviewed commit on GitHub and verify **both workflows green for
    that exact SHA**. The starting baseline's green run is not approval of new code.
    Review the local Wrangler production export and record the SHA and build output.
@@ -259,7 +260,8 @@ coordinate DNSSEC/DS and is not a substitute for a Worker version rollback.
 Stage 5B.3 prepares search metadata; it does **not** authorise indexing. All public
 pages use page-specific `https://www.backtestbadger.com` canonical and Open Graph
 URLs. Original article dates are retained without declaring a public publication
-date. No social artwork was added; the engraving rights decision is still open.
+date. No social artwork was added. Stage 5B.4 replaces the homepage engraving with the
+owner-confirmed original mascot; no broader asset-rights claim is made.
 
 For initial workers.dev and every preview/version review build, leave
 `BADGER_SEARCH_INDEXING` unset. Exported HTML must contain `noindex, nofollow`.
@@ -297,3 +299,27 @@ www HTML, robots.txt and sitemap.xml externally, then submit the www sitemap to
 search engines if desired. To reverse indexing, rebuild without the variable and
 promote that verified version under owner approval; do not merely change a runtime
 setting. Search engine processing is not immediate or guaranteed.
+
+
+## Stage 5B.4 forward-feed activation boundary
+
+The original mascot and all seven approved articles are locally ready. The
+[Stage 5B.4 report](../stage-05b4-mascot-navigation-forward-feed.md) records a genuine
+private forecast candidate validated by both Python and TypeScript, plus a tested
+private-staging/optional R2-upload tool. **No public feed is live and no website
+release has been deployed.** Keep the default unavailable state until activation.
+
+The proposed independent endpoint is a dedicated R2 bucket/custom domain, not a
+JSON file bundled in a website release. Resource creation, domain/CORS settings,
+publisher credentials, helper installation and its timer each require separate
+approval. The report gives the proposed command, safeguards, measurements,
+monitoring and rollback. The optional upload flag is an external write, never part
+of a local preview/build or an implicit approval to deploy.
+
+After the destination and exact candidate are approved and a genuine HTTPS fetch
+passes, set `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` before building. Verify a later
+publication and scoring/issuance transition without a website rebuild. The browser
+polls every five minutes; models issue on four-hour boundaries; generation/cutoff
+clocks are never rewritten by fetching. Static assets, public forecast data and
+private scientific evidence remain separate. Preserve existing noindex and
+candidate-promotion gates. Never upload raw evidence or staging directories.

@@ -10,23 +10,29 @@ Prospective paper-trading integration remains a separate future milestone.
 
 ## Website readiness — current handoff
 
-Read the [Stage 5B.2 report](stage-05b2-history-and-launch-readiness.md) and
+Read the [Stage 5B.4 report](stage-05b4-mascot-navigation-forward-feed.md) and
 [Workers launch/rollback guide](deployment/website-cloudflare-workers.md).
-The existing Next.js static frontend now has six genuine Binance ranges, including
-1Y daily and ALL weekly listing-era history, efficient tail refresh, local Wrangler
-preview and independent frontend CI. Forecast metrics remain unavailable until a
-reviewed public snapshot is connected. Exact historical results are unchanged.
+The original owner-supplied mascot is integrated as lossless WebP. Navigation is
+Home, The Burrow, The Dig, Field Guide, Field Notes, About. All four Field Notes
+and three guides are approved by unchanged source hashes; 004 remains featured.
+Search metadata is prepared and indexing remains disabled.
 
-Owner review is needed for articles (recommended Notes 002/003/004 + Guide 001),
-mascot rights, indexing/canonical metadata, first deployment and the DNS inventory.
-No article status/hash was approved. Recommend Workers Builds candidate uploads
-and explicit promotion after exact-SHA green Python/frontend CI. Initial Worker
-creation requires a separately authorised deployment; neither remote previews nor
-automatic production deployment are enabled. Python CI's temporary-storage fix at
-`7b1d7cd57341fbdcd6ce544826fbd98db9eccf67` is preserved.
+Read-only Lightsail inspection on 27 October reconfirmed release
+`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1`. A private genuine candidate from 160
+forecasts and 158 outcomes passed both frozen Python and browser validators.
+No public feed was identified or activated. The Burrow retains the truthful
+unavailable state. The local staging/optional R2 publisher is prepared and tested;
+its external-write mode was not executed. See the report for the candidate hash,
+resource measurements, dedicated R2 recommendation, exact approval scope and rollback.
+
+Next: owner review, separately authorised commit/push and exact-SHA CI, then
+separately approved feed infrastructure/publication and first website deployment.
+Do not deploy or install jobs under this stage's read-only authorisation. DNS and
+indexing remain separate gates. Frozen science and historical figures are unchanged.
 
 Sections below retain the earlier research/operations handoff. Its description of
-website planning is historical; use this current section for frontend status.
+website planning and draft publication is historical; use this current section
+and the Stage 5B.3/5B.4 reports for frontend status.
 
 ## 1. Resume here
 
@@ -70,7 +76,7 @@ preserve the authorisations, limitations and tests at their original stage;
 | Forward evidence | Genuine timestamped forecasts, automated collection, immutable scored outcomes and prospective accuracy reports; timely/late cohorts remain distinct |
 | Paper foundations | Deterministic strategy, execution and Decimal accounting/valuation primitives; no complete prospective order/fill/portfolio service |
 | Hosting | Lightsail PostgreSQL and collection/scoring, plus backups, restore drills and monitoring, in the dated production snapshot |
-| Public product | Local static website and genuine Binance dashboard implemented; Workers launch prepared. Public forecast API/snapshot not connected; Field Notes remain unapproved drafts |
+| Public product | Local static website and genuine Binance dashboard implemented; Workers launch prepared. Private genuine candidate validated; public feed not connected; all seven articles approved |
 
 Historical backtests simulate the past. Forward predictions are issued before
 outcomes but do not create orders. Prospective paper trading will simulate

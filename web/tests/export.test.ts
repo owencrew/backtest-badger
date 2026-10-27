@@ -250,3 +250,27 @@ test("sitemap serving and robots discovery agree with the build indexing policy"
     assert.doesNotMatch(robots, /Sitemap:/);
   }
 });
+
+test("original mascot and exact shared navigation reach the static export", () => {
+  const html = readFileSync(path.join(output, "index.html"), "utf8");
+  assert.ok(existsSync(path.join(output, "brand/badger-mascot.webp")));
+  assert.equal(
+    existsSync(path.join(output, "brand/badger-engraving.png")),
+    false,
+  );
+  assert.match(html, /\/brand\/badger-mascot.webp/);
+  const nav = html.match(
+    /<nav[^>]*id="primary-navigation"[^>]*>(.*?)<\/nav>/,
+  )![1];
+  assert.deepEqual(
+    [...nav.matchAll(/<a\b[^>]*>(.*?)<\/a>/g)].map((m) => m[1]),
+    ["Home", "The Burrow", "The Dig", "Field Guide", "Field Notes", "About"],
+  );
+  for (const file of files(output).filter((f) =>
+    /\.(html|js|json|txt)$/.test(f),
+  ))
+    assert.doesNotMatch(
+      readFileSync(file, "utf8"),
+      /The Field Guide|badger-engraving\.png|\/Downloads\//,
+    );
+});

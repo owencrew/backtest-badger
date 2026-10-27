@@ -68,10 +68,10 @@ export default function Home() {
           <div className="art-circle" aria-hidden="true" />
           <Image
             className="hero-badger"
-            src="/brand/badger-engraving.png"
-            width={500}
-            height={500}
-            alt="A bold black-and-white engraving of a badger digging into the earth."
+            src="/brand/badger-mascot.webp"
+            width={1254}
+            height={1254}
+            alt="An original black-and-white badger digging through soil with financial candlesticks."
             priority
           />
           <div className="art-bottomline">
@@ -191,7 +191,7 @@ export default function Home() {
             [
               "/field-guide/",
               "04",
-              "The Field Guide",
+              "Field Guide",
               "Get your bearings",
               "Clear explanations for a complicated subject.",
               "Learning library",
@@ -240,7 +240,7 @@ export default function Home() {
             to ask better questions.
           </h2>
           <Link href="/field-guide/" className="text-link">
-            Explore The Field Guide <Arrow />
+            Explore Field Guide <Arrow />
           </Link>
         </div>
         <div className="guide-links">
@@ -263,7 +263,7 @@ export default function Home() {
           ) : (
             <p>
               Introductory explanations are awaiting editorial approval. Explore
-              the planned learning topics in The Field Guide.
+              the planned learning topics in Field Guide.
             </p>
           )}
         </div>

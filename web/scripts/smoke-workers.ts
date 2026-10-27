@@ -125,7 +125,7 @@ try {
     assert.match(await response.text(), /Backtest Badger/);
   }
   const assets = [
-    "/brand/badger-engraving.png",
+    "/brand/badger-mascot.webp",
     "/brand/badger-mark.svg",
     "/licenses/lightweight-charts-LICENSE.txt",
   ];

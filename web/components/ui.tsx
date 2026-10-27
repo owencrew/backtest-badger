@@ -120,7 +120,7 @@ export function SiteFooter() {
         </div>
         <div className="footer-links">
           <Link href="/about/">About & methodology</Link>
-          <Link href="/field-guide/">The Field Guide</Link>
+          <Link href="/field-guide/">Field Guide</Link>
           <a href={repository}>Source on GitHub ↗</a>
         </div>
       </div>

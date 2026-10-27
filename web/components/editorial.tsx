@@ -28,7 +28,7 @@ export function ArticleCard({
         <p className="eyebrow">
           {collection === "fieldNotes"
             ? `Field Note ${article.slug.slice(0, 3)}`
-            : "The Field Guide"}
+            : "Field Guide"}
         </p>
         <h3>
           <Link href={href}>{article.title}</Link>
@@ -53,7 +53,7 @@ export function ArticleLayout({
   related: Article[];
 }) {
   const root = collection === "fieldNotes" ? "/field-notes/" : "/field-guide/";
-  const label = collection === "fieldNotes" ? "Field Notes" : "The Field Guide";
+  const label = collection === "fieldNotes" ? "Field Notes" : "Field Guide";
   return (
     <>
       <div className="article-header">

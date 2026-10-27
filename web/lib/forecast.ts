@@ -364,10 +364,62 @@ export function validateForecast(
   return snapshot;
 }
 export async function fetchForecast(url: string, signal: AbortSignal) {
+  const parsed = new URL(url, "https://snapshot.invalid");
   requireValue(
-    (url.startsWith("/") && !url.startsWith("//")) ||
-      new URL(url).protocol === "https:",
-    "Forecast URL must be same-origin or HTTPS.",
+    !url.includes("\\") &&
+      !parsed.username &&
+      !parsed.password &&
+      ((url.startsWith("/") &&
+        !url.startsWith("//") &&
+        parsed.origin === "https://snapshot.invalid") ||
+        (url.startsWith("https://") && parsed.protocol === "https:")),
+    "Forecast URL must be credential-free, same-origin or HTTPS.",
   );
   return validateForecast(await fetchJson(url, signal));
+}
+
+// Per mounted URL: a failed/aborted refresh never advances the accepted snapshot.
+export function createForecastLoader(url: string) {
+  let previous: ForecastSnapshot | undefined;
+  return async (signal: AbortSignal) => {
+    const next = await fetchForecast(url, signal);
+    signal.throwIfAborted();
+    if (previous) {
+      requireValue(
+        timestamp(next.as_of) >= timestamp(previous.as_of) &&
+          timestamp(next.generated_at) >= timestamp(previous.generated_at),
+        "Snapshot timestamps regressed; retaining the previous evidence.",
+      );
+      for (const old of previous.latest) {
+        const current = next.latest.find((f) => f.symbol === old.symbol);
+        requireValue(
+          current !== undefined &&
+            timestamp(current.source_close_at) >=
+              timestamp(old.source_close_at) &&
+            (current.source_close_at !== old.source_close_at ||
+              (current.issued_at === old.issued_at &&
+                current.recipe_sha256 === old.recipe_sha256 &&
+                (old.status !== "scored" || current.status === "scored"))),
+          "Latest forecast regressed; retaining the previous evidence.",
+        );
+      }
+    }
+    previous = next;
+    return next;
+  };
+}
+
+export function forecastIsStale(data: ForecastSnapshot, now: number) {
+  return now - timestamp(data.as_of) > FORECAST_STALE_MS;
+}
+
+export function forecastStatus(f: Forecast, now: number) {
+  if (f.status === "scored") return "Outcome scored";
+  if (
+    f.status === "mature_unscored" ||
+    now >= timestamp(f.target_close_at) + 60_000
+  )
+    return "Mature · score not published";
+  if (now >= timestamp(f.target_close_at)) return "Target closed · settling";
+  return "Outcome pending";
 }

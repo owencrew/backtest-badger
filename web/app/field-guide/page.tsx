@@ -35,7 +35,7 @@ const topics = [
   ],
 ];
 export const metadata = pageMetadata(
-  "The Field Guide — Learn the fundamentals",
+  "Field Guide — Learn the fundamentals",
   "Plain-language introductions to backtesting, performance metrics and the steps from forecasts to trades. Educational topics with clear evidence boundaries.",
   "/field-guide/",
 );
@@ -43,7 +43,7 @@ export default function FieldGuide() {
   const guides = readArticles("guides").slice().reverse();
   return (
     <>
-      <PageIntro section="The Field Guide" title="Find your footing.">
+      <PageIntro section="Field Guide" title="Find your footing.">
         A small library for big questions. Plain-language introductions to
         markets, models and the things a performance chart can leave out.
       </PageIntro>

@@ -9,8 +9,8 @@ const destinations = [
   ["/", "Home"],
   ["/burrow/", "The Burrow"],
   ["/dig/", "The Dig"],
+  ["/field-guide/", "Field Guide"],
   ["/field-notes/", "Field Notes"],
-  ["/field-guide/", "The Field Guide"],
   ["/about/", "About"],
 ];
 export function SiteHeader() {

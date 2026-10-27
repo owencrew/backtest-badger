@@ -188,6 +188,15 @@ def write_candidate(value, destination):
         Path(name).unlink(missing_ok=True)
 
 
+def check_destination(output, sources):
+    """Candidates must never enter static assets or retained source evidence."""
+    output = output.resolve()
+    web = Path(__file__).resolve().parents[1]
+    forbidden = [p.resolve() for p in sources] + [web / "public", web / "out"]
+    if any(output.is_relative_to(p) for p in forbidden):
+        raise ValueError("Output must be private and separate from source evidence.")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("records", "outcomes", "operations", "output"):
@@ -199,9 +208,8 @@ def main():
         args.operations.resolve(),
     ]
     output = args.output.resolve()
-    if any(output.is_relative_to(source) for source in sources):
-        parser.error("Output must be separate from retained evidence directories.")
     try:
+        check_destination(output, sources)
         value = prepare(*sources)
         write_candidate(value, output)
     except (OSError, ValueError, RuntimeError):

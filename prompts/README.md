@@ -74,3 +74,9 @@ Stage 5B.3's complete request is archived verbatim at
 It authorises all seven exact article approvals, search preparation and local
 Workers checks, while reserving deployment, DNS and indexing activation.
 See the [editorial release record](../docs/stage-05b3-editorial-publication.md).
+
+Stage 5B.4's complete request is archived verbatim at
+[`stage-05-web/006-mascot-navigation-forward-feed.md`](stage-05-web/006-mascot-navigation-forward-feed.md).
+It authorises original mascot integration, Field Guide navigation changes,
+read-only Lightsail inspection and private forecast preparation, while reserving
+production writes, public publication and deployment for separate approval.
