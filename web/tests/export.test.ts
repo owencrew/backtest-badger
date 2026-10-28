@@ -277,3 +277,21 @@ test("original mascot and exact shared navigation reach the static export", () =
       /The Field Guide|badger-engraving\.png|\/Downloads\//,
     );
 });
+
+test("homepage refinement keeps positive research labels and verified historical evidence", () => {
+  const html = readFileSync(path.join(output, "index.html"), "utf8");
+  assert.doesNotMatch(html, /No hype|Honest negative results/);
+  for (const label of [
+    "Open source",
+    "Reproducible research",
+    "Real market data",
+    "Explicit trading costs",
+    "Independent benchmarks",
+    "A little badger. A lot of backtests.",
+    "60.69%",
+    "120.81%",
+  ])
+    assert.ok(html.includes(label), label);
+  assert.match(html, /Dig into/);
+  assert.match(html, /the <span>evidence\.<\/span>/);
+});

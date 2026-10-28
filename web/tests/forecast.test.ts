@@ -240,38 +240,6 @@ test("network and invalid JSON failures reject without replacing accepted eviden
   assert.deepEqual(await load(signal), syntheticSnapshot());
 });
 
-test("isolated forecast renderer shows UTC, all model/cohort labels and undefined accuracy", async () => {
-  const { createElement } = await import("react");
-  const { renderToStaticMarkup } = await import("react-dom/server");
-  const { ForecastEvidence } = await import("../components/forward-dashboard");
-  const data = validateForecast(syntheticSnapshot(), now);
-  const html = renderToStaticMarkup(
-    createElement(ForecastEvidence, { data, checkedAt: now }),
-  );
-  for (const text of [
-    "BTCUSDT",
-    "ETHUSDT",
-    "UTC",
-    "Outcome scored",
-    "training mean",
-    "gradient boosting",
-    "ridge",
-    "zero",
-    "Undefined",
-    "Late manual",
-    "Timely automated",
-    "automation unattributed",
-    "Preliminary",
-    "MAE",
-    "RMSE",
-    "Bias",
-    "dimensionless",
-    "recipe",
-  ])
-    assert.ok(html.includes(text), text);
-  assert.doesNotMatch(html, /portfolio value|profit|ranking/i);
-});
-
 test("feed URLs cannot embed credentials or escape same-origin path checks", async () => {
   for (const url of [
     "https://user:secret@example.com/feed.json",
@@ -283,4 +251,254 @@ test("feed URLs cannot embed credentials or escape same-origin path checks", asy
       fetchForecast(url, new AbortController().signal),
       /credential-free/,
     );
+});
+
+// These snapshots are rendered only in unit tests, never connected to a site.
+function twoMarketSnapshot() {
+  const data = syntheticSnapshot();
+  data.latest.push({ ...structuredClone(data.latest[0]), symbol: "ETHUSDT" });
+  data.evaluations[3] = {
+    ...structuredClone(data.evaluations[0]),
+    symbol: "ETHUSDT",
+  };
+  return validateForecast(data, now);
+}
+async function renderEvidence(data = twoMarketSnapshot(), checkedAt = now) {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { ForecastEvidence } = await import("../components/forward-dashboard");
+  return renderToStaticMarkup(
+    createElement(ForecastEvidence, { data, checkedAt }),
+  );
+}
+
+test("log-return basis points preserve sign, zero, very small values and missingness", async () => {
+  const { logReturnBps } = await import("../lib/forecast-display");
+  for (const [value, expected] of [
+    [0.0002, "+2.00 bps"],
+    [-0.0005, "−5.00 bps"],
+    [0, "0.00 bps"],
+    [-0, "0.00 bps"],
+    [0.0000002, "+2.00e-3 bps"],
+    [-0.0000000001, "−1.00e-6 bps"],
+    [null, "N/A — no matched outcomes"],
+    [undefined, "N/A — no matched outcomes"],
+  ] as const)
+    assert.equal(logReturnBps(value), expected);
+});
+
+test("BTC and ETH cards show four models, bps, original evidence and UTC clocks", async () => {
+  const data = twoMarketSnapshot();
+  const before = JSON.stringify(data);
+  const html = await renderEvidence(data);
+  for (const symbol of ["BTCUSDT", "ETHUSDT"]) {
+    const card = html.match(
+      new RegExp(
+        `<article[^>]*aria-label="${symbol} latest prediction"[\\s\\S]*?</article>`,
+      ),
+    )![0];
+    for (const name of ["Zero", "Training mean", "Ridge", "Gradient boosting"])
+      assert.ok(card.includes(`<dt>${name}</dt>`));
+    for (const label of [
+      "Outcome scored",
+      "Target close",
+      "Source candle close",
+      "Forecast issued",
+      "UTC",
+      "Four-hour predicted log return (bps)",
+      "Realised log return",
+      "+50.00 bps",
+      "Signed error −50.00 bps",
+      "Model recipe identity",
+      "0.005",
+      "Fresh published snapshot",
+    ])
+      assert.ok(card.includes(label), label);
+  }
+  assert.match(html, /0\.0001 log-return units/);
+  assert.match(html, /Evidence cutoff .*UTC/);
+  assert.match(html, /Snapshot generated .*UTC/);
+  assert.equal(JSON.stringify(data), before);
+});
+
+test("primary evaluations are visible by default, secondary and technical disclosures closed", async () => {
+  const html = await renderEvidence();
+  const primary = html.match(
+    /<section class="primary-evaluation"[\s\S]*?<\/section><\/section>/,
+  )![0];
+  assert.doesNotMatch(primary, /<details/);
+  assert.equal((primary.match(/<table /g) ?? []).length, 2);
+  for (const label of [
+    "MAE (bps)",
+    "RMSE (bps)",
+    "Forecast bias (bps)",
+    "Direction correct / eligible",
+    "Directional accuracy",
+    "Preliminary",
+    "1 matched",
+    "1 / 1",
+    "100.0%",
+    "0 / 0",
+    "N/A — zero forecast",
+  ])
+    assert.ok(primary.includes(label), label);
+  assert.match(
+    html,
+    /<details class="forecast-disclosure"><summary>Late manual forecasts/,
+  );
+  assert.match(
+    html,
+    /<details class="forecast-disclosure"><summary>Detailed forecast evaluation/,
+  );
+  assert.doesNotMatch(html, /<details[^>]*\bopen/);
+  assert.match(html, /not directly comparable/);
+  assert.match(html, /additional information timing/);
+  assert.match(html, /zero predictions abstain/);
+  assert.match(
+    html,
+    /against a zero outcome remain eligible and count as incorrect/,
+  );
+  assert.match(html, /BTCUSDT: 0 matched \/ 0 issued/);
+  for (const label of [
+    "Pending / unsettled",
+    "Mature unscored",
+    "Missing primary opportunities",
+    "Earliest target close",
+    "pools retained recipe identities",
+    "Original snapshot values",
+  ])
+    assert.ok(html.includes(label), label);
+});
+
+test("zero accuracy is never zero percent; nonzero models can have zero eligible directions", async () => {
+  const { directionAccuracy } = await import("../lib/forecast-display");
+  const metrics = syntheticSnapshot().evaluations[0].models.zero;
+  assert.equal(directionAccuracy("zero", metrics), "N/A — zero forecast");
+  assert.equal(
+    directionAccuracy("ridge", metrics),
+    "N/A — no eligible directions",
+  );
+  assert.equal(
+    directionAccuracy("ridge", {
+      ...metrics,
+      directional_denominator: 1,
+      directional_accuracy: 0,
+    }),
+    "0.0%",
+  );
+  assert.equal(
+    directionAccuracy("ridge", {
+      ...metrics,
+      directional_correct: 1,
+      directional_denominator: 3,
+      directional_accuracy: 1 / 3,
+    }),
+    "33.3%",
+  );
+});
+
+test("empty cohorts omit metric tables and automatically show them with matched evidence", async () => {
+  const data = twoMarketSnapshot();
+  const getUnattributed = (html: string) =>
+    html.match(
+      /<section class="evaluation-cohort" aria-label="BTCUSDT Timely · automation unattributed evaluation"[\s\S]*?<\/section>/,
+    )![0];
+  const empty = getUnattributed(await renderEvidence(data));
+  assert.match(empty, /No observations recorded in this cohort\./);
+  assert.match(empty, /cannot be calculated without matched outcomes/);
+  assert.doesNotMatch(empty, /<table/);
+  data.evaluations[2] = {
+    ...structuredClone(data.evaluations[0]),
+    cohort: "timely_unattributed",
+  };
+  const populated = getUnattributed(
+    await renderEvidence(validateForecast(data, now)),
+  );
+  assert.match(populated, /<table/);
+  assert.match(populated, /1 matched/);
+  assert.doesNotMatch(populated, /No observations recorded/);
+});
+
+test("unmatched issued evidence is not described as an empty cohort or a scored outcome", async () => {
+  const data = twoMarketSnapshot();
+  data.as_of = data.generated_at = "2026-10-15T07:59:00Z";
+  for (const f of data.latest) {
+    Object.assign(f, {
+      status: "pending_not_settled",
+      scored_at: null,
+      actual_log_return_4h: null,
+    });
+    for (const m of models)
+      Object.assign(f.models[m], {
+        signed_error: null,
+        absolute_error: null,
+        squared_error: null,
+      });
+  }
+  for (const e of data.evaluations.filter(
+    (e) => e.cohort === "primary_timely_automated",
+  )) {
+    Object.assign(e, { matched_count: 0, pending_not_settled: 1 });
+    for (const m of models)
+      Object.assign(e.models[m], {
+        mae: null,
+        rmse: null,
+        forecast_bias: null,
+        directional_correct: 0,
+        directional_denominator: 0,
+        directional_accuracy: null,
+      });
+  }
+  validateForecast(data, now);
+  for (const [time, status] of [
+    ["07:59:00", "Outcome pending"],
+    ["08:00:00", "Target closed · settling"],
+    ["08:01:00", "Mature · score not published"],
+  ]) {
+    const html = await renderEvidence(data, Date.parse(`2026-10-15T${time}Z`));
+    assert.ok(html.includes(status));
+    assert.match(html, /No matched outcomes recorded/);
+    assert.match(html, /Not scored/);
+    assert.doesNotMatch(html, /Outcome scored|Signed error/);
+  }
+});
+
+test("rendered feed distinguishes loading, fresh, stale and failure with retained evidence", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { ForecastFeedView, ForwardDashboard } =
+    await import("../components/forward-dashboard");
+  const data = twoMarketSnapshot();
+  const render = (props: Partial<Parameters<typeof ForecastFeedView>[0]>) =>
+    renderToStaticMarkup(
+      createElement(ForecastFeedView, {
+        checkedAt: now,
+        loading: false,
+        refresh: () => {},
+        ...props,
+      }),
+    );
+  assert.match(render({ loading: true }), /Checking published snapshot/);
+  assert.match(render({ loading: true }), /disabled=""/);
+  assert.match(render({ data }), /Fresh published snapshot/);
+  assert.match(render({ data, checkedAt: now + 1_200_001 }), /Snapshot stale/);
+  const failure = render({ data, error: "Offline" });
+  assert.match(failure, /Request failed · last-good snapshot retained/);
+  assert.match(failure, /Retained values below have not been updated/);
+  assert.match(failure, /BTCUSDT latest prediction/);
+  assert.doesNotMatch(failure, /Fresh published snapshot/);
+  const unavailable = render({ error: "Offline" });
+  assert.match(unavailable, /No verified snapshot loaded/);
+  assert.doesNotMatch(unavailable, /latest prediction/);
+  const previous = process.env.NEXT_PUBLIC_FORWARD_SNAPSHOT_URL;
+  try {
+    delete process.env.NEXT_PUBLIC_FORWARD_SNAPSHOT_URL;
+    assert.match(
+      renderToStaticMarkup(createElement(ForwardDashboard)),
+      /Forward forecasts are not published yet/,
+    );
+  } finally {
+    if (previous !== undefined)
+      process.env.NEXT_PUBLIC_FORWARD_SNAPSHOT_URL = previous;
+  }
 });

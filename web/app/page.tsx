@@ -57,7 +57,6 @@ export default function Home() {
           <div className="hero-footnote">
             <span>Open source</span>
             <span>Reproducible research</span>
-            <span>No hype</span>
           </div>
         </div>
         <div className="hero-art">
@@ -90,7 +89,6 @@ export default function Home() {
         <span>Real market data</span>
         <span>Explicit trading costs</span>
         <span>Independent benchmarks</span>
-        <span>Honest negative results</span>
       </div>
       <section className="featured-research section-block">
         <div className="research-editorial">

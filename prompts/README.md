@@ -87,3 +87,10 @@ It authorises the dedicated R2 public feed and isolated Lightsail helper, while
 reserving authoritative DNS cutover and the first Workers website deployment.
 See the [activation record](../docs/stage-05b5-forward-feed-activation.md) for
 completed work and account-dependent steps still pending.
+
+Stage 5B.6's complete request is archived verbatim at
+[`stage-05-web/008-forward-dashboard-refinement.md`](stage-05-web/008-forward-dashboard-refinement.md).
+It scopes read-only scheduled-feed verification, presentation-only forecast
+refinement, two homepage copy removals and local browser/build checks. Production
+writes, deployment, commits and changes to scientific or editorial evidence remain
+outside its scope. See the [refinement report](../docs/stage-05b6-forward-dashboard-refinement.md).

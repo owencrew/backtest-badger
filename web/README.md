@@ -230,3 +230,31 @@ The checker validates size, complete schema, both markets, HTTP metadata, www CO
 cutoff age and missed issuance separately. Unit tests use labelled synthetic fixtures
 only; no fixture is connected to a running site. Navigation order is regression
 tested in exported HTML and manually checked on desktop/mobile with keyboard use.
+
+## Stage 5B.6 current feed and dashboard status
+
+The owner has activated the R2 development endpoint and both recurring Lightsail
+timers. Read-only verification on 28 October 2026 confirmed repeated scheduled
+publication/checker success, advancing snapshot clocks, unchanged forecast
+identities between publications, and healthy collector/scorer results. The local
+ignored build configuration now connects the genuine feed. Earlier stage sections
+above describe their historical activation status; see the
+[current verification and screenshot record](../docs/stage-05b6-forward-dashboard-refinement.md).
+
+The Burrow leads with separate BTC/ETH cards and timely automated evaluations.
+Forecasts, realised returns, MAE, RMSE, bias and signed errors display **log-return
+basis points** (original value × 10,000), never simple percentage returns. Small
+nonzero values below 0.01 bps use scientific notation to avoid displaying zero.
+Original numeric values remain in technical disclosures. The public validator,
+JSON contract, polling and regression checks are unchanged.
+
+Late manual results are collapsed and explicitly incomparable with primary results.
+Detailed evaluation includes every cohort's accounting, methodology, recipe-pooling
+limits, unattributed evaluation and the original validated snapshot. Empty cohorts
+show a message until matched data becomes available; Zero accuracy reads
+`N/A — zero forecast` with `0 / 0`. Mobile tables are labelled keyboard-focusable
+scroll regions. Homepage supporting labels retain their existing layout after
+removing the two requested phrases; historical research figures are unchanged.
+
+The temporary endpoint remains an environment value, never a source-code constant.
+No website deployment, DNS/R2 change or indexing activation has been performed.
