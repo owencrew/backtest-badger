@@ -1,8 +1,29 @@
 # Backtest Badger website
 
-Stages 5A–5B.3 form a local Next.js / React / TypeScript static website. The frontend
-needs no database, credentials or private research artifacts. The Burrow fetches
-genuine Binance Spot market data directly from the browser.
+The website is live at [www.backtestbadger.com](https://www.backtestbadger.com) on
+Cloudflare Workers Static Assets (`backtest-badger-web`), using a Next.js static
+export, React, TypeScript and semantic CSS. The frontend needs no database,
+credentials or private research artifacts. The Burrow fetches genuine Binance
+Spot observations and [forward snapshots](https://data.backtestbadger.com/forward-v1.json)
+directly from the browser.
+
+## Current production baseline — 28 October 2026
+
+Read the [Stage 5B.8 post-launch audit](../docs/stage-05b8-post-launch-audit.md) first.
+Cloudflare is authoritative DNS (`brit.ns.cloudflare.com`, `weston.ns.cloudflare.com`);
+GoDaddy remains the registrar. The apex redirects to www with paths and queries
+preserved. R2 bucket `backtest-badger-forward` serves the intended public key
+`forward-v1.json`; its temporary development URL returns 401. Both isolated
+Lightsail publication/checker timers are enabled and healthy. The active research
+release remains `cceb6509…`, not the newer website source.
+
+Website source `360c6130d3f304f275cb9f216cca4fa7c82b5976` has green Python and frontend
+CI. The owner reports active Worker version `ff180090-8473-4c91-8e51-1bb918fa90bd`
+and deploy command `pnpm exec wrangler versions upload`; exact version-to-source
+and preview-build evidence remain outstanding. See the [release runbook](../docs/deployment/website-cloudflare-workers.md).
+All seven editorial approvals remain unchanged. Indexing is still disabled.
+The audit also records missing HTTP-to-HTTPS redirection on www; no production
+configuration was changed during the audit.
 
 ## Run locally
 
@@ -87,17 +108,19 @@ while visible, with manual refresh, cancellation and explicit loading/error/stal
 states. All displayed times use UTC. Network/region restrictions can block Binance;
 there is no fabricated fallback.
 
-Forward forecasts are unavailable by default. After owner approval of a genuine
-public snapshot, set `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` to a same-origin JSON path
-or HTTPS URL **before building**. This is a public value, never a secret. The static
-browser client polls and validates that snapshot without a server or database.
+The live build uses
+`NEXT_PUBLIC_FORWARD_SNAPSHOT_URL=https://data.backtestbadger.com/forward-v1.json`.
+Set this public value **before building** a connected local or release candidate;
+it is never a secret. Without it the default remains truthfully unavailable.
+The static browser client polls and validates snapshots without a server or database.
 Do not connect `tests/fixtures/` to any running site or production export.
 
 `lib/forecast.ts` defines the version 1 contract and strict validation. The separate
 Python utility `scripts/public_forward_export.py` prepares a private candidate from
 validated retained evidence using the existing frozen evaluator. It needs the
-repository's locked Python environment; the website itself does not. An isolated helper is now installed on Lightsail; publication remains disabled
-pending the owner’s Cloudflare setup. See the [Stage 5B report](../docs/stage-05b-market-dashboard.md)
+repository's locked Python environment; the website itself does not. An isolated
+helper on Lightsail publishes validated snapshots to R2 every ten minutes; a
+separate HTTPS checker verifies them. See the [Stage 5B report](../docs/stage-05b-market-dashboard.md)
 for exact local preparation commands, field definitions, inspected release,
 publishing proposal and operational impact.
 
@@ -113,6 +136,13 @@ The regular frontend checks remain `pnpm lint`, `pnpm typecheck`, `pnpm build`,
 then `pnpm test`. Tests use synthetic fixtures only. The production output check
 accepts the truthful unconnected or awaiting-first-verified-fetch state. Stage 5B.3 approves all seven articles; 004 leads production Field Notes and
 the home journal feature. Future unapproved sources remain excluded. Historical figures in `lib/research.ts` are unchanged.
+
+## Historical implementation notes
+
+The Stage 5B.2–5B.6 sections below retain their original preparation/activation
+context. Their statements about pending deployment, disabled timers or the temporary
+endpoint are historical, superseded by the production baseline above and Stage 5B.8.
+Use the current deployment guides for operations; do not repeat initial setup.
 
 ## Stage 5B.2 launch readiness
 
@@ -231,7 +261,7 @@ cutoff age and missed issuance separately. Unit tests use labelled synthetic fix
 only; no fixture is connected to a running site. Navigation order is regression
 tested in exported HTML and manually checked on desktop/mobile with keyboard use.
 
-## Stage 5B.6 current feed and dashboard status
+## Stage 5B.6 historical feed activation and dashboard refinement
 
 The owner has activated the R2 development endpoint and both recurring Lightsail
 timers. Read-only verification on 28 October 2026 confirmed repeated scheduled
@@ -258,3 +288,12 @@ removing the two requested phrases; historical research figures are unchanged.
 
 The temporary endpoint remains an environment value, never a source-code constant.
 No website deployment, DNS/R2 change or indexing activation has been performed.
+
+## Next feature backlog
+
+**Latest Scored Forecast** is proposed, not implemented: separately show the most
+recent completed/scored forecast alongside the current pending prediction, comparing
+all model predictions, observed return, forecast error and directional correctness.
+Review any versioned public-contract/exporter extension first; preserve provenance,
+scoring methodology, Zero abstention and all cohort boundaries. See the
+[post-launch backlog](../docs/stage-05b8-post-launch-audit.md#future-development).

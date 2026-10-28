@@ -5,7 +5,7 @@
 Backtest Badger is an open-source quantitative research platform for market-data
 engineering, machine learning, backtesting and paper-trading analytics. It starts
 with Binance Spot BTCUSDT and ETHUSDT, with other asset classes left for future
-research. [backtestbadger.com](https://backtestbadger.com)
+research. [www.backtestbadger.com](https://www.backtestbadger.com)
 
 The principle is **minimum complexity, maximum correctness**: readable Python,
 exact financial accounting, versioned SQL data, causal features, chronological
@@ -54,12 +54,20 @@ forecasts before their outcomes. Prospective paper trading will simulate orders
 and portfolios as new evidence arrives. Real trading places actual orders and is
 outside the current scope. No model has demonstrated economic viability.
 
-The **Stage 5A local website prototype** now lives in [`web/`](web/README.md):
-The Burrow (forward research preview), The Dig (verified historical comparisons),
-Field Notes, The Field Guide and About/Methodology. Run `pnpm dev` from `web/` to
-review the design and editorial drafts. Production builds exclude unapproved
-articles. Public launch and the public API remain planned. See the
-[design and validation report](docs/stage-05a-website-design.md).
+The **public website is live** at [www.backtestbadger.com](https://www.backtestbadger.com),
+using a Next.js static export on Cloudflare Workers Static Assets. Home, The Burrow,
+The Dig, Field Notes, Field Guide and About are live, including four approved notes
+and three approved guides. The Burrow reads Binance prices and the genuine
+[version-1 forward feed](https://data.backtestbadger.com/forward-v1.json) from a
+separate R2 bucket. Isolated Lightsail publication and HTTPS-check timers run every
+ten minutes; the research collector and scorer remain separate.
+
+GoDaddy remains the registrar; Cloudflare now provides authoritative DNS. The apex
+redirects to www. GitHub-connected Workers Builds uploads candidates for explicit
+owner promotion. Search indexing remains disabled. The [Stage 5B.8 audit](docs/stage-05b8-post-launch-audit.md)
+records verified health, release evidence and remaining issues, including www HTTP
+not redirecting to HTTPS and incomplete Cloudflare source/preview evidence.
+See [`web/`](web/README.md) for local development; production excludes unapproved articles.
 
 ## Local development
 
@@ -91,8 +99,9 @@ uv build
 
 PostgreSQL integration tests skip without an explicit isolated
 `BADGER_TEST_ADMIN_DSN`. GitHub Actions supplies PostgreSQL 17 and runs lint,
-formatting and test suites, including guarded historical-runner checks. There is
-no deployment automation.
+formatting and test suites, including guarded historical-runner checks. Workers
+Builds separately uploads website candidates; production promotion remains an
+explicit owner action. GitHub Actions does not deploy the website or research server.
 
 ## Research and operations guides
 
@@ -111,10 +120,11 @@ no deployment automation.
   [outcome scoring](docs/stage-03d-automated-outcome-scoring.md) explain prospective
   evidence, missed horizons and operational limits.
 - [Production runbook](docs/deployment/production-infrastructure.md): the verified
-  **16 October 2026 snapshot** records Lightsail PostgreSQL, active collection and
-  scoring, backups, restore drills and monitoring. It is not a live inventory or
-  evidence that the latest research code is deployed. Unattended verification
-  items remain recorded there; no host recheck was performed for this update.
+  dated infrastructure record includes the 24 October research promotion. The
+  [28 October post-launch audit](docs/stage-05b8-post-launch-audit.md) rechecks
+  collection/scoring and the isolated public-feed services. The research release
+  remains `cceb6509…`, independently of website source `360c6130…`. Backup, restore
+  and external-alert evidence retains its original dates and limitations.
 - [Field Notes](docs/field-notes/README.md), [agent guidelines](AGENTS.md) and the
   [prompt archive](prompts/README.md) explain the research and development process.
 

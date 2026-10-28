@@ -94,3 +94,10 @@ It scopes read-only scheduled-feed verification, presentation-only forecast
 refinement, two homepage copy removals and local browser/build checks. Production
 writes, deployment, commits and changes to scientific or editorial evidence remain
 outside its scope. See the [refinement report](../docs/stage-05b6-forward-dashboard-refinement.md).
+
+Stage 5B.8's complete request is archived verbatim at
+[`stage-05-web/010-post-launch-audit.md`](stage-05-web/010-post-launch-audit.md).
+It scopes read-only public/production checks and documentation synchronisation,
+reserving all production writes, indexing activation and new features. See the
+[post-launch audit](../docs/stage-05b8-post-launch-audit.md) for verified evidence,
+owner-supplied deployment information, outstanding issues and the proposed next stage.

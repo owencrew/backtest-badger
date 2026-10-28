@@ -1,9 +1,39 @@
-# Website launch — Cloudflare Workers Static Assets
+# Website operations — Cloudflare Workers Static Assets
 
-Prepared 26 October 2026. **Runbook only: no Cloudflare project, remote preview,
-deployment, DNS change or registrar change was made.** Target:
-<https://www.backtestbadger.com>. GoDaddy remains the registrar. Local validation
-and editorial findings are in the [Stage 5B.2 report](../stage-05b2-history-and-launch-readiness.md).
+## Current live status — 28 October 2026
+
+The site is live at <https://www.backtestbadger.com>. See the
+[Stage 5B.8 audit](../stage-05b8-post-launch-audit.md) for dated observations and limits.
+GoDaddy remains registrar; Cloudflare is authoritative DNS with
+`brit.ns.cloudflare.com` and `weston.ns.cloudflare.com`. The apex permanently
+redirects to www, preserving paths/query strings. The permanent public feed is
+<https://data.backtestbadger.com/forward-v1.json>; its R2 development endpoint is disabled.
+
+Owner-supplied dashboard settings identify Worker `backtest-badger-web`, root `/web`,
+and deploy command `pnpm exec wrangler versions upload`. The supplied 17:38–17:43 UTC
+build log confirms successful validation and candidate upload of
+`ff180090-8473-4c91-8e51-1bb918fa90bd`; the owner identifies it as the manually promoted
+live version. Its exact Git SHA/build-detail URL and non-production branch command
+or disabled state are still missing. GitHub independently confirms both CI workflows
+passed for `360c6130d3f304f275cb9f216cca4fa7c82b5976`; do not infer the version-to-SHA
+mapping solely from similar output. This audit did not access the authenticated dashboard.
+
+The configured production command uploads candidates without promoting them.
+Future promotion must remain an explicit owner action after exact-SHA green CI.
+Confirm preview settings before claiming this applies to every branch. The log
+identifies public version/alias URLs; indexing remains disabled on www, and
+alternate exposures must be isolated before an indexing-enabled release.
+
+**Open issue:** `http://www.backtestbadger.com/` and
+`http://www.backtestbadger.com/burrow/?check=1` return 200 instead of HTTPS redirects.
+Review a host-scoped redirect with the owner, preserving path/query and other
+services. Do not change production settings as part of a read-only audit.
+
+The original Stage 5B.2 launch plan below is now an operational reference. First
+bootstrap and DNS migration have already occurred; do not repeat them. The
+[original report](../stage-05b2-history-and-launch-readiness.md) preserves what was
+and was not executed in that earlier stage. All write commands below require
+separate production authorisation; none ran during Stage 5B.8.
 
 ## Local build and review
 
@@ -43,12 +73,12 @@ mascot and licence assets; both markets, all six ranges, chart modes and errors;
 and narrow mobile/desktop layouts. Stage 5B.3 approves **four notes and three
 guides** by exact source hash; all seven nested routes must return 200, while
 unknown/unapproved and publication-pending routes must return genuine 404s.
-Keep the forward snapshot URL unset until the authorised Stage 5B.5 activation
-has produced and verified an actual public HTTPS endpoint. No website build needs Lightsail access.
+Set the forward snapshot URL to the verified permanent hostname before a connected
+production build. No website build needs Lightsail access.
 
 ## Release workflow: one build system, explicit promotion
 
-**Recommendation:** GitHub Actions verifies commits; Workers Builds uploads
+**Selected workflow:** GitHub Actions verifies commits; Workers Builds uploads
 candidates; the owner promotes an exact candidate only after both Actions workflows
 are green for that commit. There is no GitHub deployment workflow or automatic
 production promotion. This is simple for an initial owner-operated release and
@@ -75,26 +105,30 @@ GitHub environment approval, but would need secret handling and cross-workflow
 coordination. Do not add it alongside this process. Reconsider only if manual
 promotion becomes burdensome.
 
-### Exact Workers Builds settings (after authorisation)
+### Workers Builds target settings and owner-reported configuration
+
+The owner confirmed the build/deploy commands, root and variable names below.
+Unconfirmed settings (including preview branch controls) remain target values,
+not dashboard observations. Do not infer secret values or token scope from its name.
 
 | Setting | Value |
 | --- | --- |
 | Repository | `owencrew/backtest-badger` via Cloudflare's GitHub integration |
 | Worker/config name | `backtest-badger-web` |
 | Production branch | `main` |
-| Root directory | `web` |
+| Root directory | `/web` (owner-reported dashboard value; commands run in repository `web/`) |
 | Node | `NODE_VERSION=24.22.1`; also pinned in `.node-version` |
 | pnpm | `PNPM_VERSION=11.25.0`; also `packageManager: pnpm@11.25.0` |
 | Automatic dependency installation | `SKIP_DEPENDENCY_INSTALL=1` |
-| Build command | `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm format:check && pnpm build && pnpm test && pnpm test:workers` |
+| Build command | `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm format:check && pnpm build && pnpm test && pnpm test:export && pnpm test:workers` |
 | Deploy command | `pnpm exec wrangler versions upload` — upload only |
-| Preview command | `pnpm exec wrangler versions upload` — same candidate/version workflow |
+| Preview command | Target: `pnpm exec wrangler versions upload`, or disable non-production branch builds; actual setting unverified |
 | Static asset directory | `./out`, resolved from `web/wrangler.jsonc` |
 | Watch includes | `web/*`, `docs/*`, `.github/workflows/*` |
 | Watch excludes | None |
 | Build variables | `NEXT_TELEMETRY_DISABLED=1`, `WRANGLER_SEND_METRICS=false` |
 | Search indexing | Leave `BADGER_SEARCH_INDEXING` unset for the initial candidate and all previews |
-| Forward snapshot | Leave `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` unset |
+| Forward snapshot | `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL=https://data.backtestbadger.com/forward-v1.json` (verified in deployed browser bundle) |
 
 There is no assumed separate “install command” setting: disabling automatic
 installation and putting the frozen install in the build command makes it explicit.
@@ -106,10 +140,10 @@ deployment credentials. Start with previews disabled and enable deliberately.
 Cloudflare's [monorepo root setting](https://developers.cloudflare.com/workers/ci-cd/builds/advanced-setups/)
 sets the command working directory, not a separate repository containing only
 that folder. The sibling `../docs/field-notes/` loader therefore stays unchanged.
-A local build from `web/` in the full checkout passed. **The hosted build has not
-been executed**; inspect the first authorised build log for the sibling directory
-and publication checks before promotion. Do not upload private artifacts or copy
-the research tree into `public/`. `docs/*` watch coverage includes source reports
+Local builds and the owner-supplied hosted build log both pass publication/export
+checks. The log reads assets from `/opt/buildhome/repo/web/out`. Retain the source
+SHA/build URL with each future release before promotion. Do not upload private
+artifacts or copy the research tree into `public/`. `docs/*` watch coverage includes source reports
 used by frontend tests. [Watch paths](https://developers.cloudflare.com/workers/ci-cd/builds/build-watch-paths/)
 are repository-relative.
 
@@ -119,7 +153,7 @@ currently includes 3,000 build minutes/month, one concurrent build and a 20-minu
 build timeout. No paid features, SSR or Worker execution are required. Monitor the
 free build quota rather than enabling a paid plan.
 
-## First deployment and later promotion
+## Initial bootstrap reference and later promotion
 
 1. Owner signs in to or creates a Cloudflare account, with MFA, and selects the
    Free plan. Review content approvals, artwork rights and the DNS inventory first.
@@ -162,8 +196,10 @@ is central to this release gate.
 
 ## GoDaddy → Cloudflare DNS, then www
 
-**Separate owner authorisation is required before each DNS cutover or activation.**
-No current DNS inventory was fetched or inferred in this stage.
+**Migration completed before this audit.** Cloudflare nameservers and public routing
+were verified on 28 October. The original procedure is retained below for recovery
+planning, not as outstanding setup. Full private-zone/mail/DNSSEC inventory was not
+re-audited. Separate owner authorisation is required for any further cutover or activation.
 
 1. Export the existing authoritative zone and retain its nameservers and TTLs.
    Inventory every active service with the owner: apex/subdomain A, AAAA and
@@ -301,7 +337,10 @@ promote that verified version under owner approval; do not merely change a runti
 setting. Search engine processing is not immediate or guaranteed.
 
 
-## Stage 5B.4 forward-feed activation boundary
+## Historical Stage 5B.4 forward-feed activation boundary
+
+The observations below describe that earlier preparation stage, superseded by the
+live baseline above. Its original report remains unchanged.
 
 The original mascot and all seven approved articles are locally ready. The
 [Stage 5B.4 report](../stage-05b4-mascot-navigation-forward-feed.md) records a genuine
@@ -324,15 +363,17 @@ clocks are never rewritten by fetching. Static assets, public forecast data and
 private scientific evidence remain separate. Preserve existing noindex and
 candidate-promotion gates. Never upload raw evidence or staging directories.
 
-## Stage 5B.5 forward feed (separate from website deployment)
+## Historical Stage 5B.5 forward-feed setup boundary
+
+This describes the original limited stage scope, not current deployment status.
 
 The owner authorises dedicated R2 feed publication and the isolated Lightsail
 helper in [the archived request](../../prompts/stage-05-web/007-forward-feed-activation.md).
 This does not authorise a Workers website deployment, version promotion, apex/www
 routing change or authoritative nameserver migration.
 
-The [activation record](../stage-05b5-forward-feed-activation.md) is the current
-source of truth. The helper and disabled timers are installed, but owner-managed Cloudflare
+The [activation record](../stage-05b5-forward-feed-activation.md) preserves the
+original stage evidence. The helper and disabled timers are installed, but owner-managed Cloudflare
 setup remains outstanding: no bucket, public endpoint or permanent
 publishing credential has been created in this stage. Do not put the proposed
 `data.backtestbadger.com` URL in a release until it is actually verified.
@@ -347,7 +388,7 @@ exact loopback review origins on ports 3000 and 8787. Remove loopback origins af
 local acceptance. The development R2 hostname is a temporary test endpoint only;
 disable it after the custom HTTPS hostname is verified. Do not CNAME to r2.dev.
 
-Current public DNS still reports GoDaddy nameservers. Free-plan authoritative
+At Stage 5B.5 inspection, public DNS still reported GoDaddy nameservers. Free-plan authoritative
 cutover requires an owner-reviewed full GoDaddy record export, comparison against
 the prepared Cloudflare zone and the two actual assigned Cloudflare nameservers.
 Do not infer missing records from a handful of public DNS queries, and do not

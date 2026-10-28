@@ -1,38 +1,43 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-27 (Europe/London)
+**Last updated:** 2026-10-28 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
-**Product:** https://backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Owner review and first public launch of www.backtestbadger.com
-on Cloudflare Workers Static Assets. Stage 5B.2 is locally prepared; no public
-deployment or DNS change has occurred.
-Prospective paper-trading integration remains a separate future milestone.
+**Product:** https://www.backtestbadger.com — *A little badger. A lot of backtests.*
+**Next priority:** Owner review of the post-launch audit, resolution of operational
+verification gaps, then a separately scoped Latest Scored Forecast enhancement.
+Prospective paper trading remains a separate future milestone.
 
-## Website readiness — current handoff
+## Live website and forward feed — current handoff
 
-Read the [Stage 5B.4 report](stage-05b4-mascot-navigation-forward-feed.md) and
-[Workers launch/rollback guide](deployment/website-cloudflare-workers.md).
-The original owner-supplied mascot is integrated as lossless WebP. Navigation is
-Home, The Burrow, The Dig, Field Guide, Field Notes, About. All four Field Notes
-and three guides are approved by unchanged source hashes; 004 remains featured.
-Search metadata is prepared and indexing remains disabled.
+Start with the [Stage 5B.8 post-launch audit](stage-05b8-post-launch-audit.md),
+[Workers release/rollback guide](deployment/website-cloudflare-workers.md) and
+[forward-feed operator guide](deployment/forward-feed-cloudflare-setup.md).
 
-Read-only Lightsail inspection on 27 October reconfirmed release
-`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1`. A private genuine candidate from 160
-forecasts and 158 outcomes passed both frozen Python and browser validators.
-No public feed was identified or activated. The Burrow retains the truthful
-unavailable state. The local staging/optional R2 publisher is prepared and tested;
-its external-write mode was not executed. See the report for the candidate hash,
-resource measurements, dedicated R2 recommendation, exact approval scope and rollback.
+The public Next.js static export is served by Cloudflare Workers Static Assets,
+Worker `backtest-badger-web`. Navigation is Home, The Burrow, The Dig, Field Notes,
+Field Guide, About. The original mascot, four notes and three guides are live;
+004 is featured and all seven SHA-256 approvals are unchanged. Deployed HTML has
+`noindex,nofollow`; indexing requires separate owner approval and www validation.
 
-Next: owner review, separately authorised commit/push and exact-SHA CI, then
-separately approved feed infrastructure/publication and first website deployment.
-Do not deploy or install jobs under this stage's read-only authorisation. DNS and
-indexing remain separate gates. Frozen science and historical figures are unchanged.
+GoDaddy remains registrar; Cloudflare nameservers are `brit.ns.cloudflare.com` and
+`weston.ns.cloudflare.com`. Apex HTTP/HTTPS redirects to www HTTPS with paths and
+queries preserved. The permanent genuine feed is
+<https://data.backtestbadger.com/forward-v1.json>, in R2 bucket
+`backtest-badger-forward`. The former r2.dev endpoint returns 401. The live Burrow
+uses the permanent hostname; prices continue to come independently from Binance.
 
-Sections below retain the earlier research/operations handoff. Its description of
-website planning and draft publication is historical; use this current section
-and the Stage 5B.3/5B.4 reports for frontend status.
+Read-only checks confirmed enabled, successful public-feed publication/checker
+timers and healthy collection/scoring. Lightsail research remains at
+`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1`. Website source
+`360c6130d3f304f275cb9f216cca4fa7c82b5976` has both CI workflows green. The owner
+reports active Worker version `ff180090-8473-4c91-8e51-1bb918fa90bd` and upload-only
+Workers Builds; exact source mapping and preview configuration remain unverified.
+
+Outstanding: www HTTP still serves 200 instead of redirecting to HTTPS; close the
+release-identity/preview evidence gaps. The audit is read-only against production:
+no service, DNS, R2, credential, deployment, model or schema changes were made.
+Do not infer authorisation for fixes from this handoff. Earlier stage reports retain
+their original observations; the sections below preserve dated research evidence.
 
 ## 1. Resume here
 
@@ -76,7 +81,7 @@ preserve the authorisations, limitations and tests at their original stage;
 | Forward evidence | Genuine timestamped forecasts, automated collection, immutable scored outcomes and prospective accuracy reports; timely/late cohorts remain distinct |
 | Paper foundations | Deterministic strategy, execution and Decimal accounting/valuation primitives; no complete prospective order/fill/portfolio service |
 | Hosting | Lightsail PostgreSQL and collection/scoring, plus backups, restore drills and monitoring, in the dated production snapshot |
-| Public product | Local static website and genuine Binance dashboard implemented; Workers launch prepared. Private genuine candidate validated; public feed not connected; all seven articles approved |
+| Public product | Live Workers static website, genuine Binance dashboard and permanent R2 forward feed; seven approved articles; indexing disabled; see Stage 5B.8 for verification limits |
 
 Historical backtests simulate the past. Forward predictions are issued before
 outcomes but do not create orders. Prospective paper trading will simulate
@@ -122,6 +127,9 @@ established successful genuine execution. Neither is still pending.
 
 ## 4. Production boundary and remaining operational evidence
 
+The following is the dated 24 October research-promotion evidence. Stage 5B.8
+rechecks service health but does not resolve all earlier provenance/backup gates.
+
 The [production runbook](deployment/production-infrastructure.md) records the
 successful **24 October 20:58 UTC** promotion from
 `e0d622d51e1edc120fb4f1b5229e46907ed6219d` to
@@ -152,6 +160,10 @@ disabled remote restic pruning remain separate operational items. Do not restart
 old Mac schedulers or alter production to reconcile historical documentation.
 
 ## 5. Next product milestone — the public website
+
+This original E.5h planning section is retained for incoming links and historical
+context. The website and approved publication described here are now live; current
+status is above and the next development scope is below.
 
 The first website can use the following existing material:
 
@@ -189,21 +201,22 @@ requirements. The website can begin with research and forecasts without implying
 paper portfolios already exist. Hosting changes and public launch need their own
 scope and authorisation.
 
-## 6. Review and continuity
+## 6. Next development and review
 
-E.5h changes documentation only. Original technical stage reports, frozen methods,
-source code, private inputs and research outputs remain unchanged. No economics,
-model fitting, database operations, AWS work, commit, push or deployment is part
-of this stage. Maintain a concise current handoff; retain historical details in
-the linked reports and Git history.
+Stop for owner review of Stage 5B.8 before further development. Record the active
+version's exact Cloudflare source SHA/build URL and preview command or disabled
+state, resolve the www HTTP redirect under separate production authorisation, and
+retain the audit's public smoke checks as the release acceptance checklist.
 
-Remaining documentation work: review the draft articles for publication, prepare
-dated public forward-statistics content, and complete the pending forward
-provenance/scoring observations in the D3B.1 report. Older guides deliberately retain their original gates;
-use the architecture/roadmap current summaries to interpret them.
+**Latest Scored Forecast** belongs to a separate stage: show the last completed
+forecast independently of the currently pending prediction, with model prediction,
+actual observed return, signed error and correct/incorrect direction (Zero remains
+ineligible). Review the public-contract/exporter extension before implementation;
+retain original issuance/scoring provenance and unchanged scientific methodology.
 
-E.5h validation: 150 local Markdown links/anchors (including incoming links to
-changed documents), E.5g table rounding, draft metadata, whitespace and verbatim
-prompt comparison passed. Repository-wide Ruff lint and formatting passed (225
-files formatted). All other tracked files match the starting HEAD. No pytest,
-source authentication or economic replay was run for this documentation change.
+Other backlog retains its existing status: external alert/missing-invocation
+verification, backup/restore and retention evidence, deliberate indexing activation,
+prospective paper-trading persistence/integration/reporting (4C–4E), and separately
+reviewed research/asset-class expansion. None is implemented by this audit. No
+historical backtest, model training or holdout evaluation should be rerun merely
+to refresh documentation.

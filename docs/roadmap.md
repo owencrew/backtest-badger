@@ -47,12 +47,33 @@ scope.
 | **4B.2E.5e–5g — Local Execution and Genuine Backtest** | Complete | One-process pinned-input runner, successful genuine preflight, one genuine 2024 replay and six verified accounts. See [E.5g results](stage-04b2e5g-first-genuine-historical-backtest.md); no tuning or model promotion. |
 | **4B.2E.5h — Research Narrative** | Documentation prepared for review | Current summaries reconciled; [Field Notes 003 and 004](field-notes/README.md) drafted; website evidence handoff added. No new research or deployment. |
 | **4C–4E — Paper Persistence, Prospective Integration and Reporting** | Future, gated | Independently approve isolated database integrity, prospective quote/worker activation and reporting. No production changes authorised. |
-| **5 — Polished Website and Public Launch** | **Next product milestone; not implemented** | Present verified research, benchmark comparisons, forward accuracy evidence and Field Notes with methodology/limitations. Label simulations clearly; use read-only public data access and separately authorise launch. |
+| **5 — Polished Website and Public Launch** | **Live; post-launch audit 2026-10-28** | Workers static website, permanent R2 forward feed and seven approved articles. Indexing remains disabled; see [Stage 5B.8](stage-05b8-post-launch-audit.md) for verified health, HTTP redirect issue and release-evidence gaps. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
 
 Real-money trading is outside this roadmap and requires explicit approval.
 
-## Stage 5 — Planned website design
+## Stage 5 — Live product and next backlog
+
+The website is live at <https://www.backtestbadger.com>; the genuine public feed is
+<https://data.backtestbadger.com/forward-v1.json>. See the
+[post-launch audit](stage-05b8-post-launch-audit.md) and current
+[development handoff](development-handoff.md). Close its operational verification
+items before separately approving indexing or further product development.
+
+**Latest Scored Forecast — proposed, not implemented.** Show the most recently
+completed/scored forecast separately from the latest pending prediction. Compare
+previous predictions with actual observed return, forecast error and directional
+correctness, preserving Zero's ineligible direction. A reviewed public-contract and
+exporter extension will likely be needed. Preserve original provenance, scoring
+methodology and cohort separation; implementation requires a separate stage.
+
+Research/platform backlog retains its existing status: Stage 4C–4E prospective
+paper trading, operational alert/backup/retention verification, later research and
+asset-class expansion. This documentation audit changes none of those milestones.
+
+### Original Stage 5 website design context
+
+The planning notes below predate the live site and remain historical context.
 
 The first website can present the genuine 2024 result, independent benchmarks,
 existing prospective forecast/outcome evidence, methodology and limitations.

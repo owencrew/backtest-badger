@@ -1,8 +1,53 @@
 # Owner setup — Cloudflare forward feed
 
-The Lightsail helper is installed and tested; **the public feed is not yet active**.
-These instructions create only the dedicated R2 feed. They do not deploy the
-website or change www/apex routing. Do not share secrets in chat.
+## Current live status — 28 October 2026
+
+The permanent feed is active at
+<https://data.backtestbadger.com/forward-v1.json>, backed by dedicated R2 bucket
+`backtest-badger-forward`, intended public key `forward-v1.json`. The temporary
+r2.dev endpoint now returns 401. Cloudflare provides authoritative DNS through
+`brit.ns.cloudflare.com` and `weston.ns.cloudflare.com`; GoDaddy remains registrar.
+The website is separately live on Workers Static Assets at
+<https://www.backtestbadger.com>.
+
+The isolated Lightsail publisher and independent HTTPS checker are both enabled
+and repeatedly successful. The [Stage 5B.8 audit](../stage-05b8-post-launch-audit.md)
+records exact public-vs-validated bytes, freshness, metadata, www CORS, service
+results and resource measurements. The research collector/scorer and their release
+remain separate. This is a dated health observation, not continuous monitoring.
+
+Use the permanent URL for `FORWARD_PUBLIC_URL` and the website's build-time
+`NEXT_PUBLIC_FORWARD_SNAPSHOT_URL`. Credentials remain privately configured on
+Lightsail; do not print environment files or share secrets in chat. No R2 settings,
+credentials, services or timers were changed by the audit.
+
+### Routine read-only verification
+
+```sh
+systemctl list-timers --all 'backtest-badger-public-feed*'
+systemctl is-enabled backtest-badger-public-feed.timer backtest-badger-public-feed-check.timer
+sudo journalctl -u backtest-badger-public-feed.service --since '2 hours ago' --no-pager
+sudo journalctl -u backtest-badger-public-feed-check.service --since '2 hours ago' --no-pager
+/opt/backtest-badger-public-feed/node/bin/node \
+  /opt/backtest-badger-public-feed/web/check-forward-endpoint.cjs \
+  https://data.backtestbadger.com/forward-v1.json \
+  /var/lib/backtest-badger-public-feed/last-success.json
+```
+
+Run these on the authorised host (`ssh Ubuntu-1`). A publication crossing the exact
+byte comparison can require another read after the natural cycle completes; do not
+trigger an export merely to make the comparison pass. Monitor approaching 90-second
+wall time / 384 MiB RSS, repeated rejections, stale cutoff and missed issuance.
+Systemd logs/checks do not establish external notification delivery.
+
+## Original setup procedure — completed, retained for recovery
+
+The steps below document the original Stage 5B.5 setup, including its temporary
+r2.dev acceptance route. They are **not pending activation tasks**. Do not recreate
+resources, re-enable the retired development endpoint or rerun write commands as
+part of routine verification. Any recovery/configuration action needs separate
+authorisation. The [historical activation report](../stage-05b5-forward-feed-activation.md)
+retains the original observations and limits.
 
 ## 1. Review R2 usage and create the dedicated bucket
 
@@ -92,8 +137,8 @@ Do not add wildcard credentials, PUT browser access or extra origins. If the
 interface requires the first object before accepting CORS, perform the one-off
 upload in step 4, then apply this policy before opening the website.
 
-Because GoDaddy still serves authoritative DNS, use **Settings → Public
-Development URL → Enable** for initial local testing. Read and confirm the public
+During the original setup, GoDaddy still served authoritative DNS, so the temporary
+route used **Settings → Public Development URL → Enable** for initial local testing. Read and confirm the public
 access notice yourself. Record the generated `https://pub-….r2.dev` hostname and
 append `/forward-v1.json`. This makes the only intended object public to anyone;
 CORS does not restrict direct downloads. The development endpoint is rate-limited
@@ -216,7 +261,7 @@ counts and undefined statistics. Check refresh and network failure without
 substituting fixtures. Binance must remain the market chart's independent source.
 This is **local review**, not a deployed Workers website.
 
-## 7. Prepare the permanent data hostname separately
+## 7. Permanent data hostname migration reference (completed)
 
 Cloudflare requires the R2 custom hostname's zone in the same account. A partial
 CNAME zone is a Business/Enterprise feature, so it is not the Free-plan route.
@@ -237,7 +282,7 @@ CNAME zone is a Business/Enterprise feature, so it is not the Free-plan route.
    DNSSEC procedure. The exact later GoDaddy action is **Domain → DNS → Nameservers
    → Change → use your own nameservers**, replacing `ns23.domaincontrol.com` and
    `ns24.domaincontrol.com` with the two values from this zone. That entire-domain
-   change remains a separate owner decision; no cutover has been done here.
+   change remained a separate owner decision at the original preparation stage.
 5. Once the zone is active and existing website/mail resolution has been verified,
    open **R2 → backtest-badger-forward → Settings → Custom Domains → Add** and enter
    `data.backtestbadger.com`. Review the dedicated DNS record before connecting it.
@@ -250,7 +295,7 @@ CNAME zone is a Business/Enterprise feature, so it is not the Free-plan route.
    bucket and confirm the old r2.dev route no longer serves data. Remove loopback
    CORS origins after local acceptance; keep www.
 
-## Rollback commands
+## Rollback commands — separate production authorisation required
 
 Disable only the new publication timer:
 
@@ -293,7 +338,8 @@ Verify downloaded bytes against that backup afterward. The freshness checker may
 correctly fail because the restored timestamps are old. Re-enable publication only
 after the underlying problem is resolved. If the credential was revoked, provision
 a new equally scoped credential before any restoration. Do not restore or alter raw
-scientific evidence. No prior approved public snapshot exists until activation.
+scientific evidence. Activation has occurred; validate the retained prior snapshot
+and its original clocks before any separately authorised rollback.
 
 To disconnect the local website, remove only `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL`
 from `web/.env.local`, restart dev and rebuild static output.
