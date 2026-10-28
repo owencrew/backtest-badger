@@ -80,3 +80,10 @@ Stage 5B.4's complete request is archived verbatim at
 It authorises original mascot integration, Field Guide navigation changes,
 read-only Lightsail inspection and private forecast preparation, while reserving
 production writes, public publication and deployment for separate approval.
+
+Stage 5B.5's complete revised request is archived verbatim at
+[`stage-05-web/007-forward-feed-activation.md`](stage-05-web/007-forward-feed-activation.md).
+It authorises the dedicated R2 public feed and isolated Lightsail helper, while
+reserving authoritative DNS cutover and the first Workers website deployment.
+See the [activation record](../docs/stage-05b5-forward-feed-activation.md) for
+completed work and account-dependent steps still pending.

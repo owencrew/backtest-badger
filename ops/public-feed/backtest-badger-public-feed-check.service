@@ -1,0 +1,23 @@
+[Unit]
+Description=Independent HTTPS forward feed freshness check
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+DynamicUser=true
+EnvironmentFile=/etc/backtest-badger-public-feed/endpoint.env
+ExecStart=/opt/backtest-badger-public-feed/node/bin/node /opt/backtest-badger-public-feed/web/check-forward-endpoint.cjs ${FORWARD_PUBLIC_URL}
+TimeoutStartSec=30
+MemoryMax=128M
+CPUQuota=10%
+Nice=15
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+InaccessiblePaths=/opt/backtest-badger /var/lib/backtest-badger /var/lib/backtest-badger-public-feed
+StandardOutput=journal
+StandardError=journal
+

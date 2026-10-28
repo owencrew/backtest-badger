@@ -8,9 +8,9 @@ bytes without reserializing or retiming them.
 import argparse
 import fcntl
 import os
-import re
 import signal
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -24,13 +24,13 @@ def deadline(_signum, _frame):
     raise TimeoutError("Snapshot preparation deadline exceeded.")
 
 
-def stage(records, outcomes, operations, output, node="node", r2_object=None):
+def stage(
+    records, outcomes, operations, output, node="node", r2_object=None, validator=None
+):
     """Keep the previous candidate intact unless both validation layers succeed."""
     check_destination(output, (records, outcomes, operations))
-    if r2_object is not None and not re.fullmatch(
-        r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]/forward-v1\.json", r2_object
-    ):
-        raise ValueError("Only an explicit R2 bucket/forward-v1.json is permitted.")
+    if r2_object not in (None, "backtest-badger-forward/forward-v1.json"):
+        raise ValueError("Only the dedicated approved bucket and key are permitted.")
     # Keep this inode; unlinking an advisory lock can allow overlapping writers.
     fd = os.open(output.with_suffix(".lock"), os.O_CREAT | os.O_RDWR, 0o600)
     with os.fdopen(fd, "w") as lock:
@@ -44,7 +44,9 @@ def stage(records, outcomes, operations, output, node="node", r2_object=None):
             if candidate.stat().st_size > MAX_BYTES:
                 raise ValueError("Snapshot exceeds the public size budget.")
             subprocess.run(
-                [
+                [node, str(validator), str(candidate)]
+                if validator
+                else [
                     node,
                     "--import",
                     "tsx",
@@ -69,24 +71,17 @@ def stage(records, outcomes, operations, output, node="node", r2_object=None):
                 ):
                     raise ValueError("Snapshot clocks regressed.")
             if r2_object is not None:
-                # One object PUT, under the same lock as staging. No bucket creation,
-                # directory upload, site deployment or public-access configuration.
+                if {row["symbol"] for row in value["latest"]} != {"BTCUSDT", "ETHUSDT"}:
+                    raise ValueError("Publication requires both approved markets.")
+                # Preserve the previous approved bytes privately before attempting
+                # a PUT: a lost acknowledgement can leave remote success uncertain.
+                if output.exists():
+                    write_candidate(previous, output.with_name("previous-success.json"))
                 subprocess.run(
                     [
-                        "pnpm",
-                        "exec",
-                        "wrangler",
-                        "r2",
-                        "object",
-                        "put",
-                        r2_object,
-                        "--remote",
-                        "--file",
+                        sys.executable,
+                        str(WEB / "scripts/publish_forward_r2.py"),
                         str(candidate),
-                        "--content-type",
-                        "application/json",
-                        "--cache-control",
-                        "public, max-age=60, must-revalidate",
                     ],
                     cwd=WEB,
                     check=True,
@@ -101,6 +96,7 @@ def main():
     for name in ("records", "outcomes", "operations", "output"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--node", default="node")
+    parser.add_argument("--validator", type=Path, help="Bundled existing TS validator")
     parser.add_argument(
         "--publish-r2-object",
         help="EXTERNAL WRITE: requires separate approval; BUCKET/forward-v1.json",
@@ -116,9 +112,19 @@ def main():
             args.output.resolve(),
             args.node,
             args.publish_r2_object,
+            args.validator,
         )
-    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
-        parser.exit(1, "Snapshot preparation/publication failed; inspect privately.\n")
+    except subprocess.CalledProcessError as error:
+        phase = (
+            "publication_or_readback_failed"
+            if any("publish_forward_r2.py" in str(part) for part in error.cmd)
+            else "public_contract_rejected"
+        )
+        parser.exit(1, f"Public feed failure category={phase}; inspect privately.\n")
+    except ValueError:
+        parser.exit(1, "Public feed failure category=invalid_candidate.\n")
+    except (OSError, RuntimeError, subprocess.SubprocessError):
+        parser.exit(1, "Public feed failure category=source_lock_or_deadline.\n")
     finally:
         signal.alarm(0)
     print(

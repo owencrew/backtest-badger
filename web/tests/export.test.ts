@@ -77,9 +77,12 @@ test("production export excludes draft article text and draft routes", () => {
   }
 });
 
-test("production Burrow contains an honest unavailable forecast state", () => {
+test("production Burrow has a truthful state before its first verified fetch", () => {
   const html = readFileSync(path.join(output, "burrow/index.html"), "utf8");
-  assert.match(html, /Forward forecasts are not published yet/);
+  assert.match(
+    html,
+    /Forward forecasts are not published yet|No verified snapshot loaded/,
+  );
   assert.match(html, /No successful refresh yet/);
   assert.doesNotMatch(html, /synthetic-candidate|SYNTHETIC/);
 });
@@ -264,7 +267,7 @@ test("original mascot and exact shared navigation reach the static export", () =
   )![1];
   assert.deepEqual(
     [...nav.matchAll(/<a\b[^>]*>(.*?)<\/a>/g)].map((m) => m[1]),
-    ["Home", "The Burrow", "The Dig", "Field Guide", "Field Notes", "About"],
+    ["Home", "The Burrow", "The Dig", "Field Notes", "Field Guide", "About"],
   );
   for (const file of files(output).filter((f) =>
     /\.(html|js|json|txt)$/.test(f),

@@ -218,6 +218,8 @@ def test_upload_validates_first_and_preserves_previous_on_failure(
     import stage_forward_snapshot as staging
 
     value = exporter.project(*synthetic)
+    # This test mocks the validator to exercise the upload transaction boundary.
+    value["latest"].append(dict(value["latest"][0], symbol="ETHUSDT"))
     monkeypatch.setattr(staging, "prepare", lambda *args: value)
     output = tmp_path / "last-success.json"
     previous = dict(
@@ -232,12 +234,8 @@ def test_upload_validates_first_and_preserves_previous_on_failure(
             assert json.loads(Path(command[-1]).read_text()) == value
         else:
             assert calls[0][0] == "node"
-            assert command[:6] == ["pnpm", "exec", "wrangler", "r2", "object", "put"]
-            assert command[6] == "reviewed-feed/forward-v1.json"
-            assert (
-                json.loads(Path(command[command.index("--file") + 1]).read_text())
-                == value
-            )
+            assert command[1].endswith("publish_forward_r2.py")
+            assert json.loads(Path(command[-1]).read_text()) == value
             assert kwargs["timeout"] == 30
             raise subprocess.CalledProcessError(1, "upload")
 
@@ -248,7 +246,95 @@ def test_upload_validates_first_and_preserves_previous_on_failure(
             tmp_path / "outcomes",
             tmp_path / "operations",
             output,
-            r2_object="reviewed-feed/forward-v1.json",
+            r2_object="backtest-badger-forward/forward-v1.json",
         )
     assert len(calls) == 2
     assert json.loads(output.read_text()) == previous
+
+
+def test_publisher_sends_exact_bytes_and_checks_readback(tmp_path, monkeypatch):
+    import io
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    import publish_forward_r2 as publisher
+
+    body = b'{"synthetic": "unit test only"}\n'
+    candidate = tmp_path / "candidate.json"
+    candidate.write_bytes(body)
+    calls = []
+
+    class Storage:
+        def put_object(self, **kwargs):
+            calls.append(kwargs)
+
+        def get_object(self, **kwargs):
+            assert kwargs == {"Bucket": publisher.BUCKET, "Key": publisher.KEY}
+            return dict(
+                Body=io.BytesIO(body),
+                ContentType="application/json",
+                CacheControl=publisher.CACHE_CONTROL,
+            )
+
+    import hashlib
+
+    assert publisher.publish(candidate, Storage()) == hashlib.sha256(body).hexdigest()
+    assert calls == [
+        dict(
+            Bucket="backtest-badger-forward",
+            Key="forward-v1.json",
+            Body=body,
+            ContentType="application/json",
+            CacheControl=publisher.CACHE_CONTROL,
+            StorageClass="STANDARD",
+        )
+    ]
+
+    class Corrupt(Storage):
+        def get_object(self, **kwargs):
+            return dict(
+                Body=io.BytesIO(b"wrong bytes"),
+                ContentType="application/json",
+                CacheControl=publisher.CACHE_CONTROL,
+            )
+
+    with pytest.raises(ValueError, match="readback mismatch"):
+        publisher.publish(candidate, Corrupt())
+
+
+def test_publication_rejects_other_buckets_before_reading_evidence(
+    tmp_path, monkeypatch
+):
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    import stage_forward_snapshot as staging
+
+    with pytest.raises(ValueError, match="dedicated"):
+        staging.stage(
+            tmp_path,
+            tmp_path,
+            tmp_path,
+            tmp_path.parent / "candidate.json",
+            r2_object="private-backups/forward-v1.json",
+        )
+
+
+def test_publication_requires_both_markets_and_keeps_previous(
+    synthetic, tmp_path, monkeypatch
+):
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    import stage_forward_snapshot as staging
+
+    value = exporter.project(*synthetic)
+    monkeypatch.setattr(staging, "prepare", lambda *args: value)
+    output = tmp_path / "last-success.json"
+    exporter.write_candidate(value, output)
+    previous = output.read_bytes()
+    with pytest.raises(ValueError, match="both approved markets"):
+        staging.stage(
+            tmp_path / "records",
+            tmp_path / "outcomes",
+            tmp_path / "operations",
+            output,
+            r2_object="backtest-badger-forward/forward-v1.json",
+        )
+    assert output.read_bytes() == previous
+    assert not (tmp_path / "previous-success.json").exists()

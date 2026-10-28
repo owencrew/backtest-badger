@@ -5,6 +5,4 @@ if (process.argv.length !== 3)
     "Usage: node --import tsx scripts/validate-forward.ts candidate.json",
   );
 validateForecast(JSON.parse(readFileSync(process.argv[2], "utf8")));
-console.log(
-  "Public forward contract valid. Publication still requires owner approval.",
-);
+console.log("Public forward contract valid. Validation does not upload data.");

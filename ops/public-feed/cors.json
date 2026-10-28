@@ -1,0 +1,12 @@
+[
+  {
+    "AllowedOrigins": [
+      "https://www.backtestbadger.com",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:8787"
+    ],
+    "AllowedMethods": ["GET", "HEAD"],
+    "ExposeHeaders": ["ETag", "Last-Modified", "Cache-Control"],
+    "MaxAgeSeconds": 600
+  }
+]

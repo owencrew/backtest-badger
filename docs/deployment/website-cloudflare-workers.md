@@ -43,8 +43,8 @@ mascot and licence assets; both markets, all six ranges, chart modes and errors;
 and narrow mobile/desktop layouts. Stage 5B.3 approves **four notes and three
 guides** by exact source hash; all seven nested routes must return 200, while
 unknown/unapproved and publication-pending routes must return genuine 404s.
-Keep the forward snapshot URL unset until a genuine
-public snapshot is separately reviewed. No website build needs Lightsail access.
+Keep the forward snapshot URL unset until the authorised Stage 5B.5 activation
+has produced and verified an actual public HTTPS endpoint. No website build needs Lightsail access.
 
 ## Release workflow: one build system, explicit promotion
 
@@ -323,3 +323,32 @@ polls every five minutes; models issue on four-hour boundaries; generation/cutof
 clocks are never rewritten by fetching. Static assets, public forecast data and
 private scientific evidence remain separate. Preserve existing noindex and
 candidate-promotion gates. Never upload raw evidence or staging directories.
+
+## Stage 5B.5 forward feed (separate from website deployment)
+
+The owner authorises dedicated R2 feed publication and the isolated Lightsail
+helper in [the archived request](../../prompts/stage-05-web/007-forward-feed-activation.md).
+This does not authorise a Workers website deployment, version promotion, apex/www
+routing change or authoritative nameserver migration.
+
+The [activation record](../stage-05b5-forward-feed-activation.md) is the current
+source of truth. The helper and disabled timers are installed, but owner-managed Cloudflare
+setup remains outstanding: no bucket, public endpoint or permanent
+publishing credential has been created in this stage. Do not put the proposed
+`data.backtestbadger.com` URL in a release until it is actually verified.
+
+Once available, set the verified public URL at build time, including in Workers
+Builds for the later separately authorised launch. The URL is public; S3 credentials
+belong only in the private host configuration. Use the S3 publisher, not Wrangler's
+REST object upload, for bucket-scoped Object Read & Write credentials.
+
+The planned CORS configuration in `ops/public-feed/cors.json` allows www and the
+exact loopback review origins on ports 3000 and 8787. Remove loopback origins after
+local acceptance. The development R2 hostname is a temporary test endpoint only;
+disable it after the custom HTTPS hostname is verified. Do not CNAME to r2.dev.
+
+Current public DNS still reports GoDaddy nameservers. Free-plan authoritative
+cutover requires an owner-reviewed full GoDaddy record export, comparison against
+the prepared Cloudflare zone and the two actual assigned Cloudflare nameservers.
+Do not infer missing records from a handful of public DNS queries, and do not
+change the registrar's nameservers automatically.

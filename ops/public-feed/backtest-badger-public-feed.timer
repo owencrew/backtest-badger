@@ -1,0 +1,11 @@
+[Unit]
+Description=Publish validated forward evidence every ten minutes
+
+[Timer]
+OnCalendar=*-*-* *:03/10:00 UTC
+AccuracySec=1s
+Persistent=false
+Unit=backtest-badger-public-feed.service
+
+[Install]
+WantedBy=timers.target

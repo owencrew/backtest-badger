@@ -218,8 +218,7 @@ export function ForwardDashboard() {
           The Lightsail research system records forecasts and scores their
           outcomes. A reviewed public snapshot is not connected here, so current
           forecasts and accuracy are unavailable. Market prices above are
-          independently fetched from Binance. The next step is owner approval of
-          a separate static export.
+          independently fetched from Binance.
         </EmptyState>
       )}
       <div className="cohort-labels">

@@ -96,8 +96,8 @@ Do not connect `tests/fixtures/` to any running site or production export.
 `lib/forecast.ts` defines the version 1 contract and strict validation. The separate
 Python utility `scripts/public_forward_export.py` prepares a private candidate from
 validated retained evidence using the existing frozen evaluator. It needs the
-repository's locked Python environment; the website itself does not. It is not
-installed or scheduled on Lightsail. See the [Stage 5B report](../docs/stage-05b-market-dashboard.md)
+repository's locked Python environment; the website itself does not. An isolated helper is now installed on Lightsail; publication remains disabled
+pending the owner’s Cloudflare setup. See the [Stage 5B report](../docs/stage-05b-market-dashboard.md)
 for exact local preparation commands, field definitions, inspected release,
 publishing proposal and operational impact.
 
@@ -111,7 +111,7 @@ Additional focused exporter checks, from the repository root:
 
 The regular frontend checks remain `pnpm lint`, `pnpm typecheck`, `pnpm build`,
 then `pnpm test`. Tests use synthetic fixtures only. The production output check
-expects the default unconnected forward feed. Stage 5B.3 approves all seven articles; 004 leads production Field Notes and
+accepts the truthful unconnected or awaiting-first-verified-fetch state. Stage 5B.3 approves all seven articles; 004 leads production Field Notes and
 the home journal feature. Future unapproved sources remain excluded. Historical figures in `lib/research.ts` are unchanged.
 
 ## Stage 5B.2 launch readiness
@@ -170,7 +170,7 @@ sitemap until that approved www release is live.
 
 The homepage uses the owner's original mascot as a pixel-identical lossless WebP;
 its PNG source is retained under `design-assets/`, outside the deployed assets.
-Navigation is Home → The Burrow → The Dig → Field Guide → Field Notes → About.
+Navigation is Home → The Burrow → The Dig → Field Notes → Field Guide → About.
 Article source bytes, slugs, approvals, featured Note 004 and indexing are unchanged.
 
 A genuine private Lightsail candidate passed both validators on 27 October 2026.
@@ -190,11 +190,13 @@ Run from the repository root with explicit private evidence directories:
 ```
 
 The output parent must already exist and be private. Node/tsx must be available.
-The optional `--publish-r2-object BUCKET/forward-v1.json` **writes externally and
-requires separate owner approval before execution**. It uses pinned local Wrangler,
-uploads only the validated candidate and never deploys website assets. No cloud
-credentials are needed for default private preparation. Do not install or schedule
-this tool on production without approval. See the
+The optional `--publish-r2-object backtest-badger-forward/forward-v1.json` **writes externally and
+requires separate owner approval before execution**. It uses the separately pinned S3 publisher with a bucket-scoped R2 credential,
+uploads only the validated candidate and verifies exact object readback. It never
+deploys website assets. The only allowed destination is
+`backtest-badger-forward/forward-v1.json`. No cloud
+credentials are needed for default private preparation. Stage 5B.5 authorises this isolated helper; its timer remains disabled until
+account access, scoped credentials and endpoint verification are complete. See the
 [Stage 5B.4 report](../docs/stage-05b4-mascot-navigation-forward-feed.md) for the
 candidate identity, host recommendation, exact activation proposal and rollback.
 
@@ -202,3 +204,29 @@ The frontend rejects clock/forecast regression while retaining earlier evidence.
 It distinguishes loading, error, stale publication, pending/settling/unscored and
 scored outcomes. Five-minute visible-page polling is independent of four-hour
 issuance. No fixture or genuine one-off candidate is bundled into the website.
+
+## Stage 5B.5 activation status
+
+The isolated Lightsail helper has generated a genuine candidate that passed both
+validators. **No public endpoint is active or configured in this local build.**
+The owner will configure Cloudflare personally using the [step-by-step guide](../docs/deployment/forward-feed-cloudflare-setup.md). Both new
+timers are installed but disabled. See the [activation record](../docs/stage-05b5-forward-feed-activation.md)
+for benchmark results, safeguards, verification gaps and rollback.
+
+After the actual public object passes schema, hash, CORS and freshness checks, set
+`NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` in ignored `web/.env.local` to that verified HTTPS
+URL. Restart development and rebuild the static export; review both on loopback.
+Do not use a guessed data hostname or bundle a private candidate into static assets.
+Remove that one variable and restart/rebuild to disconnect the feed.
+
+Independent endpoint check (no credentials):
+
+```sh
+node --import tsx scripts/check-forward-endpoint.ts "$NEXT_PUBLIC_FORWARD_SNAPSHOT_URL"
+# Optional second argument: private path to the exact expected published bytes.
+```
+
+The checker validates size, complete schema, both markets, HTTP metadata, www CORS,
+cutoff age and missed issuance separately. Unit tests use labelled synthetic fixtures
+only; no fixture is connected to a running site. Navigation order is regression
+tested in exported HTML and manually checked on desktop/mobile with keyboard use.
