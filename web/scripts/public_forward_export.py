@@ -38,6 +38,40 @@ def utc(value):
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
+def project_forecast(item, as_of):
+    """Public allowlist shared by latest-issued and latest-scored observations."""
+    record, score = item["record"], item["score"]
+    return {
+        "symbol": record["market"]["symbol"],
+        "source_close_at": utc(record["target_open_time"]),
+        "issued_at": utc(record["issued_at"]),
+        "target_close_at": utc(record["target_close_boundary"]),
+        "recipe_sha256": record["model"]["model_recipe_sha256"],
+        "cohort": item["cohort"],
+        "status": "scored"
+        if score
+        else (
+            "pending_not_settled"
+            if evaluator.utc_time(as_of)
+            < evaluator.utc_time(record["target_close_boundary"])
+            + evaluator.forward.DELAY
+            else "mature_unscored"
+        ),
+        "scored_at": utc(score["evaluation_captured_at"]) if score else None,
+        "actual_log_return_4h": score["actual_log_return_4h"] if score else None,
+        "models": {
+            p["model_id"]: {
+                "predicted_log_return_4h": p["predicted_log_return_4h"],
+                **{
+                    k: score["model_errors"][p["model_id"]][k] if score else None
+                    for k in ERRORS
+                },
+            }
+            for p in record["predictions"]
+        },
+    }
+
+
 def project(report, observations, generated_at):
     """Allowlist projection only: all scores/metrics come from the frozen evaluator."""
     if not report["evidence_valid"] or report["partial_outcomes"]:
@@ -50,44 +84,7 @@ def project(report, observations, generated_at):
         ]
         if market_rows:
             item = max(market_rows, key=lambda r: r["record"]["source_open_time"])
-            record, score = item["record"], item["score"]
-            latest.append(
-                {
-                    "symbol": symbol,
-                    "source_close_at": utc(record["target_open_time"]),
-                    "issued_at": utc(record["issued_at"]),
-                    "target_close_at": utc(record["target_close_boundary"]),
-                    "recipe_sha256": record["model"]["model_recipe_sha256"],
-                    "cohort": item["cohort"],
-                    "status": "scored"
-                    if score
-                    else (
-                        "pending_not_settled"
-                        if evaluator.utc_time(report["as_of"])
-                        < evaluator.utc_time(record["target_close_boundary"])
-                        + evaluator.forward.DELAY
-                        else "mature_unscored"
-                    ),
-                    "scored_at": utc(score["evaluation_captured_at"])
-                    if score
-                    else None,
-                    "actual_log_return_4h": score["actual_log_return_4h"]
-                    if score
-                    else None,
-                    "models": {
-                        p["model_id"]: {
-                            "predicted_log_return_4h": p["predicted_log_return_4h"],
-                            **{
-                                k: score["model_errors"][p["model_id"]][k]
-                                if score
-                                else None
-                                for k in ERRORS
-                            },
-                        }
-                        for p in record["predictions"]
-                    },
-                }
-            )
+            latest.append(project_forecast(item, report["as_of"]))
         for cohort in evaluator.COHORTS:
             summary = report["markets"][symbol]["cohorts"][cohort]
             rows = [r for r in market_rows if r["cohort"] == cohort]
@@ -127,7 +124,7 @@ def project(report, observations, generated_at):
     }
 
 
-def prepare(records, outcomes, operations):
+def prepare(records, outcomes, operations, *, projector=project):
     if not all(p.is_dir() for p in (records, outcomes, operations)):
         raise ValueError("All three retained evidence directories are required.")
     as_of = datetime.now(UTC)
@@ -164,7 +161,7 @@ def prepare(records, outcomes, operations):
     generated = datetime.now(UTC)
     if not 0 <= (generated - as_of).total_seconds() <= 300:
         raise ValueError("Export exceeded freshness budget.")
-    return project(report, observations, generated)
+    return projector(report, observations, generated)
 
 
 def write_candidate(value, destination):

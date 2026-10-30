@@ -25,10 +25,22 @@ def deadline(_signum, _frame):
 
 
 def stage(
-    records, outcomes, operations, output, node="node", r2_object=None, validator=None
+    records,
+    outcomes,
+    operations,
+    output,
+    node="node",
+    r2_object=None,
+    validator=None,
+    *,
+    schema_version=1,
 ):
     """Keep the previous candidate intact unless both validation layers succeed."""
     check_destination(output, (records, outcomes, operations))
+    if schema_version not in (1, 2):
+        raise ValueError("Unsupported snapshot version.")
+    if schema_version == 2 and r2_object is not None:
+        raise ValueError("V2 is private preparation only; publication needs review.")
     if r2_object not in (None, "backtest-badger-forward/forward-v1.json"):
         raise ValueError("Only the dedicated approved bucket and key are permitted.")
     # Keep this inode; unlinking an advisory lock can allow overlapping writers.
@@ -39,7 +51,12 @@ def stage(
             prefix=".forward-stage-", dir=output.parent
         ) as d:
             candidate = Path(d) / "candidate.json"
-            value = prepare(records, outcomes, operations)
+            if schema_version == 2:
+                from public_forward_v2 import prepare as prepare_v2
+
+                value = prepare_v2(records, outcomes, operations)
+            else:
+                value = prepare(records, outcomes, operations)
             write_candidate(value, candidate)
             if candidate.stat().st_size > MAX_BYTES:
                 raise ValueError("Snapshot exceeds the public size budget.")
@@ -50,7 +67,9 @@ def stage(
                     node,
                     "--import",
                     "tsx",
-                    "scripts/validate-forward.ts",
+                    "scripts/validate-forward-v2.ts"
+                    if schema_version == 2
+                    else "scripts/validate-forward.ts",
                     str(candidate),
                 ],
                 cwd=WEB,
@@ -65,11 +84,30 @@ def stage(
                 from backtest_badger.forward_evaluation import utc_time
 
                 previous = json.loads(output.read_text())
+                if previous["schema_version"] != schema_version:
+                    raise ValueError("Use separate candidate paths for each version.")
                 if any(
                     utc_time(value[k]) < utc_time(previous[k])
                     for k in ("as_of", "generated_at")
                 ):
                     raise ValueError("Snapshot clocks regressed.")
+                if schema_version == 2:
+                    current = {r["symbol"]: r for r in value["latest_scored"]}
+                    for old in previous["latest_scored"]:
+                        row = current.get(old["symbol"])
+                        if (
+                            row is None
+                            or utc_time(row["source_close_at"])
+                            < utc_time(old["source_close_at"])
+                            or (
+                                utc_time(row["source_close_at"])
+                                == utc_time(old["source_close_at"])
+                                and row != old
+                            )
+                        ):
+                            raise ValueError(
+                                "Latest scored evidence regressed or changed."
+                            )
             if r2_object is not None:
                 if {row["symbol"] for row in value["latest"]} != {"BTCUSDT", "ETHUSDT"}:
                     raise ValueError("Publication requires both approved markets.")
@@ -96,6 +134,7 @@ def main():
     for name in ("records", "outcomes", "operations", "output"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--node", default="node")
+    parser.add_argument("--schema-version", type=int, choices=(1, 2), default=1)
     parser.add_argument("--validator", type=Path, help="Bundled existing TS validator")
     parser.add_argument(
         "--publish-r2-object",
@@ -113,6 +152,7 @@ def main():
             args.node,
             args.publish_r2_object,
             args.validator,
+            schema_version=args.schema_version,
         )
     except subprocess.CalledProcessError as error:
         phase = (

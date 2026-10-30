@@ -232,11 +232,7 @@ export default function Home() {
       <section className="guide-band">
         <div>
           <p className="eyebrow">A field guide for curious minds</p>
-          <h2>
-            You don’t need a PhD
-            <br />
-            to ask better questions.
-          </h2>
+          <h2>Understand the methods behind the numbers.</h2>
           <Link href="/field-guide/" className="text-link">
             Explore Field Guide <Arrow />
           </Link>

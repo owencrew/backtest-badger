@@ -7,6 +7,10 @@ export const modelNames: Record<Model, string> = {
   gradient_boosting: "Gradient boosting",
 };
 
+export function directionOutcome(correct: boolean | null): string {
+  return correct === null ? "N/A" : correct ? "Correct" : "Incorrect";
+}
+
 // Presentation only: keep the validated snapshot and logarithmic units intact.
 export function logReturnBps(value: number | null | undefined): string {
   if (value == null) return "N/A — no matched outcomes";

@@ -816,6 +816,7 @@ time,
   gap: 70px;
 }
 .guide-band h2 {
+  text-wrap: balance;
   font-size: 30px;
   margin: 13px 0 23px;
 }
@@ -2659,6 +2660,57 @@ button:disabled {
   justify-content: space-between;
   gap: 8px;
   font-size: 13px;
+}
+.scored-actual {
+  padding: 16px 0;
+  border-block: 1px solid var(--color-border);
+}
+.scored-actual strong {
+  color: var(--color-sand);
+  font-size: 20px;
+}
+.scored-model {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.scored-model-heading {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.scored-model-heading h5 {
+  margin: 0;
+  font-size: 14px;
+}
+.scored-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+}
+.scored-values dt {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+.scored-values dd {
+  margin: 5px 0 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 380px) {
+  .scored-values {
+    grid-template-columns: 1fr;
+  }
+  .scored-values > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .scored-values dd {
+    margin: 0;
+  }
 }
 .primary-evaluation {
   margin: 42px 0 30px;

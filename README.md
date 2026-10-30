@@ -64,9 +64,12 @@ ten minutes; the research collector and scorer remain separate.
 
 GoDaddy remains the registrar; Cloudflare now provides authoritative DNS. The apex
 redirects to www. GitHub-connected Workers Builds uploads candidates for explicit
-owner promotion. Search indexing remains disabled. The [Stage 5B.8 audit](docs/stage-05b8-post-launch-audit.md)
-records verified health, release evidence and remaining issues, including www HTTP
-not redirecting to HTTPS and incomplete Cloudflare source/preview evidence.
+owner promotion. Production search indexing is enabled; read-only 28 October checks
+confirmed www HTTP-to-HTTPS redirection. The [Stage 5B.8 audit](docs/stage-05b8-post-launch-audit.md)
+remains historical evidence. [Stage 5B.9](docs/stage-05b9-latest-scored-forecast.md)
+adds locally validated latest-scored forecasts and homepage refinement, awaiting
+owner review and a separately approved v2 migration. Exact Cloudflare source/preview
+evidence remains a release gate.
 See [`web/`](web/README.md) for local development; production excludes unapproved articles.
 
 ## Local development

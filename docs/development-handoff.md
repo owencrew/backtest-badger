@@ -1,23 +1,27 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-28 (Europe/London)
+**Last updated:** 2026-10-29 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://www.backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Owner review of the post-launch audit, resolution of operational
-verification gaps, then a separately scoped Latest Scored Forecast enhancement.
+**Next priority:** Owner review of locally validated Stage 5B.9 and its controlled
+v1-to-v2 migration plan. Production activation remains separately authorised.
 Prospective paper trading remains a separate future milestone.
 
 ## Live website and forward feed — current handoff
 
-Start with the [Stage 5B.8 post-launch audit](stage-05b8-post-launch-audit.md),
+Start with the [Stage 5B.9 implementation report](stage-05b9-latest-scored-forecast.md),
+[historical Stage 5B.8 audit](stage-05b8-post-launch-audit.md),
 [Workers release/rollback guide](deployment/website-cloudflare-workers.md) and
 [forward-feed operator guide](deployment/forward-feed-cloudflare-setup.md).
 
 The public Next.js static export is served by Cloudflare Workers Static Assets,
 Worker `backtest-badger-web`. Navigation is Home, The Burrow, The Dig, Field Notes,
 Field Guide, About. The original mascot, four notes and three guides are live;
-004 is featured and all seven SHA-256 approvals are unchanged. Deployed HTML has
-`noindex,nofollow`; indexing requires separate owner approval and www validation.
+004 is featured and all seven SHA-256 approvals are unchanged. Read-only checks
+on 28 October confirmed production `index, follow`, the 13-page sitemap and robots
+reference, plus www HTTP-to-HTTPS 301 preservation of path/query. The owner reports
+successful Search Console submission, which does not prove indexing. Candidate
+builds remain noindex. These updates supersede the historical audit's gaps.
 
 GoDaddy remains registrar; Cloudflare nameservers are `brit.ns.cloudflare.com` and
 `weston.ns.cloudflare.com`. Apex HTTP/HTTPS redirects to www HTTPS with paths and
@@ -33,8 +37,8 @@ timers and healthy collection/scoring. Lightsail research remains at
 reports active Worker version `ff180090-8473-4c91-8e51-1bb918fa90bd` and upload-only
 Workers Builds; exact source mapping and preview configuration remain unverified.
 
-Outstanding: www HTTP still serves 200 instead of redirecting to HTTPS; close the
-release-identity/preview evidence gaps. The audit is read-only against production:
+Outstanding: close the release-identity/preview evidence gaps. The later www
+redirect check passed. Inspection remained read-only against production:
 no service, DNS, R2, credential, deployment, model or schema changes were made.
 Do not infer authorisation for fixes from this handoff. Earlier stage reports retain
 their original observations; the sections below preserve dated research evidence.
@@ -81,7 +85,7 @@ preserve the authorisations, limitations and tests at their original stage;
 | Forward evidence | Genuine timestamped forecasts, automated collection, immutable scored outcomes and prospective accuracy reports; timely/late cohorts remain distinct |
 | Paper foundations | Deterministic strategy, execution and Decimal accounting/valuation primitives; no complete prospective order/fill/portfolio service |
 | Hosting | Lightsail PostgreSQL and collection/scoring, plus backups, restore drills and monitoring, in the dated production snapshot |
-| Public product | Live Workers static website, genuine Binance dashboard and permanent R2 forward feed; seven approved articles; indexing disabled; see Stage 5B.8 for verification limits |
+| Public product | Live Workers static website, genuine Binance dashboard and permanent v1 R2 feed; seven approved articles; production indexing enabled; Stage 5B.9 locally validated, pending owner review and separate v2 activation |
 
 Historical backtests simulate the past. Forward predictions are issued before
 outcomes but do not create orders. Prospective paper trading will simulate
@@ -203,19 +207,20 @@ scope and authorisation.
 
 ## 6. Next development and review
 
-Stop for owner review of Stage 5B.8 before further development. Record the active
-version's exact Cloudflare source SHA/build URL and preview command or disabled
-state, resolve the www HTTP redirect under separate production authorisation, and
-retain the audit's public smoke checks as the release acceptance checklist.
+Stop for owner review of [Stage 5B.9](stage-05b9-latest-scored-forecast.md).
+The uncommitted implementation includes strict private v2 preparation, independent
+latest-scored BTC/ETH cards and the approved homepage headline. Genuine retained
+evidence and local responsive/build tests are documented in the report. No public
+v2 object, new publisher/checker or production timer was installed. Keep the live
+v1 feed refreshing throughout any future dual-running migration.
 
-**Latest Scored Forecast** belongs to a separate stage: show the last completed
-forecast independently of the currently pending prediction, with model prediction,
-actual observed return, signed error and correct/incorrect direction (Zero remains
-ineligible). Review the public-contract/exporter extension before implementation;
-retain original issuance/scoring provenance and unchanged scientific methodology.
+Before a separately authorised release, resolve exact candidate source/build
+identity and preview indexing controls, implement and validate an isolated v2
+publisher/checker, approve key permissions and verify genuine HTTPS publication.
+Retain original issuance/scoring provenance and unchanged scientific methodology.
 
 Other backlog retains its existing status: external alert/missing-invocation
-verification, backup/restore and retention evidence, deliberate indexing activation,
+verification, backup/restore and retention evidence, production search monitoring,
 prospective paper-trading persistence/integration/reporting (4C–4E), and separately
 reviewed research/asset-class expansion. None is implemented by this audit. No
 historical backtest, model training or holdout evaluation should be rerun merely

@@ -295,3 +295,29 @@ test("homepage refinement keeps positive research labels and verified historical
   assert.match(html, /Dig into/);
   assert.match(html, /the <span>evidence\.<\/span>/);
 });
+
+test("Field Guide band preserves links and metadata with the exact approved headline", () => {
+  const html = readFileSync(path.join(output, "index.html"), "utf8");
+  const band = html.match(
+    /<section class="guide-band">[\s\S]*?<\/section>/,
+  )![0];
+  const title = band
+    .match(/<h2>(.*?)<\/h2>/)![1]
+    .replace(/<br\s*\/?\s*>/g, " ");
+  assert.equal(title, "Understand the methods behind the numbers.");
+  assert.match(band, /A field guide for curious minds/);
+  assert.match(band, /Explore Field Guide/);
+  assert.doesNotMatch(band, /You don’t need a PhD/);
+  const guides = readArticles("guides").slice().reverse().slice(0, 3);
+  assert.equal(guides.length, 3);
+  for (const guide of guides) {
+    assert.ok(band.includes(`href="/field-guide/${guide.slug}/"`));
+    assert.ok(decode(band).includes(guide.title));
+    assert.ok(
+      band
+        .replace(/<!--.*?-->/g, "")
+        .replace(/\s+/g, " ")
+        .includes(`Introduction · ${guide.minutes} min`),
+    );
+  }
+});

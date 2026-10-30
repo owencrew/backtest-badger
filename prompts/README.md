@@ -101,3 +101,10 @@ It scopes read-only public/production checks and documentation synchronisation,
 reserving all production writes, indexing activation and new features. See the
 [post-launch audit](../docs/stage-05b8-post-launch-audit.md) for verified evidence,
 owner-supplied deployment information, outstanding issues and the proposed next stage.
+
+Stage 5B.9's complete original request is archived verbatim at
+[`stage-05-web/011-latest-scored-forecast.md`](stage-05-web/011-latest-scored-forecast.md).
+It scopes a strict v2 private forecast export, latest-scored cards, one homepage
+headline change, validation and a controlled migration plan. No commit, deployment,
+public-feed change or production write is authorised. See the
+[implementation and validation report](../docs/stage-05b9-latest-scored-forecast.md).

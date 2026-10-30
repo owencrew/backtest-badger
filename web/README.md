@@ -21,9 +21,29 @@ Website source `360c6130d3f304f275cb9f216cca4fa7c82b5976` has green Python and f
 CI. The owner reports active Worker version `ff180090-8473-4c91-8e51-1bb918fa90bd`
 and deploy command `pnpm exec wrangler versions upload`; exact version-to-source
 and preview-build evidence remain outstanding. See the [release runbook](../docs/deployment/website-cloudflare-workers.md).
-All seven editorial approvals remain unchanged. Indexing is still disabled.
-The audit also records missing HTTP-to-HTTPS redirection on www; no production
-configuration was changed during the audit.
+All seven editorial approvals remain unchanged. Subsequent read-only Stage 5B.9
+checks on 28 October confirmed production `index, follow`, the 13-page sitemap,
+its robots reference and the www HTTP-to-HTTPS 301 with path/query preservation.
+The owner reports successful Search Console submission; this is not proof of indexing.
+These observations supersede the historical audit's indexing/redirect gaps.
+No production configuration was changed during either inspection.
+
+## Stage 5B.9 — local implementation awaiting owner review
+
+The [implementation report](../docs/stage-05b9-latest-scored-forecast.md) records
+the latest-scored cards, exact homepage headline, genuine-data screenshots,
+regression tests and controlled migration plan. The browser accepts strict v1 or
+v2 snapshots; v1 retains existing predictions/aggregates and truthfully reports
+that latest-scored observations are unavailable in that version.
+
+Private v2 preparation uses the same command below with `--schema-version 2` and
+a separate private output path. It adds only `latest_scored` and its saved
+direction fields; retained prediction/scorer semantics are unchanged. V2 staging
+rejects publication arguments. The v1 publisher/checker, public key and production
+timers remain unchanged. No v2 endpoint is activated by this stage. A future
+website build must switch `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` only after separately
+approved genuine v2 publication and independent HTTPS validation. Keep candidate
+builds noindex and preserve the explicit owner promotion workflow.
 
 ## Run locally
 

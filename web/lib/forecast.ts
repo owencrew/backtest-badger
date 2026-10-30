@@ -1,4 +1,4 @@
-import { fetchJson, requireValue, symbols, type Symbol } from "./market";
+import { requireValue, symbols, type Symbol } from "./market";
 export const models = [
   "zero",
   "training_mean",
@@ -55,8 +55,27 @@ export type Evaluation = {
     }
   >;
 };
+export type ScoredForecast = Omit<
+  Forecast,
+  "status" | "cohort" | "scored_at" | "actual_log_return_4h" | "models"
+> & {
+  status: "scored";
+  cohort: "primary_timely_automated";
+  scored_at: string;
+  actual_log_return_4h: number;
+  actual_direction: -1 | 0 | 1;
+  models: Record<
+    Model,
+    {
+      predicted_log_return_4h: number;
+      signed_error: number;
+      absolute_error: number;
+      squared_error: number;
+      directional_correct: boolean | null;
+    }
+  >;
+};
 export type ForecastSnapshot = {
-  schema_version: 1;
   kind: "public_forward_research";
   data_source: "Binance Spot";
   protocol: "stage-3c-v1";
@@ -65,7 +84,9 @@ export type ForecastSnapshot = {
   as_of: string;
   latest: Forecast[];
   evaluations: Evaluation[];
-};
+} & (
+  { schema_version: 1 } | { schema_version: 2; latest_scored: ScoredForecast[] }
+);
 type Obj = Record<string, unknown>;
 function object(value: unknown, keys: string[]): Obj {
   requireValue(
@@ -92,7 +113,9 @@ export function timestamp(value: unknown): number {
       new Date(ms).toISOString().slice(0, 19) === value.slice(0, 19),
     "Invalid forecast timestamp.",
   );
-  return ms;
+  // Date.parse truncates microseconds. Preserve them for cutoff/clock comparisons.
+  const fraction = value.split(".")[1]?.slice(0, -1) ?? "";
+  return ms + Number(fraction.padEnd(6, "0").slice(3)) / 1000;
 }
 function numeric(value: unknown): number {
   requireValue(
@@ -112,6 +135,34 @@ function count(value: unknown): number {
 function same(a: number, b: number) {
   return Math.abs(a - b) <= 1e-12 * Math.max(1, Math.abs(a), Math.abs(b));
 }
+// Browser consistency check only: never replace the saved numbers. Allow eight
+// times Number.EPSILON at the subtraction's operand scale (no unit-sized
+// absolute floor). Absolute/squared errors must also agree with the saved signed
+// error at their own scales. Zero and sign remain exact, including tiny returns.
+function roundedEqual(
+  a: number,
+  b: number,
+  scale = Math.max(Math.abs(a), Math.abs(b)),
+) {
+  return (
+    Number.isFinite(b) &&
+    Math.sign(a) === Math.sign(b) &&
+    (a === b || Math.abs(a - b) <= 8 * Number.EPSILON * scale)
+  );
+}
+function savedErrorsMatch(m: Obj, prediction: number, actual: number) {
+  const error = prediction - actual;
+  const signed = numeric(m.signed_error);
+  return (
+    roundedEqual(
+      signed,
+      error,
+      Math.max(Math.abs(prediction), Math.abs(actual), Math.abs(error)),
+    ) &&
+    roundedEqual(numeric(m.absolute_error), Math.abs(signed)) &&
+    roundedEqual(numeric(m.squared_error), signed * signed)
+  );
+}
 function identity(row: Obj) {
   requireValue(
     symbols.includes(row.symbol as Symbol) &&
@@ -125,6 +176,21 @@ export function validateForecast(
   value: unknown,
   now = Date.now(),
 ): ForecastSnapshot {
+  return validateSnapshot(value, now, 1);
+}
+export function validateForecastV2(
+  value: unknown,
+  now = Date.now(),
+): ForecastSnapshot & { schema_version: 2 } {
+  return validateSnapshot(value, now, 2) as ForecastSnapshot & {
+    schema_version: 2;
+  };
+}
+function validateSnapshot(
+  value: unknown,
+  now: number,
+  version: 1 | 2,
+): ForecastSnapshot {
   const root = object(value, [
     "schema_version",
     "kind",
@@ -135,9 +201,10 @@ export function validateForecast(
     "as_of",
     "latest",
     "evaluations",
+    ...(version === 2 ? ["latest_scored"] : []),
   ]);
   requireValue(
-    root.schema_version === 1 &&
+    root.schema_version === version &&
       root.kind === "public_forward_research" &&
       root.data_source === "Binance Spot" &&
       root.protocol === "stage-3c-v1" &&
@@ -159,8 +226,17 @@ export function validateForecast(
       root.evaluations.length === 6,
     "Expected separate BTC/ETH evaluations for all three cohorts.",
   );
+  if (version === 2)
+    requireValue(
+      Array.isArray(root.latest_scored) && root.latest_scored.length <= 2,
+      "Expected at most one latest scored forecast per market.",
+    );
   const seen = new Set<string>();
-  for (const item of root.latest) {
+  const scoredRows = version === 2 ? (root.latest_scored as unknown[]) : [];
+  for (const [item, latestScored] of [
+    ...root.latest.map((item): [unknown, boolean] => [item, false]),
+    ...scoredRows.map((item): [unknown, boolean] => [item, true]),
+  ]) {
     const r = object(item, [
       "symbol",
       "source_close_at",
@@ -172,13 +248,14 @@ export function validateForecast(
       "scored_at",
       "actual_log_return_4h",
       "models",
+      ...(latestScored ? ["actual_direction"] : []),
     ]);
     identity(r);
     requireValue(
-      !seen.has(String(r.symbol)),
+      !seen.has(`${latestScored}/${r.symbol}`),
       "Duplicate latest market forecast.",
     );
-    seen.add(String(r.symbol));
+    seen.add(`${latestScored}/${r.symbol}`);
     requireValue(
       typeof r.recipe_sha256 === "string" &&
         /^[a-f0-9]{64}$/.test(r.recipe_sha256),
@@ -200,6 +277,15 @@ export function validateForecast(
       (r.cohort === "secondary_late_manual") === issued >= source + 16 * 60_000,
       "Forecast timing conflicts with cohort.",
     );
+    if (latestScored)
+      requireValue(
+        r.status === "scored" &&
+          r.cohort === "primary_timely_automated" &&
+          [-1, 0, 1].includes(r.actual_direction as number) &&
+          (r.actual_log_return_4h === 0 ||
+            Math.sign(numeric(r.actual_log_return_4h)) === r.actual_direction),
+        "Latest scored must retain a primary score and its original direction.",
+      );
     const scored = r.status === "scored";
     requireValue(
       scored ||
@@ -226,18 +312,29 @@ export function validateForecast(
         "signed_error",
         "absolute_error",
         "squared_error",
+        ...(latestScored ? ["directional_correct"] : []),
       ]);
       const prediction = numeric(m.predicted_log_return_4h);
       requireValue(
         model !== "zero" || prediction === 0,
         "Invalid zero baseline.",
       );
+      if (latestScored)
+        requireValue(
+          m.directional_correct ===
+            (prediction === 0
+              ? null
+              : Math.sign(prediction) === r.actual_direction),
+          "Inconsistent saved directional result.",
+        );
       if (scored) {
         const error = prediction - numeric(r.actual_log_return_4h);
         requireValue(
-          same(numeric(m.signed_error), error) &&
-            same(numeric(m.absolute_error), Math.abs(error)) &&
-            same(numeric(m.squared_error), error * error) &&
+          (version === 2
+            ? savedErrorsMatch(m, prediction, numeric(r.actual_log_return_4h))
+            : same(numeric(m.signed_error), error) &&
+              same(numeric(m.absolute_error), Math.abs(error)) &&
+              same(numeric(m.squared_error), error * error)) &&
             numeric(m.absolute_error) >= 0 &&
             numeric(m.squared_error) >= 0,
           "Inconsistent saved forecast errors.",
@@ -338,7 +435,10 @@ export function validateForecast(
     }
   }
   const snapshot = value as ForecastSnapshot;
-  for (const latest of snapshot.latest) {
+  for (const latest of [
+    ...snapshot.latest,
+    ...(snapshot.schema_version === 2 ? snapshot.latest_scored : []),
+  ]) {
     const evaluation = snapshot.evaluations.find(
       (e) => e.symbol === latest.symbol && e.cohort === latest.cohort,
     )!;
@@ -361,7 +461,82 @@ export function validateForecast(
       "Latest forecast coverage conflicts with evaluation evidence.",
     );
   }
+  if (snapshot.schema_version === 2) {
+    for (const symbol of symbols) {
+      const evaluation = snapshot.evaluations.find(
+        (e) => e.symbol === symbol && e.cohort === cohorts[0],
+      )!;
+      const scored = snapshot.latest_scored.find((f) => f.symbol === symbol);
+      const latest = snapshot.latest.find((f) => f.symbol === symbol);
+      requireValue(
+        evaluation.matched_count > 0 === !!scored,
+        "Latest scored coverage conflicts with matched primary evidence.",
+      );
+      if (scored) {
+        requireValue(
+          !!latest &&
+            timestamp(scored.source_close_at) <=
+              timestamp(latest.source_close_at),
+          "Scored forecast is newer than latest issuance.",
+        );
+        if (
+          timestamp(scored.source_close_at) ===
+          timestamp(latest.source_close_at)
+        )
+          requireValue(
+            equalEvidence(forecastProjection(scored), latest),
+            "Conflicting latest and scored observation.",
+          );
+      }
+    }
+  }
   return snapshot;
+}
+// The v1 checker remains strict. Only the browser's configured feed accepts either version.
+export function validatePublicForecast(value: unknown, now = Date.now()) {
+  return (value as { schema_version?: unknown } | null)?.schema_version === 2
+    ? validateForecastV2(value, now)
+    : validateForecast(value, now);
+}
+function equalEvidence(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== "object" || typeof b !== "object") return false;
+  const left = a as Obj,
+    right = b as Obj;
+  return (
+    Object.keys(left).length === Object.keys(right).length &&
+    Object.keys(left).every(
+      (key) =>
+        Object.hasOwn(right, key) && equalEvidence(left[key], right[key]),
+    )
+  );
+}
+export function forecastProjection(scored: ScoredForecast): Forecast {
+  return {
+    symbol: scored.symbol,
+    source_close_at: scored.source_close_at,
+    issued_at: scored.issued_at,
+    target_close_at: scored.target_close_at,
+    recipe_sha256: scored.recipe_sha256,
+    cohort: scored.cohort,
+    status: scored.status,
+    scored_at: scored.scored_at,
+    actual_log_return_4h: scored.actual_log_return_4h,
+    models: Object.fromEntries(
+      models.map((model) => {
+        const p = scored.models[model];
+        return [
+          model,
+          {
+            predicted_log_return_4h: p.predicted_log_return_4h,
+            signed_error: p.signed_error,
+            absolute_error: p.absolute_error,
+            squared_error: p.squared_error,
+          },
+        ];
+      }),
+    ) as Forecast["models"],
+  };
 }
 export async function fetchForecast(url: string, signal: AbortSignal) {
   const parsed = new URL(url, "https://snapshot.invalid");
@@ -375,7 +550,38 @@ export async function fetchForecast(url: string, signal: AbortSignal) {
         (url.startsWith("https://") && parsed.protocol === "https:")),
     "Forecast URL must be credential-free, same-origin or HTTPS.",
   );
-  return validateForecast(await fetchJson(url, signal));
+  const response = await fetch(url, {
+    signal,
+    cache: "no-store",
+    credentials: "omit",
+  });
+  requireValue(
+    response.ok && !!response.body,
+    "Forecast request failed; try again later.",
+  );
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.length;
+      requireValue(size <= 65536, "Forecast response exceeds size budget.");
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel();
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return validatePublicForecast(
+    JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
+  );
 }
 
 // Per mounted URL: a failed/aborted refresh never advances the accepted snapshot.
@@ -385,6 +591,26 @@ export function createForecastLoader(url: string) {
     const next = await fetchForecast(url, signal);
     signal.throwIfAborted();
     if (previous) {
+      if (previous.schema_version === 2) {
+        requireValue(
+          next.schema_version === 2,
+          "Snapshot schema regressed; retaining previous evidence.",
+        );
+        for (const old of previous.latest_scored) {
+          const current = next.latest_scored.find(
+            (f) => f.symbol === old.symbol,
+          );
+          requireValue(
+            !!current &&
+              timestamp(current.source_close_at) >=
+                timestamp(old.source_close_at) &&
+              (timestamp(current.source_close_at) !==
+                timestamp(old.source_close_at) ||
+                equalEvidence(current, old)),
+            "Latest scored evidence regressed or changed; retaining previous evidence.",
+          );
+        }
+      }
       requireValue(
         timestamp(next.as_of) >= timestamp(previous.as_of) &&
           timestamp(next.generated_at) >= timestamp(previous.generated_at),

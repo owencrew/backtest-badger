@@ -17,6 +17,7 @@ import {
 import { utc } from "@/lib/market";
 import { useFeed } from "./use-feed";
 import { EmptyState } from "./ui";
+import { LatestScoredForecasts } from "./latest-scored-forecasts";
 const cohortNames: Record<Cohort, string> = {
   primary_timely_automated: "Timely automated",
   secondary_late_manual: "Late manual",
@@ -279,6 +280,7 @@ export function ForecastEvidence({
         ))}
       </div>
       {data.latest.length === 0 && <p>No forecast observations published.</p>}
+      <LatestScoredForecasts data={data} />
       <section
         className="primary-evaluation"
         aria-labelledby="primary-evaluation-title"
