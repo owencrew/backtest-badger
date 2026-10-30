@@ -1,0 +1,11 @@
+[Unit]
+Description=Check v2 after its bounded publication window
+
+[Timer]
+OnCalendar=*-*-* *:00/10:45 UTC
+AccuracySec=1s
+Persistent=false
+Unit=backtest-badger-public-feed-v2-check.service
+
+[Install]
+WantedBy=timers.target

@@ -1,5 +1,21 @@
 # Owner setup — Cloudflare forward feed
 
+## Stage 5B.10 preparation — 30 October 2026
+
+The [v2 activation record](../stage-05b10-forward-v2-production-activation.md)
+supersedes the current-state summary below: v1 remains healthy; v2 publisher,
+independent checker and four separate units are implemented locally, with genuine
+read-only host timing measured. **V2 is not installed or published.** Gate 1 is
+required for installation, private quota qualification, first publication and
+new timers. Its exact proposed paths/schedules/rollback are in that record.
+
+The intended bucket will contain the two reviewed public keys `forward-v1.json`
+and `forward-v2.json`; no private artifacts. Existing bucket-scoped Object Read &
+Write should cover both if its scope is confirmed unchanged. Application destination
+checks are not object-scoped credentials. Do not recreate/rotate tokens or enable
+r2.dev. The original completed one-key setup below remains historical recovery
+context; its v1 rollback commands must not be used to disable v1 for this migration.
+
 ## Current live status — 28 October 2026
 
 The permanent feed is active at

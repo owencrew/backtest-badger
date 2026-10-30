@@ -1,15 +1,16 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-29 (Europe/London)
+**Last updated:** 2026-10-30 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://www.backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Owner review of locally validated Stage 5B.9 and its controlled
-v1-to-v2 migration plan. Production activation remains separately authorised.
+**Next priority:** Review Stage 5B.10 local tooling and Approval Gate 1 for isolated
+v2 publication. Stage 5B.9 is committed; production www continues using v1.
 Prospective paper trading remains a separate future milestone.
 
 ## Live website and forward feed — current handoff
 
-Start with the [Stage 5B.9 implementation report](stage-05b9-latest-scored-forecast.md),
+Start with the [Stage 5B.10 activation record](stage-05b10-forward-v2-production-activation.md),
+[Stage 5B.9 implementation report](stage-05b9-latest-scored-forecast.md),
 [historical Stage 5B.8 audit](stage-05b8-post-launch-audit.md),
 [Workers release/rollback guide](deployment/website-cloudflare-workers.md) and
 [forward-feed operator guide](deployment/forward-feed-cloudflare-setup.md).
@@ -207,17 +208,20 @@ scope and authorisation.
 
 ## 6. Next development and review
 
-Stop for owner review of [Stage 5B.9](stage-05b9-latest-scored-forecast.md).
-The uncommitted implementation includes strict private v2 preparation, independent
-latest-scored BTC/ETH cards and the approved homepage headline. Genuine retained
-evidence and local responsive/build tests are documented in the report. No public
-v2 object, new publisher/checker or production timer was installed. Keep the live
-v1 feed refreshing throughout any future dual-running migration.
+Stage 5B.9 is committed at `14ed627c28b99c484f7a2f63ef9fc694ad252436`,
+with both GitHub workflows green. [Stage 5B.10](stage-05b10-forward-v2-production-activation.md)
+implements separate v2 publication/checking, hardened units and failure tests
+locally. A genuine read-only Lightsail benchmark passed against 4,991 current
+retained files (11.83 s wall, 206 MiB RSS, without a cgroup quota). The exact quota
+qualification, production installation and first R2 PUT require Gate 1 approval.
+V1/research remain healthy; no v2 object/timer or new website candidate is active.
 
-Before a separately authorised release, resolve exact candidate source/build
-identity and preview indexing controls, implement and validate an isolated v2
-publisher/checker, approve key permissions and verify genuine HTTPS publication.
-Retain original issuance/scoring provenance and unchanged scientific methodology.
+Before a website release, record the new committed source and green CI, confirmed
+R2 scope, two successful scheduled v2 cycles, exact Cloudflare source/build/version
+mapping, preview-branch safeguards and verified v1 rollback version. Gate 2
+separately approves promotion. Preserve original issuance/scoring provenance,
+scientific methodology and editorial approvals. Four-hour transition verification
+remains outstanding. Do not infer deployment from local tests.
 
 Other backlog retains its existing status: external alert/missing-invocation
 verification, backup/restore and retention evidence, production search monitoring,

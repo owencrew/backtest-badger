@@ -108,3 +108,16 @@ It scopes a strict v2 private forecast export, latest-scored cards, one homepage
 headline change, validation and a controlled migration plan. No commit, deployment,
 public-feed change or production write is authorised. See the
 [implementation and validation report](../docs/stage-05b9-latest-scored-forecast.md).
+
+Stage 5B.10's complete request is archived verbatim at
+[`stage-05-web/012-v2-feed-production-activation.md`](stage-05-web/012-v2-feed-production-activation.md).
+It authorises local production-tooling work and read-only host verification,
+with separate approval gates for v2 publication and website promotion. See the
+[activation record](../docs/stage-05b10-forward-v2-production-activation.md) for the
+actual state reached; no production activation is implied by this archive.
+
+The Stage 5B.10 continuation and backend activation approval is archived verbatim at
+[`stage-05-web/013-v2-backend-activation-approval.md`](stage-05-web/013-v2-backend-activation-approval.md).
+It authorises reviewed commits/pushes, exact-SHA CI verification, isolated
+Lightsail/R2 activation and two scheduled cycles. The owner retains all Cloudflare
+dashboard changes, website promotion and website rollback.

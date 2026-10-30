@@ -1,0 +1,51 @@
+[Unit]
+Description=Validated v2 public forward snapshot (separate from v1)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Retained evidence is owner-only (0600, including future atomic writes).
+# Reuse its UID inside a restricted filesystem; do not widen evidence ACLs.
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/backtest-badger-public-feed-v2/current
+EnvironmentFile=/etc/backtest-badger-public-feed/publisher.env
+Environment=PYTHONPATH=/opt/backtest-badger-public-feed-v2/current/src
+Environment=PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
+Environment=AWS_EC2_METADATA_DISABLED=true
+ExecStart=/usr/bin/time -f "elapsed_seconds=%%e cpu_user_seconds=%%U cpu_system_seconds=%%S peak_rss_kib=%%M" /opt/backtest-badger-public-feed-v2/current/.venv/bin/python web/scripts/publish_forward_v2.py --records /run/badger-feed-v2-evidence/predictions --outcomes /run/badger-feed-v2-evidence/outcomes --operations /run/badger-feed-v2-evidence/operations --output /var/lib/backtest-badger-public-feed-v2/last-success-v2.json --node /opt/backtest-badger-public-feed-v2/current/node/bin/node --validator /opt/backtest-badger-public-feed-v2/current/web/validator-v2.cjs --publish-r2-object backtest-badger-forward/forward-v2.json
+UMask=0077
+Nice=10
+IOSchedulingClass=idle
+CPUQuota=25%
+MemoryHigh=384M
+MemoryMax=512M
+TasksMax=32
+TimeoutStartSec=150
+KillMode=control-group
+Restart=no
+NoNewPrivileges=true
+CapabilityBoundingSet=
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/backtest-badger-public-feed-v2
+BindReadOnlyPaths=/var/lib/backtest-badger/artifacts/forward-predictions:/run/badger-feed-v2-evidence/predictions
+BindReadOnlyPaths=/var/lib/backtest-badger/artifacts/forward-outcomes:/run/badger-feed-v2-evidence/outcomes
+BindReadOnlyPaths=/var/lib/backtest-badger/artifacts/forward-operations:/run/badger-feed-v2-evidence/operations
+InaccessiblePaths=/var/lib/backtest-badger-public-feed /etc/backtest-badger-public-feed /opt/backtest-badger /var/lib/backtest-badger -/etc/backtest-badger -/run/postgresql -/run/docker.sock
+CPUAccounting=true
+MemoryAccounting=true
+IOAccounting=true
+StandardOutput=journal
+StandardError=journal

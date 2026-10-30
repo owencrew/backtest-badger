@@ -67,9 +67,12 @@ redirects to www. GitHub-connected Workers Builds uploads candidates for explici
 owner promotion. Production search indexing is enabled; read-only 28 October checks
 confirmed www HTTP-to-HTTPS redirection. The [Stage 5B.8 audit](docs/stage-05b8-post-launch-audit.md)
 remains historical evidence. [Stage 5B.9](docs/stage-05b9-latest-scored-forecast.md)
-adds locally validated latest-scored forecasts and homepage refinement, awaiting
-owner review and a separately approved v2 migration. Exact Cloudflare source/preview
-evidence remains a release gate.
+adds locally validated latest-scored forecasts and homepage refinement and is now
+committed as `14ed627c`. [Stage 5B.10](docs/stage-05b10-forward-v2-production-activation.md)
+adds isolated v2 publication/checking tooling, synthetic fault tests and a genuine
+read-only Lightsail benchmark. Production installation/publication remain at
+Approval Gate 1; www still uses v1. Exact Cloudflare source/preview evidence remains
+a website release gate.
 See [`web/`](web/README.md) for local development; production excludes unapproved articles.
 
 ## Local development

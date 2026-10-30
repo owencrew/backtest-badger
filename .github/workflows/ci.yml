@@ -6,6 +6,28 @@ permissions:
   contents: read
 
 jobs:
+  public-feed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.0"
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.node-version
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+          run_install: false
+      - run: uv python install 3.12
+      - run: uv sync --locked
+      - run: pnpm --dir web install --frozen-lockfile
+      # Root pytest testpaths intentionally excludes web/tests. These exercise
+      # Python provenance/staging and strict TypeScript contracts together.
+      - run: uv run --locked pytest -q web/tests
   test:
     # 26.04 uses quota-limited tmpfs for /tmp; guarded fixtures also use /tmp
     # explicitly, so TMPDIR alone cannot move all of their data onto disk.

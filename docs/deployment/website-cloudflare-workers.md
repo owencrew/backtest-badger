@@ -1,5 +1,23 @@
 # Website operations — Cloudflare Workers Static Assets
 
+## Stage 5B.10 release gate — 30 October 2026
+
+See the [activation record](../stage-05b10-forward-v2-production-activation.md).
+Current public www is indexing-enabled; HTTPS/HTTP/apex redirects and 13-page
+sitemap passed fresh checks. Owner screenshots show both workers.dev and version
+URL toggles disabled, production branch `main`, root `/web` and candidate-only
+`pnpm exec wrangler versions upload`. Local Wrangler config now explicitly
+preserves those disabled alternate URLs. Preview-branch settings and exact
+current/candidate source-to-version mapping still require verification.
+
+Owner supplied version `1bb9d5bc-850e-4891-9f10-54c257814bd3` and successful build
+`9f8643ac` displayed as one day old; these do not identify a new Stage 5B.10 v2
+candidate. No new Worker was uploaded/promoted. Keep the build-time feed URL at v1
+until genuine v2 publication and independent scheduled checks pass. Owner changes
+the build variable only then. Require new exact-SHA green CI, protected preview
+review and Gate 2 before promotion. Verify the actual v1-configured rollback
+version, not merely the source revision. The dated audit below remains historical.
+
 ## Current live status — 28 October 2026
 
 The site is live at <https://www.backtestbadger.com>. See the

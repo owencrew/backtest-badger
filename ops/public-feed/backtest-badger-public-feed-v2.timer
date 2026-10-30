@@ -1,0 +1,11 @@
+[Unit]
+Description=Publish v2 every ten minutes, staggered from v1
+
+[Timer]
+OnCalendar=*-*-* *:08/10:00 UTC
+AccuracySec=1s
+Persistent=false
+Unit=backtest-badger-public-feed-v2.service
+
+[Install]
+WantedBy=timers.target

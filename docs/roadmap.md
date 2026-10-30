@@ -1,10 +1,10 @@
 # Roadmap
 
-**Current summary: 24 October 2026.** Each stage is scoped independently. Planned
+**Current summary: 30 October 2026.** Each stage is scoped independently. Planned
 capabilities are not current features. The first genuine native-minute 2024
-backtest is complete; the next product milestone is **Stage 5: a polished public
-website**, using research and forward evidence already available. It need not
-wait for prospective paper-trading implementation.
+backtest is complete and the public website is live. The current product milestone
+is controlled v2 forward-feed activation using existing retained evidence.
+Prospective paper-trading implementation remains a separate future scope.
 
 [E.5g](stage-04b2e5g-first-genuine-historical-backtest.md) records verified independent
 Ridge, Cash and Buy & Hold accounts for each market. Ridge lost **60.69% on BTCUSDT
@@ -47,7 +47,7 @@ scope.
 | **4B.2E.5e–5g — Local Execution and Genuine Backtest** | Complete | One-process pinned-input runner, successful genuine preflight, one genuine 2024 replay and six verified accounts. See [E.5g results](stage-04b2e5g-first-genuine-historical-backtest.md); no tuning or model promotion. |
 | **4B.2E.5h — Research Narrative** | Documentation prepared for review | Current summaries reconciled; [Field Notes 003 and 004](field-notes/README.md) drafted; website evidence handoff added. No new research or deployment. |
 | **4C–4E — Paper Persistence, Prospective Integration and Reporting** | Future, gated | Independently approve isolated database integrity, prospective quote/worker activation and reporting. No production changes authorised. |
-| **5 — Polished Website and Public Launch** | **Live; post-launch audit 2026-10-28** | Workers static website, permanent R2 forward feed and seven approved articles. Indexing remains disabled; see [Stage 5B.8](stage-05b8-post-launch-audit.md) for verified health, HTTP redirect issue and release-evidence gaps. |
+| **5 — Polished Website and Public Launch** | **Live; v2 activation gated 2026-10-30** | Workers static website, permanent v1 R2 feed, indexing enabled and seven approved articles. [Stage 5B.10](stage-05b10-forward-v2-production-activation.md) records isolated v2 tooling and host benchmark; installation/publication and website promotion remain separately gated. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
 
 Real-money trading is outside this roadmap and requires explicit approval.
@@ -57,15 +57,13 @@ Real-money trading is outside this roadmap and requires explicit approval.
 The website is live at <https://www.backtestbadger.com>; the genuine public feed is
 <https://data.backtestbadger.com/forward-v1.json>. See the
 [post-launch audit](stage-05b8-post-launch-audit.md) and current
-[development handoff](development-handoff.md). Close its operational verification
-items before separately approving indexing or further product development.
+[development handoff](development-handoff.md).
 
-**Latest Scored Forecast — proposed, not implemented.** Show the most recently
-completed/scored forecast separately from the latest pending prediction. Compare
-previous predictions with actual observed return, forecast error and directional
-correctness, preserving Zero's ineligible direction. A reviewed public-contract and
-exporter extension will likely be needed. Preserve original provenance, scoring
-methodology and cohort separation; implementation requires a separate stage.
+**Latest Scored Forecast — implemented locally in Stage 5B.9, public v2 pending.**
+[Stage 5B.10](stage-05b10-forward-v2-production-activation.md) prepares isolated
+publication/checking, private rollback and resource validation. Finish Gate 1
+activation, genuine scheduled-cycle observation, then Gate 2 website promotion.
+Preserve v1 throughout; record four-hour transition verification honestly.
 
 Research/platform backlog retains its existing status: Stage 4C–4E prospective
 paper trading, operational alert/backup/retention verification, later research and

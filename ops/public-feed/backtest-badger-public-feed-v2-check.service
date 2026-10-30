@@ -1,0 +1,35 @@
+[Unit]
+Description=Independent v2 HTTPS, exact-byte and evidence progression check
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+ExecStart=/opt/backtest-badger-public-feed-v2/current/node/bin/node /opt/backtest-badger-public-feed-v2/current/web/check-forward-v2-endpoint.cjs https://data.backtestbadger.com/forward-v2.json /var/lib/backtest-badger-public-feed-v2/last-success-v2.json /var/lib/backtest-badger-public-feed-v2-check/last-check-v2.json
+UMask=0077
+TimeoutStartSec=30
+MemoryMax=128M
+CPUQuota=10%
+TasksMax=16
+Nice=15
+Restart=no
+NoNewPrivileges=true
+CapabilityBoundingSet=
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/backtest-badger-public-feed-v2-check
+InaccessiblePaths=/opt/backtest-badger /var/lib/backtest-badger /var/lib/backtest-badger-public-feed /etc/backtest-badger-public-feed -/etc/backtest-badger -/run/postgresql -/run/docker.sock
+StandardOutput=journal
+StandardError=journal
