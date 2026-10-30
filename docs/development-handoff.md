@@ -3,46 +3,62 @@
 **Last updated:** 2026-10-30 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://www.backtestbadger.com — *A little badger. A lot of backtests.*
-**Next priority:** Review Stage 5B.10 local tooling and Approval Gate 1 for isolated
-v2 publication. Stage 5B.9 is committed; production www continues using v1.
-Prospective paper trading remains a separate future milestone.
+**Next priority:** The owner completes the website release against the active v2
+feed: change the Cloudflare build variable, trigger a build, review and manually
+promote the candidate. Backend scheduled-cycle acceptance is complete;
+production www still uses v1. Prospective paper trading is a separate future scope.
 
 ## Live website and forward feed — current handoff
 
-Start with the [Stage 5B.10 activation record](stage-05b10-forward-v2-production-activation.md),
+Start with the [Stage 5B.10 activation record](stage-05b10-forward-v2-production-activation.md)
+for actual operations, hashes, constrained timing, scheduled results and exact
+owner-managed website steps. The
 [Stage 5B.9 implementation report](stage-05b9-latest-scored-forecast.md),
-[historical Stage 5B.8 audit](stage-05b8-post-launch-audit.md),
 [Workers release/rollback guide](deployment/website-cloudflare-workers.md) and
-[forward-feed operator guide](deployment/forward-feed-cloudflare-setup.md).
+[forward-feed operator guide](deployment/forward-feed-cloudflare-setup.md)
+provide the UI and operating context; older audit observations remain historical.
 
-The public Next.js static export is served by Cloudflare Workers Static Assets,
-Worker `backtest-badger-web`. Navigation is Home, The Burrow, The Dig, Field Notes,
-Field Guide, About. The original mascot, four notes and three guides are live;
-004 is featured and all seven SHA-256 approvals are unchanged. Read-only checks
-on 28 October confirmed production `index, follow`, the 13-page sitemap and robots
-reference, plus www HTTP-to-HTTPS 301 preservation of path/query. The owner reports
-successful Search Console submission, which does not prove indexing. Candidate
-builds remain noindex. These updates supersede the historical audit's gaps.
+The genuine public [v2 feed](https://data.backtestbadger.com/forward-v2.json) is
+active beside the unchanged [v1 feed](https://data.backtestbadger.com/forward-v1.json).
+The isolated backend source is `6a377e22e660f38cf919ab823ab45229b546c9b9`, with both
+[CI](https://github.com/owencrew/backtest-badger/actions/runs/41133900665) and
+[Frontend](https://github.com/owencrew/backtest-badger/actions/runs/41133900292) green
+before installation. The source archive/release identity is
+`0000dbb3ba66f2e0d4bc601543b6580ba9b4f2767f962abe4b9a8e4d90d111da` under
+`/opt/backtest-badger-public-feed-v2/releases/`, selected by root-controlled `current`.
+Later documentation-only commits do not replace that installed backend identity.
 
-GoDaddy remains registrar; Cloudflare nameservers are `brit.ns.cloudflare.com` and
-`weston.ns.cloudflare.com`. Apex HTTP/HTTPS redirects to www HTTPS with paths and
-queries preserved. The permanent genuine feed is
-<https://data.backtestbadger.com/forward-v1.json>, in R2 bucket
-`backtest-badger-forward`. The former r2.dev endpoint returns 401. The live Burrow
-uses the permanent hostname; prices continue to come independently from Binance.
+Exact-limit private qualification passed in 37.80 seconds with 214,440 KiB peak
+RSS under 25% CPU and 384/512 MiB memory limits. First publication and independent
+HTTPS checks passed with exact bytes, original timestamps, both markets and latest
+scored observations. Both new timers are enabled: publication at :08/10 and
+independent check at :00/10 plus 45 seconds. Two scheduled pairs passed at
+23:08 / 23:10:45 and 23:18 / 23:20:45 UTC. No rollback was needed.
 
-Read-only checks confirmed enabled, successful public-feed publication/checker
-timers and healthy collection/scoring. Lightsail research remains at
-`cceb6509edbb6e6a9fb577c112bf9c648e81c5a1`. Website source
-`360c6130d3f304f275cb9f216cca4fa7c82b5976` has both CI workflows green. The owner
-reports active Worker version `ff180090-8473-4c91-8e51-1bb918fa90bd` and upload-only
-Workers Builds; exact source mapping and preview configuration remain unverified.
+V1 implementation/units remain byte-identical and continue refreshing. Research
+collector/scorer and release `cceb6509edbb6e6a9fb577c112bf9c648e81c5a1` are unchanged.
+Existing bucket-only credentials were reused without printing, copying or editing.
+No private research evidence was exported and no synthetic candidate was published.
+A genuine four-hour transition was not observed by the 30 October 23:21 UTC
+acceptance cutoff; do not
+force research events. Longer-running monitoring/notification verification remains
+separate work.
 
-Outstanding: close the release-identity/preview evidence gaps. The later www
-redirect check passed. Inspection remained read-only against production:
-no service, DNS, R2, credential, deployment, model or schema changes were made.
-Do not infer authorisation for fixes from this handoff. Earlier stage reports retain
-their original observations; the sections below preserve dated research evidence.
+The website remains on its existing production Worker. No Cloudflare settings,
+manual website build, promotion or rollback was performed by Codex. Git pushes
+may automatically upload candidates through `pnpm exec wrangler versions upload`;
+that is not promotion. The owner changes `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` to
+`https://data.backtestbadger.com/forward-v2.json`, triggers a build, reviews its
+exact commit/build/version and manually promotes it. Preserve
+`BADGER_SEARCH_INDEXING=www-live-owner-approved`, disabled workers.dev/version
+URLs, existing preview protections and a verified v1-configured rollback version.
+The activation report has the complete click path and post-promotion checks.
+
+The public Next.js static export remains served by `backtest-badger-web`, with
+Home, The Burrow, The Dig, Field Notes, Field Guide and About. The mascot and all
+seven approved articles are unchanged. GoDaddy remains registrar; Cloudflare DNS,
+www indexing, 13-page sitemap and HTTP/apex redirects remain unchanged. The owner
+reports Search Console submission; this does not prove indexing.
 
 ## 1. Resume here
 
@@ -86,7 +102,7 @@ preserve the authorisations, limitations and tests at their original stage;
 | Forward evidence | Genuine timestamped forecasts, automated collection, immutable scored outcomes and prospective accuracy reports; timely/late cohorts remain distinct |
 | Paper foundations | Deterministic strategy, execution and Decimal accounting/valuation primitives; no complete prospective order/fill/portfolio service |
 | Hosting | Lightsail PostgreSQL and collection/scoring, plus backups, restore drills and monitoring, in the dated production snapshot |
-| Public product | Live Workers static website, genuine Binance dashboard and permanent v1 R2 feed; seven approved articles; production indexing enabled; Stage 5B.9 locally validated, pending owner review and separate v2 activation |
+| Public product | Live Workers static website, genuine Binance dashboard, healthy v1 and isolated v2 R2 feeds; seven approved articles; production indexing enabled; v2 website build/promotion owner-managed |
 
 Historical backtests simulate the past. Forward predictions are issued before
 outcomes but do not create orders. Prospective paper trading will simulate
@@ -208,20 +224,15 @@ scope and authorisation.
 
 ## 6. Next development and review
 
-Stage 5B.9 is committed at `14ed627c28b99c484f7a2f63ef9fc694ad252436`,
-with both GitHub workflows green. [Stage 5B.10](stage-05b10-forward-v2-production-activation.md)
-implements separate v2 publication/checking, hardened units and failure tests
-locally. A genuine read-only Lightsail benchmark passed against 4,991 current
-retained files (11.83 s wall, 206 MiB RSS, without a cgroup quota). The exact quota
-qualification, production installation and first R2 PUT require Gate 1 approval.
-V1/research remain healthy; no v2 object/timer or new website candidate is active.
-
-Before a website release, record the new committed source and green CI, confirmed
-R2 scope, two successful scheduled v2 cycles, exact Cloudflare source/build/version
-mapping, preview-branch safeguards and verified v1 rollback version. Gate 2
-separately approves promotion. Preserve original issuance/scoring provenance,
-scientific methodology and editorial approvals. Four-hour transition verification
-remains outstanding. Do not infer deployment from local tests.
+[Stage 5B.10](stage-05b10-forward-v2-production-activation.md) has activated the
+isolated genuine v2 feed from committed, CI-verified source. Both scheduled
+acceptance pairs passed; the backend continuation is complete. Research and v1
+remain unchanged.
+The owner handles all remaining website work: v2 build variable, build, candidate
+review and manual promotion. Preserve original issuance/scoring provenance,
+scientific methodology, editorial approvals, indexing and disabled alternate URLs.
+Backend/website four-hour transition observations must be recorded honestly;
+local tests alone are not evidence of a production website release.
 
 Other backlog retains its existing status: external alert/missing-invocation
 verification, backup/restore and retention evidence, production search monitoring,

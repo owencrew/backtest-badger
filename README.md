@@ -69,10 +69,11 @@ confirmed www HTTP-to-HTTPS redirection. The [Stage 5B.8 audit](docs/stage-05b8-
 remains historical evidence. [Stage 5B.9](docs/stage-05b9-latest-scored-forecast.md)
 adds locally validated latest-scored forecasts and homepage refinement and is now
 committed as `14ed627c`. [Stage 5B.10](docs/stage-05b10-forward-v2-production-activation.md)
-adds isolated v2 publication/checking tooling, synthetic fault tests and a genuine
-read-only Lightsail benchmark. Production installation/publication remain at
-Approval Gate 1; www still uses v1. Exact Cloudflare source/preview evidence remains
-a website release gate.
+has activated the isolated [v2 feed](https://data.backtestbadger.com/forward-v2.json)
+with strict publication/readback checks and independent timers. Constrained private
+qualification and two scheduled publication/check cycles passed.
+V1 remains healthy and www still uses v1. The owner manages the remaining website
+build-variable change, build and manual candidate promotion.
 See [`web/`](web/README.md) for local development; production excludes unapproved articles.
 
 ## Local development

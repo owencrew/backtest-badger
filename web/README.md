@@ -28,7 +28,7 @@ The owner reports successful Search Console submission; this is not proof of ind
 These observations supersede the historical audit's indexing/redirect gaps.
 No production configuration was changed during either inspection.
 
-## Stage 5B.9 — committed; v2 public activation pending
+## Stage 5B.9 — committed implementation; activation followed in Stage 5B.10
 
 The [implementation report](../docs/stage-05b9-latest-scored-forecast.md) records
 the latest-scored cards, exact homepage headline, genuine-data screenshots,
@@ -40,20 +40,20 @@ Private v2 preparation uses the same command below with `--schema-version 2` and
 a separate private output path. It adds only `latest_scored` and its saved
 direction fields; retained prediction/scorer semantics are unchanged. V2 staging
 rejects publication arguments. The v1 publisher/checker, public key and production
-timers remain unchanged. No v2 endpoint is activated by this stage. A future
-website build must switch `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` only after separately
-approved genuine v2 publication and independent HTTPS validation. Keep candidate
-builds noindex and preserve the explicit owner promotion workflow.
+timers remain unchanged. Stage 5B.9 itself did not activate a public endpoint;
+Stage 5B.10 below records the later authorised activation. The owner manages the
+website build-time URL change and explicit candidate promotion. Default local
+builds remain noindex; protected production candidates preserve approved indexing.
 
-## Stage 5B.10 — isolated v2 tooling, not activated
+## Stage 5B.10 — isolated v2 feed live; website release owner-managed
 
 See the [activation record](../docs/stage-05b10-forward-v2-production-activation.md)
-for baseline, 4,991-file read-only host benchmark, tests, exact proposed operations,
-rollback and approval gates. `publish_forward_v2.py` prepares genuine retained
-evidence before any credential lookup; it accepts only the v2 destination and
+for the installed source identity, constrained qualification, actual publication
+and checker results, rollback and owner-managed website steps.
+`publish_forward_v2.py` prepares genuine retained evidence before any credential lookup; it accepts only the v2 destination and
 keeps separate private success/rollback bytes. `check-forward-v2-endpoint.ts`
 independently checks strict v2 HTTPS metadata, bytes, freshness and evidence
-progression. New v2 units are prepared locally; v1 files/units are unchanged.
+progression. Both new v2 timers are enabled; v1 files/units are unchanged.
 
 Build only the isolated helper bundles from the repository root:
 
@@ -61,8 +61,9 @@ Build only the isolated helper bundles from the repository root:
 node ops/public-feed/bundle-v2-validator.mjs /tmp/badger-v2-bundles
 ```
 
-The publication CLI performs an external write and must not be run without Gate 1
-approval. Private preparation remains available through the unchanged
+The owner authorised this isolated backend activation; it does not authorise
+arbitrary future publication or infrastructure changes. Private preparation remains
+available through the unchanged
 `stage_forward_snapshot.py --schema-version 2` path. Keep private JSON outside
 `web/public` and `web/out`. The browser contract and scientific values are unchanged.
 Local Wrangler configuration explicitly preserves disabled workers.dev/version

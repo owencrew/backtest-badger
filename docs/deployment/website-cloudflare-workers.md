@@ -12,11 +12,16 @@ current/candidate source-to-version mapping still require verification.
 
 Owner supplied version `1bb9d5bc-850e-4891-9f10-54c257814bd3` and successful build
 `9f8643ac` displayed as one day old; these do not identify a new Stage 5B.10 v2
-candidate. No new Worker was uploaded/promoted. Keep the build-time feed URL at v1
-until genuine v2 publication and independent scheduled checks pass. Owner changes
-the build variable only then. Require new exact-SHA green CI, protected preview
-review and Gate 2 before promotion. Verify the actual v1-configured rollback
-version, not merely the source revision. The dated audit below remains historical.
+candidate. The isolated v2 backend is now live and independently checked; its
+acceptance evidence is in the activation record. The owner handles the remaining
+website release: set `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` to
+`https://data.backtestbadger.com/forward-v2.json`, trigger a new build, review its
+exact source/build/version mapping and manually promote the candidate. Preserve
+`BADGER_SEARCH_INDEXING=www-live-owner-approved`, candidate-only upload and disabled
+alternate URLs. Record the actual previous v1-configured version for owner-managed
+rollback. Git pushes may automatically upload candidates; Codex did not trigger a
+manual website build or promote/roll back any version. The dated audit below is
+historical.
 
 ## Current live status — 28 October 2026
 

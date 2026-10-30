@@ -1,7 +1,6 @@
 # Stage 5B.10 — Controlled v2 forward-feed activation
 
-**30 October 2026 — backend activation approved; awaiting committed-source CI and
-exact-limit qualification before installation/publication.**
+**30 October 2026, 23:21 UTC — v2 backend acceptance complete; website release owner-managed.**
 
 The owner subsequently approved the [backend activation continuation](../prompts/stage-05-web/013-v2-backend-activation-approval.md),
 including commit/push, isolated installation, genuine publication, timers and
@@ -9,14 +8,127 @@ backend rollback by disabling only the new timers. Website configuration, builds
 promotion and rollback are owner-managed. This supersedes the initial approval
 gates below for backend operations only.
 
-**Initial preparation record:**
-No commit, push, production installation, R2 PUT, credential/configuration change,
-Worker upload or promotion has been performed. V1 continues serving www. This
-stage is **not complete** until the separately approved feed and website release
-have passed their public acceptance checks.
+The reviewed implementation is committed and pushed as
+`6a377e22e660f38cf919ab823ab45229b546c9b9`
+(`feat(ops): prepare isolated v2 forward feed activation`). The source-only
+artifact rebuilt from that commit is byte-identical to the reviewed archive below.
+Both exact-SHA workflows passed before installation. No website deployment was performed.
+
+The original preparation observations below are dated historical evidence; they
+do not override the subsequent backend authorisation. The authorised continuation
+ends at a healthy v2 feed. The website release remains owner-managed.
 
 The [complete request](../prompts/stage-05-web/012-v2-feed-production-activation.md)
 is archived verbatim. Historical reports remain unchanged.
+
+## Approved backend activation — actual operations
+
+The source commit `6a377e22e660f38cf919ab823ab45229b546c9b9` passed both
+[CI](https://github.com/owencrew/backtest-badger/actions/runs/41133900665)
+(including the new public-feed job and all guarded stages) and
+[Frontend](https://github.com/owencrew/backtest-badger/actions/runs/41133900292).
+The full CI workflow completed at 22:53:15 UTC; installation began only afterward.
+The local 261 Python tests, 144 frontend tests, Ruff, TypeScript, ESLint and
+Prettier were also rerun successfully before the implementation commit.
+
+Installed immutable source release:
+
+```text
+/opt/backtest-badger-public-feed-v2/releases/0000dbb3ba66f2e0d4bc601543b6580ba9b4f2767f962abe4b9a8e4d90d111da/
+```
+
+The root-controlled `current` symlink points to that directory. The source-only
+archive SHA-256 is the directory suffix; all 65 payload hashes in `MANIFEST.json`
+passed after transfer. `RELEASE.json` records the implementation commit and archive
+identity. The original reviewed archive and rebuilt committed-source archive are
+byte-identical. Only documentation changed afterward; those changes are not a new
+installed backend release.
+
+The existing `.venv` and Node runtime were copied into the isolated release and
+compared byte-for-byte. Relocated imports resolve inside the new release:
+Python 3.12.3, NumPy 2.5.4, scikit-learn 1.9.1, boto3 1.42.7, Node 24.22.1.
+An initial verification command mistakenly imported pandas, which is neither a
+project dependency nor present in either runtime; verification was corrected to
+the actual dependencies. No package was added/upgraded and no scientific check
+was weakened. The existing root:root 0600 environment file remains unchanged;
+its contents were not printed, copied or edited.
+
+Both new private state directories are ubuntu:ubuntu 0700. Four new unit files
+passed `systemd-analyze verify`; both timers stayed disabled until publication and
+independent HTTPS verification succeeded. The runtime-only private qualification
+unit omitted `EnvironmentFile` and the upload argument while preserving the exact
+25% CPU, 384/512 MiB memory, 32-task, 150-second deadline and filesystem restrictions.
+
+| Operation (30 October, UTC) | Result | Wall time | User/system CPU | Peak RSS |
+| --- | --- | ---: | ---: | ---: |
+| Private qualification, 22:57:35–22:58:13 | Both validators passed; no upload | 37.80 s | 8.82 / 0.59 s | 214,440 KiB |
+| First publication, 22:58:57–22:59:38 | PUT acknowledged; exact R2 readback | 40.80 s | 9.64 / 0.53 s | 214,608 KiB |
+| Scheduled publication 1, 23:08:00–23:08:41 | PUT acknowledged; exact R2 readback | 40.41 s | 9.46 / 0.58 s | 214,792 KiB |
+| Scheduled publication 2, 23:18:00–23:18:42 | PUT acknowledged; exact R2 readback | 41.22 s | 9.68 / 0.58 s | 214,984 KiB |
+
+Qualification was comfortably below the 90-second / 384 MiB stop thresholds.
+Systemd recorded 9.510 CPU seconds for qualification, 10.273 for initial
+publication and 10.141 for scheduled publication 1. RSS above is GNU `time`'s
+process peak, not an aggregate cgroup peak. Post-exit cgroup MemoryPeak/I/O
+counters were unavailable for qualification and the first publication. The
+configured cgroup limits remained enforced. During scheduled publication 2,
+live counters and its completion journal also recorded a 178,413,568-byte cgroup
+peak (170.1 MiB), zero memory high/max/OOM events, 10.359 total CPU seconds,
+zero physical disk reads and 81,920 bytes written. The CPU quota actively throttled
+the process. This is a warm-cache observation, not a cold-cache or sustained-load test.
+
+The independent checker passed at 23:00:04–23:00:08. A separate local HTTPS fetch
+returned HTTP 200, strict schema v2, 14,220 bytes, JSON content type, cache policy
+`public, max-age=60, must-revalidate` and exact
+`Access-Control-Allow-Origin: https://www.backtestbadger.com`. Its bytes and hash
+matched the publisher's private success and R2 readback. BTC and ETH latest
+issuance used original 20:00 source closes, targeting 00:00; latest-scored source
+closes were 16:00, with original BTC score time `20:07:11.864903Z` and ETH
+`20:02:11.798461Z`. No timestamps or saved scientific values were rewritten.
+
+Both new timers were enabled at 23:00:32. They are independent of v1: publisher
+at :08/:18/:28/:38/:48/:58, checker at :00/:10/:20/:30/:40/:50 plus 45 seconds.
+The extra scheduled 23:00:45 check also passed against the initial publication;
+it is not counted as a scheduled publication/check cycle.
+
+| Publication | Evidence cutoff / generation (UTC) | SHA-256 | Independent HTTPS check |
+| --- | --- | --- | --- |
+| Initial | 22:59:15.174826 / 22:59:33.474654 | `34e272a28c598bbc5daa5eb001b8351e253428743707fad913f5ad8407838e95` | 23:00:07, exact match |
+| Scheduled 1 | 23:08:18.187049 / 23:08:36.393241 | `4a807d9fcaab06c705b8ab7c4c4508634c328dfcc5a6529e2e38bf1af5c28e82` | 23:10:48, exact match |
+| Scheduled 2 | 23:18:19.100883 / 23:18:37.203861 | `e9f77cbb062b5bd5fb0db71068ba73cff73acad6eafdc94c79eb52fffd26d5c8` | 23:20:48, exact match |
+
+Both scheduled publication/check pairs exited 0 with `Result=success`. Their
+independent checks ran at 23:10:45–23:10:49 and 23:20:45–23:20:48, taking about
+3–4 seconds and 0.334 / 0.335 CPU seconds. All four v1/v2 timers were verified
+enabled and active after acceptance.
+A separate public comparison from initial publication to scheduled publication 2
+confirmed that only `as_of` and `generated_at` changed; all scientific fields were
+identical. Primary counts remained 98 genuine / 97 matched / 1 pending / 0 mature
+unscored per market. Original scored rows remained equal while fresh publication
+clocks advanced.
+A genuine four-hour boundary had not occurred by the 23:21 UTC acceptance cutoff;
+no research run was forced. Website transition verification remains owner-managed.
+
+The protected v1 helper/source/unit manifest (73 files) was unchanged after
+installation and after both scheduled cycles: SHA-256
+`f6a27f4de7f8c20f868bc8202809f9ba2f4f0e1e024cc2aa0c8b73449476d616`.
+Research still points to release `cceb6509edbb6e6a9fb577c112bf9c648e81c5a1`.
+V1 publisher/checker and research collector/scorer continued succeeding on their
+existing schedules. At 23:21 UTC they all had exit 0 / `Result=success`; collection
+last completed 23:21:06, scoring 23:17:12, v1 publication 23:13:40 and checking
+23:16:04. V1 independently passed strict HTTPS and exact-private-byte verification
+with cutoff `23:13:17.821660Z`, generation `23:13:35.905015Z`, 10,971 bytes and
+SHA-256 `cf67ac1714728a178fc0f424d031945338558807ffc01d91fcf07256f531db01`.
+All v2 state files are 0600 within 0700 directories. The only failed unit is the
+pre-existing historical D3B promotion unit, left unchanged.
+No existing service, unit, scientific evidence, credential, permission or research
+release was changed. No rollback operation was needed. Public probes of
+`/qualification-v2.json`,
+`/last-success-v2.json` and `/previous-success-v2.json` returned 404. These probes
+are not a bucket-wide inventory.
+
+The observations below preserve the initial preparation history. Current
+activation results above supersede their proposed/not-yet-installed descriptions.
 
 ## Source and baseline
 
@@ -28,11 +140,11 @@ finished successfully, checked during this session:
 - [Python CI](https://github.com/owencrew/backtest-badger/actions/runs/41069725744).
 - [Frontend](https://github.com/owencrew/backtest-badger/actions/runs/41069725606).
 
-These results validate the starting commit, **not these uncommitted changes**.
+These historical results validate the starting commit, **not the new implementation**.
 A new `public-feed` job in Python CI explicitly collects `web/tests`; root pytest's
 configured `testpaths` did not collect the Python exporter/publication suites.
-New code must be committed/pushed only after owner review, then receive green CI
-for its own exact SHA before a website release.
+The owner subsequently approved commit/push and required both workflows to pass
+for the new exact SHA before backend installation.
 
 Read-only Lightsail observations at 14:16–14:18 UTC, refreshed after the benchmark
 at 15:44 UTC:
@@ -97,8 +209,9 @@ Owner supplied version ID `1bb9d5bc-850e-4891-9f10-54c257814bd3` with screenshot
 
 This does not establish the newest Stage 5B.9 candidate identity or a verified
 current-version-to-source mapping. Preview-branch/Previews Base configuration
-also remains outstanding. Do not promote or upload an indexed candidate until
-these are recorded. Local `wrangler.jsonc` now explicitly sets `workers_dev` and
+also remains outstanding for the owner's later website review; it does not block
+the authorised backend continuation. Git pushes may automatically upload candidates
+through the existing upload-only command. Local `wrangler.jsonc` explicitly sets `workers_dev` and
 `preview_urls` false to preserve the owner's disabled exposure on future uploads.
 The remote settings themselves were not changed.
 
@@ -195,7 +308,7 @@ service's exact restrictions is mandatory **before the first PUT or timer enable
 Stop if preparation exceeds 90 seconds or peak RSS reaches 384 MiB; investigate
 without weakening provenance or silently expanding resources.
 
-## Isolation and proposed schedule
+## Isolation and reviewed schedule
 
 Proposed separate release root:
 `/opt/backtest-badger-public-feed-v2/releases/<reviewed-artifact-sha256>/`, with
@@ -276,7 +389,7 @@ command ran. Builds remain configured against v1 for these regressions. Phase E'
 v2-connected release candidate is intentionally deferred until v2 is publicly
 verified. No new article, editorial approval or scientific source changed.
 
-## Approval Gate 1 — proposed operations, not executed
+## Original Gate 1 plan — subsequently authorised
 
 Approval is required by sections 6 and 14 of the archived owner request. The local checks below are complete and the owner confirmed existing token scope.
 At initial preparation no installation/publication approval had been given. The
@@ -294,7 +407,7 @@ The precise proposed operations are:
    exact CPU/memory/timeout/filesystem bindings, using a transient qualification
    unit without credentials. Write only a distinct private qualification candidate.
    Record duration/RSS and strict validation; remove no retained research evidence.
-   Stop on limit violation. This transient unit itself requires Gate 1 approval.
+   Stop on limit violation. The continuation explicitly authorises this qualification.
 4. With the owner-confirmed existing bucket credential, run one v2 publisher
    oneshot. This performs the first authorised PUT of `forward-v2.json`. Compare
    S3 and public bytes/hash, validate both markets and independent HTTPS checker.
@@ -328,22 +441,21 @@ fail freshness/regression monitoring; do not reset those checks to hide it.
 
 For website rollback, the supplied version ID is a **candidate rollback identity**
 until its actual active state, exact source SHA and v1-configured asset mapping
-are independently recorded. Do not claim rollback has been exercised. After
-Gate 2 promotion, request owner authorisation to restore the verified previous
-v1-configured Worker, then recheck homepage/Burrow/feed/indexing/sitemap/redirects.
+are independently recorded. Do not claim rollback has been exercised. The owner manages any website promotion or rollback and its
+homepage/Burrow/feed/indexing/sitemap/redirect checks.
 
-Phase E needs a genuine healthy public v2 endpoint, the new reviewed source commit
-and both green workflows, owner-set v2 build variable, confirmed preview-branch
-safety and exact candidate version/build/source mapping. Gate 2 then separately
-approves promotion to 100% traffic. No candidate/upload/promotion for this stage
-exists yet. A real four-hour issuance/scoring/frontend transition is outstanding;
-no boundary was fabricated or research job triggered.
+The owner's website release follows genuine healthy public v2 operation and
+exact-SHA green CI: set the build variable, build, review the exact candidate
+version/build/source mapping and promote manually with preview protections intact.
+Git pushes may upload candidates automatically; no manual build, upload or
+promotion is part of this backend continuation. A real four-hour transition must
+be observed naturally; no research job may be triggered to force one.
 
 Next milestone: finish this controlled activation and observe genuine operation;
 then separately scope longer-running monitoring/notification verification. Do not
 infer profitability or long-term reliability from these tests.
 
-## Final local verification and reviewed installation artifact
+## Initial local verification and reviewed installation artifact
 
 Local link-path validation checked 162 Markdown targets with zero missing files.
 The archived prompt is byte-identical to the supplied attachment. A Git comparison
@@ -352,7 +464,8 @@ public v1 helpers, the v2 scientific exporter/contract, or existing v1 unit/conf
 files. Generated Next.js type-reference churn was restored to its starting bytes.
 `git diff --check` passes. Full root integration/backtest suites were not rerun
 locally; focused frozen-forward/export suites are reported above, and the starting
-commit's full GitHub CI succeeded. New uncommitted code has no GitHub CI result yet.
+commit's full GitHub CI succeeded. These were the results available before the
+subsequently authorised implementation commit and its own CI runs.
 
 A local, private, source-only installation archive is prepared at
 `/tmp/badger-5b10-reviewed-source.tar` (993,280 bytes, 66 files including manifest).
@@ -361,7 +474,7 @@ SHA-256:
 It contains Python source, frozen protocol, dependency identity files, the exact
 v2 bundles and four units. It contains no environment file, credentials, private
 candidate or retained evidence. `MANIFEST.json` records every payload file hash.
-It has **not** been transferred to production. Any code/bundle/unit change requires
+At initial preparation it had not been transferred to production. Any code/bundle/unit change requires
 rebuilding and reviewing a new archive identity before installation.
 
 The proposed release directory suffix is that archive digest. Do not deploy an
@@ -370,7 +483,8 @@ the archive; copy only the existing pinned `.venv` and `node` directories into
 the new release, verify relocated imports and versions, and record their identity.
 All new units must pass host `systemd-analyze verify` and the exact-limit private
 qualification before any public write. Unit runtime/namespace correctness has
-not yet been tested on the host because installation requires approval.
+not tested during the initial read-only preparation. The owner subsequently
+authorised installation and required this trial before the first PUT.
 
 ## Complete changed-file inventory
 
@@ -402,17 +516,61 @@ not yet been tested on the host because installation requires approval.
 
 | Scope | Actual state |
 | --- | --- |
-| Local implementation and synthetic fault tests | Completed; commit/push authorised, pending exact-SHA CI |
-| Genuine retained evidence on Lightsail | Read-only preparation/validation passed; no raw transfer |
-| Exact service quota/namespace qualification | Authorised; pending exact-SHA CI and installation |
-| Existing R2 token scope | Owner confirmed bucket-only Object Read & Write |
-| Production writes / credentials / R2 uploads | No writes yet; backend activation authorised, credential changes forbidden |
-| V2 scheduled publication / independent checker | Not installed or activated |
-| Two scheduled v2 cycles | Not observed |
-| Four-hour transition through v2 and frontend | Outstanding |
-| New website v2 candidate / www promotion | Not prepared, uploaded or promoted; Gates 1 and 2 remain |
-| Indexing/alternate URLs | Public www indexable; owner screenshots and tested alternate URLs show disabled exposure |
-| Preview-branch builds / exact rollback provenance | Outstanding before website release |
+| Local implementation and synthetic fault tests | Committed/pushed; both exact-SHA workflows green |
+| Genuine retained evidence on Lightsail | Validated in place; no raw transfer |
+| Exact service quota/namespace qualification | Passed: 37.80 s, 214,440 KiB RSS; no upload |
+| Existing R2 token scope | Owner confirmed bucket-only Object Read & Write; unchanged |
+| Production writes / credentials / R2 uploads | Isolated v2 installed and published; credentials unchanged |
+| V2 scheduled publication / independent checker | Both timers enabled/active; two scheduled cycles passed |
+| Two scheduled v2 cycles | 23:08 / 23:10:45 and 23:18 / 23:20:45; all passed |
+| Four-hour transition through v2 and frontend | Not observed at acceptance cutoff; website remains owner-managed |
+| Website v2 build / www promotion | Owner changes build variable, triggers build and manually promotes reviewed candidate |
+| Indexing/alternate URLs | Existing www indexing and disabled alternate exposure preserved |
+| Preview-branch builds / exact rollback provenance | Owner's website release review; not a backend blocker |
 
-Suggested Conventional Commit (only after owner authorisation):
-`feat(ops): prepare isolated v2 forward feed activation`.
+Implementation commit: `6a377e22e660f38cf919ab823ab45229b546c9b9`
+(`feat(ops): prepare isolated v2 forward feed activation`).
+
+## Owner-managed website release
+
+The backend continuation stops at a healthy v2 feed. Codex did not change
+Cloudflare build variables, DNS, R2 settings, credentials, permissions or Workers
+Builds settings, trigger a manual website build, or promote/roll back a Worker.
+Git pushes may automatically upload candidates through the existing upload-only
+command; an automatic upload is not a production promotion.
+
+The remaining website release steps are for the owner:
+
+1. Open Cloudflare → Workers & Pages → `backtest-badger-web` → Settings → Builds
+   → Production → Variables and secrets. Set only
+   `NEXT_PUBLIC_FORWARD_SNAPSHOT_URL` to
+   `https://data.backtestbadger.com/forward-v2.json` and save it.
+2. Keep `BADGER_SEARCH_INDEXING=www-live-owner-approved`, production branch `main`,
+   root `/web`, the existing validation build command and candidate-only
+   `pnpm exec wrangler versions upload`. Keep production workers.dev and
+   version-preview URLs disabled; preserve the existing preview-branch safeguards.
+3. Trigger a new build of the reviewed source. Confirm its successful validation
+   log and exact commit/build/Worker-version mapping. The feed URL is a build-time
+   value: changing it alone does not update the existing static website.
+4. Review the resulting v2-configured candidate and record the current
+   v1-configured active version as the rollback target. Manually promote the
+   reviewed candidate when ready. No additional backend activation is needed.
+5. After promotion, check homepage, Burrow current and latest-scored rows, original
+   issuance/scoring timestamps, fresh v2 fetch, www indexing/canonical/robots,
+   13-page sitemap, redirects preserving path/query and disabled alternate URLs.
+   Keep v1 running. Any website rollback is also owner-managed.
+
+At the 23:21 UTC acceptance cutoff, a natural four-hour issuance/scoring transition
+and longer-running operational monitoring remained observations to collect; do not
+force research events or treat a short successful activation as evidence of
+long-term reliability.
+
+## Documentation closeout
+
+The post-activation documentation update changes seven Markdown files only; no
+backend, scientific, editorial, frontend implementation or installed artifact
+changed. All 134 relative Markdown targets checked resolve, `git diff --check`
+and the frontend format check pass. Both workflows must also be green for the
+resulting documentation commit before final handoff; that commit identity and its
+CI results are reported separately from the installed source identity above.
+Acceptance measurements in this report are dated through 23:21 UTC on 30 October.
