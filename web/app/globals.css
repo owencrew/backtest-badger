@@ -394,6 +394,9 @@ time,
 .text-link > span {
   font-size: 19px;
 }
+.text-link > .text-link-label {
+  font-size: inherit;
+}
 .featured-research {
   display: grid;
   grid-template-columns: 0.85fr 1.25fr;
@@ -1553,6 +1556,9 @@ details p {
   }
 }
 @media (max-width: 850px) {
+  .link-arrow {
+    display: none;
+  }
   .header-inner {
     min-height: 76px;
   }

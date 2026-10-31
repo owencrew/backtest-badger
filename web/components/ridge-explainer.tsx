@@ -1,4 +1,5 @@
 import { reportUrl } from "@/lib/research";
+import { Arrow } from "./ui";
 export function RidgeExplainer() {
   return (
     <section
@@ -20,7 +21,9 @@ export function RidgeExplainer() {
             className="text-link"
             href="https://doi.org/10.1080/00401706.2020.1742207"
           >
-            History of the name ↗
+            <span className="text-link-label">
+              History of the name <Arrow />
+            </span>
           </a>
         </p>
         <p>
@@ -136,7 +139,9 @@ export function RidgeExplainer() {
         fails.
       </p>
       <a href={reportUrl} className="text-link">
-        Read the authoritative E.5g report ↗
+        <span className="text-link-label">
+          Read the authoritative E.5g report <Arrow />
+        </span>
       </a>
       <details className="glossary">
         <summary>A short research glossary</summary>

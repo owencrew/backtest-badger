@@ -8,7 +8,12 @@ export default function NotFound() {
         It may be awaiting editorial approval, or the link may have changed.
       </p>
       <Link className="button" href="/">
-        Back to home →
+        <span>
+          Back to home{" "}
+          <span className="link-arrow" aria-hidden="true">
+            →
+          </span>
+        </span>
       </Link>
     </div>
   );

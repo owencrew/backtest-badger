@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import { repository, reportUrl } from "@/lib/research";
 
 export function Arrow() {
-  return <span aria-hidden="true">↗</span>;
+  return (
+    <span className="link-arrow" aria-hidden="true">
+      ↗
+    </span>
+  );
 }
 export function Status({
   children,
@@ -121,7 +125,9 @@ export function SiteFooter() {
         <div className="footer-links">
           <Link href="/about/">About & methodology</Link>
           <Link href="/field-guide/">Field Guide</Link>
-          <a href={repository}>Source on GitHub ↗</a>
+          <a href={repository}>
+            Source on GitHub <Arrow />
+          </a>
         </div>
       </div>
       <div className="footer-bottom">
