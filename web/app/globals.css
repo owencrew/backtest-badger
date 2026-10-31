@@ -1556,6 +1556,10 @@ details p {
   }
 }
 @media (max-width: 850px) {
+  .art-cross {
+    /* Hide the decorative glyph while preserving the hero artwork's spacing. */
+    visibility: hidden;
+  }
   .link-arrow {
     display: none;
   }
