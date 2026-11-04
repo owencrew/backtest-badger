@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Study 002 — private review draft</title>
+<style>body{font:17px/1.6 system-ui;
+background:#f4f1ea;
+color:#202820;
+max-width:1100px;
+margin:auto;
+padding:24px}.badge{background:#315943;
+color:white;
+padding:8px 14px;
+display:inline-block}table{border-collapse:collapse;
+width:100%;
+font-variant-numeric:tabular-nums}th,td{padding:10px;
+text-align:left;
+border-bottom:1px solid #82908d}img{width:100%;
+height:auto}figure{margin:35px 0}.scroll{overflow:auto}a{color:#315943}</style>
+<p class="badge">UNAPPROVED · LOCAL REVIEW DRAFT · HISTORICAL SIMULATION</p>
+<h1>Can a Slower Trend Beat the Noise?</h1>
+<p>Study 001's frequent position changes incurred substantial costs. This study asks
+whether a simpler rule changes the outcome: once daily, hold the asset when its
+completed price is above its price exactly 30 days earlier;
+ otherwise hold cash.</p>
+<p>The table includes fixed trading costs. Each strategy and market has its own 10,000
+USDT. This changes both the signal and its frequency, so it cannot isolate the effect
+of trading less.</p>
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>Market</th>
+<th>Strategy</th>
+<th>Net return</th>
+<th>Hourly drawdown</th>
+<th>Executions</th>
+<th>Costs (USDT)</th>
+</tr>
+</thead>
+<tbody><tr><th>BTCUSDT</th><td>30-Day Trend</td><td>+36.62%</td><td>37.88%</td><td>38</td><td>543.87</td></tr><tr><th>BTCUSDT</th><td>Cash</td><td>+0.00%</td><td>0.00%</td><td>0</td><td>0.00</td></tr><tr><th>BTCUSDT</th><td>Buy & Hold</td><td>+120.81%</td><td>32.31%</td><td>1</td><td>12.99</td></tr><tr><th>ETHUSDT</th><td>30-Day Trend</td><td>+8.47%</td><td>34.67%</td><td>32</td><td>422.61</td></tr><tr><th>ETHUSDT</th><td>Cash</td><td>+0.00%</td><td>0.00%</td><td>0</td><td>0.00</td></tr><tr><th>ETHUSDT</th><td>Buy & Hold</td><td>+46.18%</td><td>46.66%</td><td>1</td><td>12.99</td></tr><tr><th>BTCUSDT</th><td>Ridge Sign</td><td>-60.69%</td><td>65.41%</td><td>1140</td><td>9,932.12</td></tr><tr><th>ETHUSDT</th><td>Ridge Sign</td><td>-57.96%</td><td>65.79%</td><td>998</td><td>9,239.49</td></tr></tbody>
+</table>
+</div>
+<p>Read the <a href="../study-002-slower-trend-results.md">scientific report</a>, <a
+href="../study-002-methodology.md">predeclared methodology</a> and <a
+href="review-data.json">exact source-linked data</a>. December's mark-to-mark period
+is partial;
+funding-relative returns include inception costs.</p>
+<figure><img src="equity.png" alt="Account equity in USDT; historical simulation from source-linked retained evidence"><figcaption>Account equity in USDT. Exact source hashes appear on each chart.</figcaption></figure><figure><img src="drawdown.png" alt="Observed hourly drawdown; historical simulation from source-linked retained evidence"><figcaption>Observed hourly drawdown. Exact source hashes appear on each chart.</figcaption></figure><figure><img src="exposure.png" alt="Trend long/cash exposure; historical simulation from source-linked retained evidence"><figcaption>Trend long/cash exposure. Exact source hashes appear on each chart.</figcaption></figure><figure><img src="activity.png" alt="Monthly trading activity; historical simulation from source-linked retained evidence"><figcaption>Monthly trading activity. Exact source hashes appear on each chart.</figcaption></figure><figure><img src="costs.png" alt="Attributed cost comparison in USDT; historical simulation from source-linked retained evidence"><figcaption>Attributed cost comparison in USDT. Exact source hashes appear on each chart.</figcaption></figure><figure><img src="monthly.png" alt="Monthly mark-to-mark returns; historical simulation from source-linked retained evidence"><figcaption>Monthly mark-to-mark returns. Exact source hashes appear on each chart.</figcaption></figure>
+<h2>What this cannot establish</h2>
+<p>2024 was already inspected. This is exploratory retrospective research, not
+untouched out-of-sample evidence, live trading or proof of a durable edge. Archive
+openings and assumed costs do not establish fillability. BTC and ETH share market
+conditions.</p>
+<p>Run: 20261101T211013080953Z-b974b600fe2646349c172b250333918c.
+No production route or sitemap entry exists for this draft.
+Publication requires owner review.</p>
+</html>

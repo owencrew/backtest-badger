@@ -1,6 +1,40 @@
 # Development handoff — Backtest Badger
 
-**Last updated:** 2026-10-30 (Europe/London)
+## Study 002 handoff — 4 November 2026
+
+[Study 002](studies/study-002-slower-trend-results.md) is complete as unpublished
+local historical research. Its one genuine run completed on 1 November at
+21:10:27 UTC; report preparation resumed after a usage interruption without
+repeating the run. The fixed daily 30-day trend returned **+36.62% BTCUSDT /
++8.47% ETHUSDT**, versus Ridge **−60.69% / −57.96%**, Cash 0%, and Buy & Hold
+**+120.81% / +46.18%**. Costs fell about 95% relative to Ridge, but BTC Trend's
+37.88% hourly drawdown was worse than Buy & Hold's 32.31%. This is exploratory
+retrospective research on previously inspected 2024 history.
+
+Read the [frozen methodology](studies/study-002-methodology.md),
+[freeze identity record](studies/study-002-freeze.json), full report and
+[Dig integration draft](studies/study-002-dig-draft.md). The local review page is
+`docs/studies/study-002-assets/review.html`; it is outside production export.
+The optional [Field Notes draft](studies/study-002-field-note-draft.md) requires
+separate editorial approval. No existing approval hashes were changed.
+
+Private run: `artifacts/studies/study-002/20261101T211013080953Z-b974b600fe2646349c172b250333918c/`.
+Its completion marker, six ledgers and independent serialized accounting checks
+passed. Original Study 001 summary/evidence reproduced byte for byte in an opt-in
+regression. Final applicable selections: 40 new synthetic tests, 1,081 existing
+research regressions and one original-reference regression passed; 183 PostgreSQL
+integration cases skipped without an isolated test DSN. The report discloses the
+corrected initial test-fixture import failure and exact validation scope.
+
+Next is owner scientific/editorial review, then separately authorised website
+integration and deployment. **Do not run Study 002 again under this request:**
+its one-run authority is consumed. Preserve all original evidence and frozen
+sources. No commit or push was made. Earlier production/forward-feed handoffs
+below retain their independent status and are not changed by this study.
+
+## Production and forward snapshot — 30 October 2026
+
+**Snapshot date:** 2026-10-30 (Europe/London)
 **Repository:** https://github.com/owencrew/backtest-badger
 **Product:** https://www.backtestbadger.com — *A little badger. A lot of backtests.*
 **Next priority:** The owner completes the website release against the active v2

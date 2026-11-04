@@ -1,10 +1,17 @@
 # Roadmap
 
-**Current summary: 30 October 2026.** Each stage is scoped independently. Planned
+**Current summary: 4 November 2026.** Each stage is scoped independently. Planned
 capabilities are not current features. The first genuine native-minute 2024
 backtest is complete and the public website is live. The current product milestone
 is an active isolated v2 forward feed, with the website release owner-managed.
 Prospective paper-trading implementation remains a separate future scope.
+
+[Stage 6A.1 — Study 002](studies/study-002-slower-trend-results.md) is complete
+as local exploratory research and awaits owner publication review. The one
+predeclared daily 30-day trend run returned +36.62% BTC / +8.47% ETH with roughly
+95% less attributed cost than Ridge, but lagged Buy & Hold in both markets.
+The method, verified ledgers, report, charts and Dig/Field Notes drafts are
+retained; the website and approved Study 001 experience are unchanged.
 
 [E.5g](stage-04b2e5g-first-genuine-historical-backtest.md) records verified independent
 Ridge, Cash and Buy & Hold accounts for each market. Ridge lost **60.69% on BTCUSDT
@@ -19,6 +26,7 @@ scope.
 
 | Stage | Status | Acceptance criteria |
 | --- | --- | --- |
+| **6A.1 — Study 002: daily 30-day trend** | Local research complete; publication pending | Frozen method/config/source hashes, authenticated warm-up/minute inputs, 40 synthetic tests, existing regressions and exact Study 001 output regression; one verified genuine run, six independent ledgers, source-linked report/charts and unpublished Dig/Field Notes drafts. |
 | **0 — Foundation** | Complete | Python 3.12 package installs from the uv lockfile; configuration and both CLI checks work; local PostgreSQL connectivity is demonstrated when Docker is available; pytest and Ruff pass; CI, license and concise documentation exist. |
 | **1A — Market Data Feasibility and Design** | Complete; schema decisions refined in 1B.1 | Official Binance documentation reviewed; bounded public API/archive tests completed; timeframe, revision policy and minimal schema proposed in the [Stage 1A design](stage-01a-market-data-design.md). Schema implemented in 1B.1; bounded monthly archives implemented in 1B.2. |
 | **1B.1 — Schema and Persistence** | Implemented | Three application tables and market seeds; Alembic upgrade/downgrade; exact Decimal persistence; version-preserving writes; stale-write handling and PostgreSQL concurrency/rollback tests; ingestion added separately in 1B.2. |

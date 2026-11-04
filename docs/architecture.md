@@ -1,5 +1,24 @@
 # Architecture
 
+## Study 002 research update — 4 November 2026
+
+The [second historical study](studies/study-002-slower-trend-results.md) completed
+one genuine local run on 1 November; its report and unpublished review package
+were finalised on 4 November. `study002.py` uses a fixed daily 30-day close trend
+and a narrow scheduler around the unchanged monetary fill, accounting, hourly
+mark and reporting primitives. `study002_runner.py` verifies pinned native 4h
+warm-up, the existing authenticated minute publication and independent sign-off,
+a pre-run method/config/source freeze, independent ledgers and output hashes.
+The frozen Ridge planner and original evidence are unchanged; a pinned regression
+reproduced its original summary and detailed evidence byte for byte.
+
+`study002_materials.py` creates source-linked review JSON, six charts and a local
+HTML page from retained evidence, without replay. All review material is outside
+the production export. See the [methodology](studies/study-002-methodology.md) and
+[Dig integration proposal](studies/study-002-dig-draft.md). No production or
+prospective trading component was added. The sections below retain their dated
+architecture context.
+
 ## Current architecture — 24 October 2026
 
 The repository now supports genuine historical research and prospective forecast

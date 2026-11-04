@@ -121,3 +121,11 @@ The Stage 5B.10 continuation and backend activation approval is archived verbati
 It authorises reviewed commits/pushes, exact-SHA CI verification, isolated
 Lightsail/R2 activation and two scheduled cycles. The owner retains all Cloudflare
 dashboard changes, website promotion and website rollback.
+
+Stage 6A.1's complete request is archived verbatim at
+[`stage-06-research/001-study-002-slower-trend.md`](stage-06-research/001-study-002-slower-trend.md).
+It predeclares one daily 30-day trend rule and conditionally authorises one local
+2024 historical run after provenance, freeze, synthetic and regression gates.
+Publication, production access, acquisition, tuning, commits and pushes remain
+outside scope. See the [Study 002 methodology](../docs/studies/study-002-methodology.md)
+and [results and validation record](../docs/studies/study-002-slower-trend-results.md).

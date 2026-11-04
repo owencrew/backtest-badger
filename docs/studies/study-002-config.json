@@ -1,0 +1,23 @@
+{
+  "study": "study-002",
+  "strategy": "trend_30d_daily_v1",
+  "classification": "exploratory_retrospective_previously_inspected_2024",
+  "symbols": ["BTCUSDT", "ETHUSDT"],
+  "start": "2024-01-01T00:00:00+00:00",
+  "end_exclusive": "2025-01-01T00:00:00+00:00",
+  "lookback_calendar_days": 30,
+  "signal_utc": "00:01:00",
+  "execution_utc": "00:02:00",
+  "long_rule": "P_now > P_30d",
+  "initial_cash_usdt": "10000",
+  "fee_rate": "0.001",
+  "fee_quantum_usdt": "0.00000001",
+  "half_spread_rate": "0.0001",
+  "slippage_rate": "0.0002",
+  "quantity_step": "0.000001",
+  "valuation_interval_seconds": 3600,
+  "last_mark": "2024-12-31T23:00:00+00:00",
+  "buy_and_hold_inception": "2024-01-01T00:00:00+00:00",
+  "annualisation_days": 365,
+  "terminal_liquidation": false
+}
