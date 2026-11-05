@@ -55,6 +55,7 @@ try {
     "/",
     "/burrow/",
     "/dig/",
+    "/dig/study-002/",
     "/field-notes/",
     "/field-guide/",
     "/about/",
@@ -127,6 +128,9 @@ try {
   const assets = [
     "/brand/badger-mascot.webp",
     "/brand/badger-mark.svg",
+    "/research/study-002/equity.png",
+    "/research/study-002/drawdown.png",
+    "/research/study-002/exposure.png",
     "/licenses/lightweight-charts-LICENSE.txt",
   ];
   for (const directory of ["css", "chunks", "media"]) {

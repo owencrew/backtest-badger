@@ -11,7 +11,26 @@ The principle is **minimum complexity, maximum correctness**: readable Python,
 exact financial accounting, versioned SQL data, causal features, chronological
 evaluation and reproducible evidence. Profitability is a question to investigate.
 
-## Latest research: a working pipeline, a losing strategy
+## Study 002 website candidate — 5 November 2026
+
+The Dig now has a two-study research library and a dedicated
+`/dig/study-002/` candidate page. The fixed daily 30-day trend returned
++36.62% BTCUSDT / +8.47% ETHUSDT after assumed costs, with about 95% lower
+attributed costs than Ridge, but both markets lagged Buy & Hold. Bitcoin
+Trend's observed hourly drawdown was worse than Buy & Hold's. These are
+exploratory simulations on previously examined 2024 history, not live results.
+
+See the [publication and validation handoff](docs/studies/study-002-web-publication.md)
+for source identities, screenshots, checks and manual Cloudflare promotion.
+The original Study 001 results and seven editorial approvals are preserved.
+Field Notes 005 remains unpublished. This candidate does not establish a
+production release; the owner makes the final promotion decision.
+The task's current website configuration uses the existing
+[v2 forward feed](https://data.backtestbadger.com/forward-v2.json), which this
+frontend integration does not modify. Older dated v1 observations below are
+historical.
+
+## Study 001: a working pipeline, a losing strategy
 
 The first genuine **2024 native-minute historical backtest** completed on
 24 October 2026. Six independently funded portfolios passed ledger verification.

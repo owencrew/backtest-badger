@@ -6,6 +6,7 @@ export const publicPaths = [
   "/",
   "/burrow/",
   "/dig/",
+  "/dig/study-002/",
   "/field-notes/",
   "/field-guide/",
   "/about/",

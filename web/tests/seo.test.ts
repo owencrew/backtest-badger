@@ -17,7 +17,7 @@ test("indexing requires the exact deliberate launch setting", () => {
   assert.equal(indexingEnabled("www-live-owner-approved"), true);
 });
 
-test("sitemap contains exactly the six site routes and seven eligible articles", () => {
+test("sitemap contains exactly the seven site routes and seven eligible articles", () => {
   const entries = sitemap();
   const expected = [...publicPaths];
   for (const collection of ["fieldNotes", "guides"] as const) {
@@ -39,7 +39,7 @@ test("sitemap contains exactly the six site routes and seven eligible articles",
       );
     }
   }
-  assert.equal(entries.length, 13);
+  assert.equal(entries.length, 14);
   assert.deepEqual(
     entries.map((e) => e.url).sort(),
     expected.map((p) => siteOrigin + p).sort(),

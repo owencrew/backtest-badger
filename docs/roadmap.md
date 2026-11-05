@@ -6,6 +6,13 @@ backtest is complete and the public website is live. The current product milesto
 is an active isolated v2 forward feed, with the website release owner-managed.
 Prospective paper-trading implementation remains a separate future scope.
 
+[Stage 6A.2 — Study 002 website integration](studies/study-002-web-publication.md)
+adds the two-study Dig library and dedicated source-verified Study 002 page.
+Local implementation and validation are complete; exact-commit CI and the
+Cloudflare candidate status are reported in the release handoff. Production
+promotion remains an owner decision. Field Notes 005 publication remains a
+separate editorial milestone. No new economics or backend change is included.
+
 [Stage 6A.1 — Study 002](studies/study-002-slower-trend-results.md) is complete
 as local exploratory research and awaits owner publication review. The one
 predeclared daily 30-day trend run returned +36.62% BTC / +8.47% ETH with roughly

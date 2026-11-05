@@ -7,6 +7,23 @@ credentials or private research artifacts. The Burrow fetches genuine Binance
 Spot observations and [forward snapshots](https://data.backtestbadger.com/forward-v1.json)
 directly from the browser.
 
+## Stage 6A.2 — Study 002 website candidate
+
+`/dig/` is a two-entry research library; Study 001 stays at `/dig/#study-001`.
+`/dig/study-002/` presents verified daily-trend results, retained hourly charts,
+independent account/cost/exposure tables, all 12 months and limitations.
+`lib/study002-data.json` is a narrow Decimal-string selection from committed
+review data, validated by `lib/study002.ts` and source/report/manifest tests.
+Only three byte-identical research PNGs enter `public/research/study-002/`.
+No private evidence or review HTML/JSON is copied into the export.
+
+The indexed sitemap has 14 URLs. The seven editorial approvals and local
+noindex gate are unchanged. Field Notes 005 remains outside the content loader.
+Build with the existing v2 feed URL; do not change Cloudflare settings or promote
+a version automatically. See the [publication handoff](../docs/studies/study-002-web-publication.md)
+for validation, screenshots, source pins and the owner's release/rollback steps.
+The following production snapshots retain their historical dates.
+
 ## Current production baseline — 28 October 2026
 
 Read the [Stage 5B.8 post-launch audit](../docs/stage-05b8-post-launch-audit.md) first.

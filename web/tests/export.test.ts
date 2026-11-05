@@ -321,3 +321,83 @@ test("Field Guide band preserves links and metadata with the exact approved head
     );
   }
 });
+
+test("Study 002 exports all markets, months and evidence while Study 001 and drafts remain separate", () => {
+  const dig = readFileSync(path.join(output, "dig/index.html"), "utf8");
+  assert.match(dig, /id="study-001"/);
+  assert.match(dig, /href="\/dig\/#study-001"/);
+  assert.match(dig, /href="\/dig\/study-002\/"/);
+  assert.match(dig, /The 2024 Ridge Sign Study/);
+  assert.match(dig, /570/);
+  assert.match(dig, /How does a forecast become a trade/);
+  const html = readFileSync(
+    path.join(output, "dig/study-002/index.html"),
+    "utf8",
+  );
+  const visible = decode(
+    html
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")
+      .replace(/<!--.*?-->/g, ""),
+  );
+  for (const value of [
+    "Historical simulation",
+    "BTCUSDT",
+    "ETHUSDT",
+    "+36.62%",
+    "+8.47%",
+    "−60.69%",
+    "−57.96%",
+    "+120.81%",
+    "+46.18%",
+    "13,662.50",
+    "10,846.55",
+    "37.88%",
+    "34.67%",
+    "543.87",
+    "422.61",
+    "Undefined (zero variance)",
+    "previously examined year",
+    "not charged again",
+    "2024-12 (partial)",
+  ])
+    assert.ok(visible.replace(/<[^>]+>/g, "").includes(value), value);
+  for (let month = 1; month <= 12; month++)
+    assert.equal(
+      (
+        visible.match(
+          new RegExp(
+            `<th scope="row">2024-${String(month).padStart(2, "0")}`,
+            "g",
+          ),
+        ) ?? []
+      ).length,
+      2,
+    );
+  for (const name of ["equity", "drawdown", "exposure"]) {
+    assert.ok(existsSync(path.join(output, `research/study-002/${name}.png`)));
+    assert.match(
+      visible,
+      new RegExp(`alt="[^"]+"[^>]*src="/research/study-002/${name}\\.png"`),
+    );
+  }
+  for (const match of visible.matchAll(
+    /href="(https:\/\/github.com\/owencrew\/backtest-badger\/blob\/[^\"]+)"/g,
+  )) {
+    if (match[1].includes("docs/studies/"))
+      assert.ok(
+        match[1].includes("/04c485e6af74e52d0541ceab3a88ca0debb21346/"),
+      );
+  }
+  for (const file of files(output).filter((f) =>
+    /\.(html|txt|json|js)$/.test(f),
+  ))
+    assert.doesNotMatch(
+      readFileSync(file, "utf8"),
+      /A smaller trading bill is only part of the story|unapproved_draft|artifacts\/studies\/|private\/evidence\.json|canonical_account_identity|legacy_reporting_fingerprint/,
+    );
+  assert.equal(
+    existsSync(path.join(output, "research/study-002/review-data.json")),
+    false,
+  );
+  assert.equal(sitemap().length, 14);
+});

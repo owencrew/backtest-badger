@@ -1,3 +1,4 @@
+import { StudyLibrary } from "@/components/study-library";
 import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { RidgeExplainer } from "@/components/ridge-explainer";
@@ -13,7 +14,7 @@ import { readArticles } from "@/lib/content";
 import { ArticleCard } from "@/components/editorial";
 export const metadata = pageMetadata(
   "The Dig — Historical research",
-  "Explore the 2024 Ridge crypto spot backtest against Cash and Buy & Hold, with independent accounts, explicit trading costs and research limitations.",
+  "Explore two verified 2024 crypto spot studies: Ridge Sign and a daily 30-day trend, with independent benchmarks, explicit costs and research limitations.",
   "/dig/",
 );
 export default function Dig() {
@@ -26,7 +27,8 @@ export default function Dig() {
         A good backtest doesn’t promise a winning strategy. It gives you a
         clearer view of the evidence, the costs and the alternatives.
       </PageIntro>
-      <div className="study-header">
+      <StudyLibrary />
+      <div className="study-header" id="study-001">
         <div>
           <Status>Historical simulation</Status>
           <h2>The 2024 Ridge sign study</h2>

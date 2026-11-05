@@ -129,3 +129,12 @@ It predeclares one daily 30-day trend rule and conditionally authorises one loca
 Publication, production access, acquisition, tuning, commits and pushes remain
 outside scope. See the [Study 002 methodology](../docs/studies/study-002-methodology.md)
 and [results and validation record](../docs/studies/study-002-slower-trend-results.md).
+
+
+Stage 6A.2's complete request is archived verbatim at
+[`stage-06-research/002-study-002-dig-publication.md`](stage-06-research/002-study-002-dig-publication.md).
+It authorises source-verified frontend integration, local validation, commit and
+push to main, and exact-commit CI verification. It preserves all scientific
+sources, Study 001 and editorial approvals; Field Notes 005 remains unpublished.
+Cloudflare promotion and rollback remain manual owner actions. See the
+[website publication handoff](../docs/studies/study-002-web-publication.md).

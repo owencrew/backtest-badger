@@ -2805,3 +2805,366 @@ button:disabled {
     font-size: 14px;
   }
 }
+
+/* Study library and the source-verified daily-trend research page. */
+.study-library {
+  margin: 0 0 48px;
+}
+.study-library h2 {
+  font-size: 24px;
+}
+.study-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.study-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+.study-card:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-surface-raised);
+}
+.study-card[aria-current] {
+  border-top: 3px solid var(--color-primary-light);
+}
+.study-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-primary-light);
+}
+.study-card h3 {
+  font-size: 27px;
+  max-width: 410px;
+}
+.study-card p {
+  font-size: 14px;
+}
+.study-card .study-card-meta {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+.study-card .study-card-finding {
+  border-top: 1px solid var(--color-border);
+  padding-top: 18px;
+  margin-top: auto;
+  color: var(--color-sand);
+}
+.study002 {
+  min-width: 0;
+}
+.study-intro h1 {
+  margin-top: 24px;
+  max-width: 950px;
+}
+.study-byline {
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 2;
+}
+.study-verdict {
+  padding: 36px 40px;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary-light);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+}
+.study-verdict h2 {
+  font-size: clamp(24px, 3vw, 36px);
+  margin: 14px 0 20px;
+}
+.study-verdict p {
+  max-width: 850px;
+}
+.study-verdict .small {
+  margin-top: 20px;
+  color: var(--color-sand);
+}
+.study-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 20px 0;
+}
+.study-contents a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.study-contents a:hover {
+  color: var(--color-sand);
+  text-decoration: underline;
+}
+.study002 .section-block > .eyebrow {
+  margin-bottom: 16px;
+}
+.study-section-lede {
+  margin: 20px 0 28px;
+  max-width: 800px;
+  color: var(--color-text-muted);
+}
+.study-timeline {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 32px 0;
+}
+.study-timeline li {
+  padding: 24px;
+  border-top: 2px solid var(--color-primary-light);
+  background: var(--color-surface);
+}
+.study-timeline .mono {
+  color: var(--color-primary-light);
+  font-size: 13px;
+}
+.study-timeline h3 {
+  font-size: 19px;
+  margin: 16px 0;
+}
+.study-timeline p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.study-results .market-selector {
+  width: fit-content;
+  max-width: 100%;
+  margin: 24px 0 16px;
+}
+.study-results .market-selector button {
+  min-height: 44px;
+}
+.study-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 30px;
+}
+.study-metrics > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--color-surface);
+}
+.study-metrics span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.study-metrics strong {
+  font-size: clamp(23px, 2.7vw, 34px);
+  font-weight: 550;
+  color: var(--color-primary-light);
+  font-variant-numeric: tabular-nums;
+}
+.study-figure {
+  margin-top: 28px;
+}
+.study-figure figcaption {
+  margin-bottom: 12px;
+}
+.study-figure figcaption strong {
+  font-size: 17px;
+}
+.study-figure figcaption p {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  max-width: 820px;
+}
+.study-figure-scroll {
+  overflow-x: auto;
+  width: 100%;
+  border-radius: var(--radius);
+  margin: 16px 0;
+}
+/* Original figures: 1800 × 1200. Keep every plotted pixel and axis label,
+   y=190…1100. Only the dated draft masthead and duplicate hash footer are omitted. */
+.study-figure-window {
+  min-width: 1000px;
+  width: 100%;
+  aspect-ratio: 1800 / 910;
+  overflow: hidden;
+  position: relative;
+  background: #f4f1ea;
+}
+.study-figure-window img {
+  display: block;
+  position: absolute;
+  top: 0;
+  transform: translateY(-15.8333333333%);
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+.study002 .source-note {
+  overflow-wrap: anywhere;
+}
+.study002 .source-note a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.study-cost-bars {
+  margin-top: 32px;
+  background: var(--color-surface);
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.study-cost-bars figcaption {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.study-cost-bars figcaption span {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
+.study-cost-row {
+  margin-top: 20px;
+}
+.study-cost-row > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.study-cost-track {
+  height: 14px;
+  background: var(--color-bg);
+  border-right: 1px solid var(--color-border);
+}
+.study-cost-bar {
+  display: block;
+  height: 100%;
+  background: var(--color-primary-light);
+}
+.study-cost-bar.ridge {
+  background: var(--color-negative);
+}
+.study-cost-bar.buy_and_hold {
+  background: var(--color-sand);
+}
+.study-cost-bar.cash {
+  background: var(--color-slate);
+}
+.study-note {
+  border-left: 2px solid var(--color-sand);
+  padding: 20px 24px;
+  background: var(--color-surface);
+}
+.study-note p {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+.study002 .finding-panel p + p {
+  margin-top: 20px;
+}
+.study002 .methodology-grid > div > p + p {
+  margin-top: 24px;
+}
+.study002 .methodology-details {
+  min-width: 0;
+}
+.study002 summary {
+  min-height: 44px;
+  align-content: center;
+}
+.study002 code {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.study-hashes dt {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  color: var(--color-sand);
+}
+.study-hashes dd {
+  margin: 4px 0 20px;
+}
+.study-back {
+  margin: 32px 0;
+}
+@media (max-width: 850px) {
+  .study-timeline {
+    gap: 12px;
+  }
+  .study-timeline li {
+    padding: 18px;
+  }
+  .study-card {
+    padding: 24px;
+  }
+  .study-metrics > div {
+    padding: 18px;
+  }
+}
+@media (max-width: 600px) {
+  .study-card-grid,
+  .study-timeline,
+  .study-metrics {
+    grid-template-columns: 1fr;
+  }
+  .study-card {
+    padding: 24px;
+  }
+  .study-card h3 {
+    font-size: 25px;
+  }
+  .study-library .section-heading {
+    display: block;
+  }
+  .study-library .section-heading h2 {
+    margin-bottom: 12px;
+  }
+  .study-intro h1 {
+    font-size: 38px;
+  }
+  .study-verdict {
+    padding: 24px;
+  }
+  .study-contents {
+    gap: 4px 20px;
+  }
+  .study-results .market-selector button {
+    padding: 8px 10px;
+  }
+  .study-metrics > div {
+    padding: 20px;
+    gap: 8px;
+  }
+  .study-metrics strong {
+    font-size: 32px;
+  }
+  .study-cost-bars {
+    padding: 20px;
+  }
+  .study-cost-row > div:first-child {
+    font-size: 12px;
+  }
+  .study002 .table-wrap caption {
+    font-size: 14px;
+  }
+}

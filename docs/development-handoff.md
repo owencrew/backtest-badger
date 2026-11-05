@@ -1,5 +1,23 @@
 # Development handoff — Backtest Badger
 
+## Stage 6A.2 website handoff — 5 November 2026
+
+Start with [Study 002 web publication](studies/study-002-web-publication.md).
+The new research library preserves Study 001 at `/dig/#study-001`; Study 002 has
+its own `/dig/study-002/` static route. The narrow public data selection and three
+retained PNGs are pinned to research commit
+`04c485e6af74e52d0541ceab3a88ca0debb21346` and verified against the report/manifest.
+All 12 months and both markets remain accessible, with explicit costs, drawdown,
+partial endpoints and retrospective limitations. Seven editorial approvals,
+Field Notes 005 draft, scientific sources and the existing v2 feed are unchanged.
+
+The owner reviews the exact new commit/candidate and promotes it manually.
+The authenticated dashboard showed active version prefix `25290d96` at 100%
+traffic during this task; record its full UUID before promotion. No deployment,
+rollback, DNS, build setting, R2 or Lightsail change is authorised here.
+The publication handoff records local checks, screenshot paths and release steps.
+Earlier research and production records below retain their dated context.
+
 ## Study 002 handoff — 4 November 2026
 
 [Study 002](studies/study-002-slower-trend-results.md) is complete as unpublished
