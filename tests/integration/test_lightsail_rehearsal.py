@@ -17,6 +17,15 @@ from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from backtest_badger.candles import save_candle
 from backtest_badger.config import Settings
 
+from .conftest import migrate
+
+
+@pytest.fixture
+def database(empty_database):
+    migrate(empty_database, "0001")
+    return empty_database
+
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ops/lightsail"))
 db = importlib.import_module("rehearsal_db")
 f = importlib.import_module("rehearsal_files")

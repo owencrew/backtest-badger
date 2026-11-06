@@ -138,3 +138,6 @@ push to main, and exact-commit CI verification. It preserves all scientific
 sources, Study 001 and editorial approvals; Field Notes 005 remains unpublished.
 Cloudflare promotion and rollback remain manual owner actions. See the
 [website publication handoff](../docs/studies/study-002-web-publication.md).
+
+[Stage 4C — Durable paper persistence](stage-04-paper/stage-04c-durable-paper-persistence.md)
+archives the local implementation, database verification and handoff request.

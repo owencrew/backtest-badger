@@ -68,6 +68,8 @@ jobs:
       # Clean at session exit: per-test cleanup ("failed") conflicts with
       # scientific I/O guards that are still active during fixture teardown.
       - run: uv run --locked pytest -o tmp_path_retention_policy=none
+        env:
+          BADGER_D2A_TEST_CONTAINER: ${{ job.services.postgres.id }}
       - name: Storage after Python tests
         if: always()
         # Some system-owned /tmp directories may not be readable.

@@ -68,7 +68,7 @@ def test_fresh_migration_downgrade_and_unrelated_data(empty_database):
         migrate(empty_database)
         migrate(empty_database)  # repeat upgrade is harmless, seeds once
         assert conn.execute("SELECT version_num FROM alembic_version").fetchone() == (
-            "0001",
+            "0002",
         )
         assert conn.execute("SELECT symbol FROM market ORDER BY symbol").fetchall() == [
             ("BTCUSDT",),

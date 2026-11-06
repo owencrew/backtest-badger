@@ -1,5 +1,12 @@
 # Architecture
 
+## Stage 4C paper persistence
+
+Revision 0002 adds five portfolio-scoped evidence tables. An order fill, its two
+ledger postings, terminal state and resulting exit satisfaction commit together.
+Independent replay reconstructs historical valuations from their saved ledger
+sequence and original bid. See the [schema and transaction contract](stage-04c-paper-trading-persistence.md).
+
 ## Study 002 research update — 4 November 2026
 
 The [second historical study](studies/study-002-slower-trend-results.md) completed

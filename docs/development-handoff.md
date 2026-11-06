@@ -1,5 +1,12 @@
 # Development handoff — Backtest Badger
 
+## Stage 4C persistence handoff
+
+Use the [persistence report](stage-04c-paper-trading-persistence.md) for revision
+0002, transaction interfaces, isolated restore evidence and the Stage 4D
+sequence. Production migration and experiment inception require separate
+approval. The deployed backup rehearsal covers revision 0001.
+
 ## Stage 6A.2 website handoff — 5 November 2026
 
 Start with [Study 002 web publication](studies/study-002-web-publication.md).

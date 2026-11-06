@@ -65,8 +65,9 @@ or [The Price of Changing Your Mind](docs/field-notes/003-the-price-of-changing-
   immutable outcome scoring and prospective accuracy reports. Forecast errors
   are not trading returns.
 - **Paper-trading foundations:** deterministic strategy, execution and accounting
-  primitives, exercised synthetically and reused for historical replay. A complete
-  prospective paper-trading service is **not implemented**.
+  primitives and transactional PostgreSQL persistence for supplied evidence.
+  Stage 4D owns prospective worker integration and inception. See the
+  [Stage 4C persistence report](docs/stage-04c-paper-trading-persistence.md).
 
 Historical backtests simulate past decisions. Live forward predictions record
 forecasts before their outcomes. Prospective paper trading will simulate orders

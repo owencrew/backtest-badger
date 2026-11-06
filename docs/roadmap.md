@@ -1,5 +1,12 @@
 # Roadmap
 
+## Stage 4C update
+
+Local PostgreSQL persistence now supports fabricated paper-trading transactions,
+recovery and valuation replay. Stage 4D covers prospective evidence adapters,
+worker integration, production backup readiness and separately approved
+activation. See the [Stage 4C handoff](stage-04c-paper-trading-persistence.md).
+
 **Current summary: 4 November 2026.** Each stage is scoped independently. Planned
 capabilities are not current features. The first genuine native-minute 2024
 backtest is complete and the public website is live. The current product milestone

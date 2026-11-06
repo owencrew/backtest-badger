@@ -38,7 +38,7 @@ def test_environment_migrations_and_stage_zero_cli(empty_database):
             f"raise SystemExit(main(['{check}']))",
         )
     run("-m", "alembic", "upgrade", "head")
-    assert "0001 (head)" in run("-m", "alembic", "current")
+    assert "0002 (head)" in run("-m", "alembic", "current")
     assert "CREATE TABLE candle" in run("-m", "alembic", "upgrade", "head", "--sql")
     run("-m", "alembic", "downgrade", "base")
     run("-m", "alembic", "upgrade", "head")

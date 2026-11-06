@@ -21,7 +21,13 @@ def test_admin():
     dsn = os.environ.get("BADGER_TEST_ADMIN_DSN")
     if not dsn:
         pytest.skip("Set BADGER_TEST_ADMIN_DSN to an isolated local PostgreSQL server.")
+    if any(os.environ.get(k) for k in ("PGHOSTADDR", "PGSERVICE")):
+        pytest.fail("Remove libpq host/service overrides before using the test DSN.")
     parameters = conninfo_to_dict(dsn)
+    if set(parameters) - {"dbname", "host", "port", "user", "password"}:
+        pytest.fail(
+            "Use explicit loopback test parameters without service/host overrides."
+        )
     if parameters.get("dbname") != "postgres" or parameters.get("host") not in (
         "127.0.0.1",
         "localhost",
@@ -31,6 +37,10 @@ def test_admin():
             "Test admin DSN must use localhost and the postgres maintenance DB."
         )
     with psycopg.connect(dsn, autocommit=True, connect_timeout=5) as connection:
+        assert (
+            connection.info.dbname == "postgres"
+            and connection.info.server_version // 10000 == 17
+        )
         yield connection, dsn
 
 
