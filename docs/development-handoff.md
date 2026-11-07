@@ -1,5 +1,12 @@
 # Development handoff — Backtest Badger
 
+## Stage 4D.1 integration handoff
+
+Run `python -m backtest_badger.paper_worker dry-run` for one fabricated proposal.
+The separate `market-smoke` action makes bounded public HTTPS reads. The worker
+has no service installation or production configuration. See the
+[Stage 4D.1 evidence and 4D.2 rehearsal plan](stage-04d1-prospective-integration.md).
+
 ## Stage 4C persistence handoff
 
 Use the [persistence report](stage-04c-paper-trading-persistence.md) for revision

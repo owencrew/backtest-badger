@@ -1,0 +1,72 @@
+"""Descriptor-relative access to explicitly selected local evidence directories."""
+
+import os
+import stat
+from contextlib import contextmanager
+from hashlib import sha256
+from pathlib import Path
+from uuid import uuid4
+
+from backtest_badger.paper_types import digest, require
+
+
+@contextmanager
+def directory(path):
+    path = Path(path).absolute()
+    require(".." not in path.parts, "Unsafe evidence root.")
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    fd = os.open("/", flags)
+    try:
+        for part in path.parts[1:]:
+            child = os.open(part, flags, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def read_original(fd, name, limit):
+    require(Path(name).name == name and name not in (".", ".."), "Unsafe filename.")
+    file = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
+    try:
+        info = os.fstat(file)
+        require(
+            stat.S_ISREG(info.st_mode) and info.st_size <= limit,
+            "Expected bounded regular evidence file.",
+        )
+        with os.fdopen(file, "rb", closefd=False) as stream:
+            body = stream.read(limit + 1)
+        require(len(body) == info.st_size, "Incomplete or oversized original.")
+        return body
+    finally:
+        os.close(file)
+
+
+def retain_body(root, body, fingerprint):
+    """Publish once in an existing private directory. Equal bytes are idempotent."""
+    digest(fingerprint)
+    require(sha256(body).hexdigest() == fingerprint, "Source body hash mismatch.")
+    with directory(root) as fd:
+        info = os.fstat(fd)
+        require(
+            info.st_uid == os.getuid() and not info.st_mode & 0o077,
+            "Expected an owner-only archive directory.",
+        )
+        name = fingerprint + ".json"
+        staging = "." + uuid4().hex + ".partial"
+        file = os.open(staging, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o400, dir_fd=fd)
+        try:
+            with os.fdopen(file, "wb") as stream:
+                stream.write(body)
+                stream.flush()
+                os.fsync(stream.fileno())
+            try:
+                os.link(
+                    staging, name, src_dir_fd=fd, dst_dir_fd=fd, follow_symlinks=False
+                )
+            except FileExistsError:
+                require(read_original(fd, name, len(body)) == body, "Archive conflict.")
+            os.fsync(fd)
+        finally:
+            os.unlink(staging, dir_fd=fd)

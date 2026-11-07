@@ -64,10 +64,11 @@ or [The Price of Changing Your Mind](docs/field-notes/003-the-price-of-changing-
 - **Live forward evidence:** actual forecast issuance, automated collection,
   immutable outcome scoring and prospective accuracy reports. Forecast errors
   are not trading returns.
-- **Paper-trading foundations:** deterministic strategy, execution and accounting
-  primitives and transactional PostgreSQL persistence for supplied evidence.
-  Stage 4D owns prospective worker integration and inception. See the
-  [Stage 4C persistence report](docs/stage-04c-paper-trading-persistence.md).
+- **Paper-trading foundations:** the Stage 4D.1 single-cycle planner authenticates
+  original forecasts, interprets public market data and reads reconciled portfolio
+  state. Run `python -m backtest_badger.paper_worker` for an offline fabricated
+  proposal. The [integration report](docs/stage-04d1-prospective-integration.md)
+  covers the separate public smoke check and PostgreSQL recovery rehearsal.
 
 Historical backtests simulate past decisions. Live forward predictions record
 forecasts before their outcomes. Prospective paper trading will simulate orders

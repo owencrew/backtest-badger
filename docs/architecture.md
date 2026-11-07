@@ -1,5 +1,14 @@
 # Architecture
 
+## Stage 4D.1 proposal planning
+
+The original Stage 3 verifier supplies the record, model recipe and journal cohort.
+A bounded public adapter supplies quote and filter evidence. A single-cycle
+planner reads a coherent Stage 4C snapshot and emits proposed decisions, intents
+and scheduled marks. The CLI defaults to fabricated inputs. The only financial
+writes in the rehearsal belong to disposable PostgreSQL tests.
+[Contracts and recovery matrix](stage-04d1-prospective-integration.md)
+
 ## Stage 4C paper persistence
 
 Revision 0002 adds five portfolio-scoped evidence tables. An order fill, its two
@@ -38,7 +47,7 @@ using existing research and forward evidence with explicit labels.
 | Market data | Binance archives/REST → validation → versioned PostgreSQL candles and retained source evidence | Missing data and revisions remain visible; source validity is not proof of tradability. |
 | Historical research | Frozen exports → causal features → train-only fixed models → retained validation forecasts → independent simulated portfolios | Retrospective research; the inspected 2024 period is not untouched out-of-sample evidence. |
 | Live forward predictions | Fresh native 4h inputs → timestamped predictions → immutable outcomes → prospective accuracy reports | Predictions issued before outcomes; no orders, fills or trading returns. |
-| Prospective paper trading | Strategy/execution/accounting primitives exist; persistence, quote ingestion, worker integration and reporting remain future work | Will simulate orders and portfolios as evidence arrives; not yet an operating service. |
+| Prospective paper trading | Strategy, execution, accounting, PostgreSQL replay and a local dry-run planner exist. Operational activation and reporting are future work | Will simulate orders and portfolios as evidence arrives; not yet an operating service. |
 | Real trading | Not implemented | Actual order placement is outside current scope. |
 
 ### Local historical execution

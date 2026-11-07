@@ -1,5 +1,12 @@
 # Roadmap
 
+## Stage 4D milestones
+
+4D.1 supplies the local integration and fabricated recovery rehearsal.
+4D.2 covers least-privilege roles, operational measurements, backups and isolated
+staging. 4D.3 requires separate owner approval for prospective inception.
+[Stage 4D.1 report and 4D.2 prerequisites](stage-04d1-prospective-integration.md)
+
 ## Stage 4C update
 
 Local PostgreSQL persistence now supports fabricated paper-trading transactions,

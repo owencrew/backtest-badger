@@ -141,3 +141,6 @@ Cloudflare promotion and rollback remain manual owner actions. See the
 
 [Stage 4C — Durable paper persistence](stage-04-paper/stage-04c-durable-paper-persistence.md)
 archives the local implementation, database verification and handoff request.
+
+[Stage 4D.1 — Prospective integration](stage-04-paper/stage-04d1-prospective-integration.md)
+archives the original integration, dry-run and isolated verification request.
