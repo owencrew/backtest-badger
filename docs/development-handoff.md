@@ -1,5 +1,9 @@
 # Development handoff — Backtest Badger
 
+## Stage 4D.2 readiness handoff
+
+Use the [measured rehearsal and remaining conditions](stage-04d2-production-readiness.md) and the [operator checklist](deployment/paper-migration-activation-checklist.md) for the separate Stage 4D.3 review. The Stage 4D.1 CLI remains a proposal planner. Fabricated writes are exercised through isolated PostgreSQL tests.
+
 ## Stage 4D.1 integration handoff
 
 Run `python -m backtest_badger.paper_worker dry-run` for one fabricated proposal.

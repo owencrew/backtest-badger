@@ -97,6 +97,8 @@ V1 remains healthy and www still uses v1. The owner manages the remaining websit
 build-variable change, build and manual candidate promotion.
 See [`web/`](web/README.md) for local development; production excludes unapproved articles.
 
+The [Stage 4D.2 readiness rehearsal](docs/stage-04d2-production-readiness.md) exercised restricted PostgreSQL logins, private source retention, process termination and a second-cluster restore with independent fabricated BTC and ETH accounts. Production migration and each prospective activation have separate [operator review gates](docs/deployment/paper-migration-activation-checklist.md).
+
 ## Local development
 
 Prerequisites: Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/)

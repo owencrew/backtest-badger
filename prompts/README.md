@@ -1,5 +1,7 @@
 # Prompt archive
 
+[Stage 4D.2 production readiness and isolated paper-trading rehearsal](stage-04-paper/stage-04d2-production-readiness.md) is the archived operational milestone request.
+
 Stage 5B's complete request is preserved verbatim at
 [`stage-05-web/003-market-dashboard-and-research-explanations.md`](stage-05-web/003-market-dashboard-and-research-explanations.md).
 

@@ -3,8 +3,9 @@
 ## Stage 4D milestones
 
 4D.1 supplies the local integration and fabricated recovery rehearsal.
-4D.2 covers least-privilege roles, operational measurements, backups and isolated
-staging. 4D.3 requires separate owner approval for prospective inception.
+[4D.2](stage-04d2-production-readiness.md) rehearses restricted roles, long histories,
+crash recovery and an independent restore with fabricated accounts. 4D.3 requires
+separate deployment review and an activation decision for each market.
 [Stage 4D.1 report and 4D.2 prerequisites](stage-04d1-prospective-integration.md)
 
 ## Stage 4C update

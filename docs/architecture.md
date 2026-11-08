@@ -1,5 +1,9 @@
 # Architecture
 
+## Stage 4D.2 isolated operations
+
+The private archive retains the original forecast/journal bytes and the filters for each simulated intent. Recovery verifies them against immutable PostgreSQL evidence. Restricted inception, worker and reporting logins use the revision 0002 ledger. The isolated checkpoint restores schema, permissions and both fabricated portfolios to another PG17 cluster. [Readiness report](stage-04d2-production-readiness.md)
+
 ## Stage 4D.1 proposal planning
 
 The original Stage 3 verifier supplies the record, model recipe and journal cohort.
