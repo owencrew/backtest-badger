@@ -49,6 +49,8 @@ class Plan:
     reason: str | None = None
     position: str | None = None
     pending_exit: str | None = None
+    http_status: int | None = None
+    retry_after: int | None = None
 
     def report(self):
         return dict(
@@ -56,6 +58,8 @@ class Plan:
             run_id=self.run_id,
             result=self.result,
             reason=self.reason,
+            http_status=self.http_status,
+            retry_after=self.retry_after,
             position=self.position,
             pending_exit=self.pending_exit,
             decisions=[
@@ -252,7 +256,13 @@ def cycle(read_state, read_forward, read_filters, read_quote, clock, sink):
             reason=str(exc),
         )
     except MarketError as exc:
-        plan = Plan(clock.run_id, "MARKET_UNAVAILABLE", reason=exc.code)
+        plan = Plan(
+            clock.run_id,
+            "MARKET_UNAVAILABLE",
+            reason=exc.code,
+            http_status=exc.status,
+            retry_after=exc.retry_after,
+        )
     except IntegrityIssue as exc:
         plan = Plan(
             clock.run_id, "INTEGRITY_PAUSE", reason=f"{exc.code}:{exc.evidence_id}"
@@ -355,7 +365,13 @@ def _active_cycle(
         now = clock.now()
         filters = effective_filters(source, state.account.portfolio, now)
     except MarketError as exc:
-        return replace(plan, result="FILTER_REJECTED", reason=exc.code)
+        return replace(
+            plan,
+            result="FILTER_REJECTED",
+            reason=exc.code,
+            http_status=exc.status,
+            retry_after=exc.retry_after,
+        )
     if trigger.action == Action.BUY_REQUIRED and now >= trigger.forecast.deadline:
         return replace(plan, result="ENTRY_WINDOW_CLOSED")
     n = len(prior) + 1

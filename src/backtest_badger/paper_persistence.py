@@ -75,14 +75,23 @@ def _put(cur, table, pk, key, fields):
 def _write(conn, pid):
     require(isinstance(pid, UUID), "Expected portfolio UUID.")
     with transaction(conn) as cur:
-        row = cur.execute(
-            "SELECT * FROM paper_portfolio WHERE portfolio_id=%s FOR UPDATE", (pid,)
-        ).fetchone()
-        require(row is not None, "Unknown portfolio.")
-        yield cur, row
+        yield cur, _locked_portfolio(cur, pid)
+
+
+def _locked_portfolio(cur, pid):
+    row = cur.execute(
+        "SELECT * FROM paper_portfolio WHERE portfolio_id=%s FOR UPDATE", (pid,)
+    ).fetchone()
+    require(row is not None, "Unknown portfolio.")
+    return row
 
 
 def create_portfolio(conn, p, config, implementation_sha256, created_at):
+    with transaction(conn) as cur:
+        return _create(cur, p, config, implementation_sha256, created_at)
+
+
+def _create(cur, p, config, implementation_sha256, created_at):
     utc(created_at)
     digest(implementation_sha256)
     expected = records.configuration(
@@ -95,64 +104,66 @@ def create_portfolio(conn, p, config, implementation_sha256, created_at):
         "Configuration fingerprint mismatch.",
     )
     pid = records.identity("v1", "portfolio", p.key)
-    with transaction(conn) as cur:
-        market = cur.execute(
-            "SELECT market_id FROM market WHERE venue=%s AND market_type=%s "
-            "AND symbol=%s",
-            (p.venue, p.market_type, p.symbol),
-        ).fetchone()
-        require(market is not None, "Unknown spot market.")
-        return _put(
-            cur,
-            "paper_portfolio",
-            "portfolio_id",
-            pid,
-            dict(
-                portfolio_key=p.key,
-                market_id=market["market_id"],
-                base_asset=p.base_asset,
-                quote_asset="USDT",
-                strategy_id=p.strategy_id,
-                strategy_version=p.strategy_version,
-                model_id="ridge",
-                strategy_config=config,
-                config_canonical=canonical,
-                strategy_config_sha256=p.config_sha256,
-                protocol_sha256=p.protocol_sha256,
-                model_recipe_sha256=p.model_recipe_sha256,
-                implementation_sha256=implementation_sha256,
-                execution_policy_sha256=records.fingerprint(EXECUTION_POLICY),
-                valuation_policy_sha256=records.fingerprint(VALUATION_POLICY),
-                initial_cash=10000,
-                created_at=created_at,
-                inception_at=p.inception_at,
-            ),
-        )
+    market = cur.execute(
+        "SELECT market_id FROM market WHERE venue=%s AND market_type=%s AND symbol=%s",
+        (p.venue, p.market_type, p.symbol),
+    ).fetchone()
+    require(market is not None, "Unknown spot market.")
+    return _put(
+        cur,
+        "paper_portfolio",
+        "portfolio_id",
+        pid,
+        dict(
+            portfolio_key=p.key,
+            market_id=market["market_id"],
+            base_asset=p.base_asset,
+            quote_asset="USDT",
+            strategy_id=p.strategy_id,
+            strategy_version=p.strategy_version,
+            model_id="ridge",
+            strategy_config=config,
+            config_canonical=canonical,
+            strategy_config_sha256=p.config_sha256,
+            protocol_sha256=p.protocol_sha256,
+            model_recipe_sha256=p.model_recipe_sha256,
+            implementation_sha256=implementation_sha256,
+            execution_policy_sha256=records.fingerprint(EXECUTION_POLICY),
+            valuation_policy_sha256=records.fingerprint(VALUATION_POLICY),
+            initial_cash=10000,
+            created_at=created_at,
+            inception_at=p.inception_at,
+        ),
+    )
 
 
 def fund_portfolio(conn, pid, at):
     with _write(conn, pid) as (cur, p):
-        account = fund_account(Account(records.portfolio(p)), at)
-        receipt = _put(
-            cur,
-            "paper_ledger_entry",
-            "ledger_entry_id",
-            records.identity(pid, "funding", "initial"),
-            dict(
-                portfolio_id=pid,
-                ledger_seq=1,
-                entry_type="INITIAL_FUNDING",
-                asset="USDT",
-                delta_units=account.cash,
-                posted_at=at,
-            ),
+        return _fund(cur, pid, p, at)
+
+
+def _fund(cur, pid, p, at):
+    account = fund_account(Account(records.portfolio(p)), at)
+    receipt = _put(
+        cur,
+        "paper_ledger_entry",
+        "ledger_entry_id",
+        records.identity(pid, "funding", "initial"),
+        dict(
+            portfolio_id=pid,
+            ledger_seq=1,
+            entry_type="INITIAL_FUNDING",
+            asset="USDT",
+            delta_units=account.cash,
+            posted_at=at,
+        ),
+    )
+    if receipt.created:
+        cur.execute(
+            "UPDATE paper_portfolio SET ledger_highwater=1 WHERE portfolio_id=%s",
+            (pid,),
         )
-        if receipt.created:
-            cur.execute(
-                "UPDATE paper_portfolio SET ledger_highwater=1 WHERE portfolio_id=%s",
-                (pid,),
-            )
-        return receipt
+    return receipt
 
 
 def record_decision(conn, pid, d, *, artifact_relpath=None, prediction_id=None):
@@ -462,45 +473,47 @@ def record_mark(conn, pid, slot, at, *, quote=None, reason=None, inception=False
     utc(slot)
     utc(at)
     with _write(conn, pid) as (cur, p):
-        key = slot.isoformat()
-        policy = p["valuation_policy_sha256"]
-        if quote is None:
-            require(reason and not inception, "Missing mark requires a reason.")
-            return _event(
-                cur,
-                pid,
-                "MARK_MISSING",
-                key,
-                at,
-                at,
-                reason_code=reason,
-                mark_slot=slot,
-                valuation_policy_sha256=policy,
-            )
-        require(reason is None, "Unexpected observed-mark reason.")
-        validate_quote(quote, records.portfolio(p), at)
-        # Retry a committed snapshot against its original prefix even after later fills.
-        prior = cur.execute(
-            "SELECT asof_ledger_seq FROM paper_market_event WHERE portfolio_id=%s "
-            "AND mark_slot=%s "
-            "AND valuation_policy_sha256=%s",
-            (pid, slot, policy),
-        ).fetchone()
+        return _mark(cur, pid, p, slot, at, quote, reason, inception)
+
+
+def _mark(cur, pid, p, slot, at, quote, reason, inception):
+    key = slot.isoformat()
+    policy = p["valuation_policy_sha256"]
+    if quote is None:
+        require(reason and not inception, "Missing mark requires a reason.")
         return _event(
             cur,
             pid,
-            "MARK_OBSERVED",
+            "MARK_MISSING",
             key,
             at,
             at,
+            reason_code=reason,
             mark_slot=slot,
             valuation_policy_sha256=policy,
-            reason_code="INCEPTION" if inception else None,
-            asof_ledger_seq=prior["asof_ledger_seq"]
-            if prior
-            else p["ledger_highwater"],
-            **records.quote_fields(quote),
         )
+    require(reason is None, "Unexpected observed-mark reason.")
+    validate_quote(quote, records.portfolio(p), at)
+    # Retry a committed snapshot against its original prefix even after later fills.
+    prior = cur.execute(
+        "SELECT asof_ledger_seq FROM paper_market_event WHERE portfolio_id=%s "
+        "AND mark_slot=%s "
+        "AND valuation_policy_sha256=%s",
+        (pid, slot, policy),
+    ).fetchone()
+    return _event(
+        cur,
+        pid,
+        "MARK_OBSERVED",
+        key,
+        at,
+        at,
+        mark_slot=slot,
+        valuation_policy_sha256=policy,
+        reason_code="INCEPTION" if inception else None,
+        asof_ledger_seq=prior["asof_ledger_seq"] if prior else p["ledger_highwater"],
+        **records.quote_fields(quote),
+    )
 
 
 def record_operational_event(conn, pid, kind, key, at, reason):

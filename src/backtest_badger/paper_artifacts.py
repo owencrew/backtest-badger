@@ -47,13 +47,20 @@ def retain_body(root, body, fingerprint):
     """Publish once in an existing private directory. Equal bytes are idempotent."""
     digest(fingerprint)
     require(sha256(body).hexdigest() == fingerprint, "Source body hash mismatch.")
+    publish_once(root, fingerprint + ".json", body)
+
+
+def publish_once(root, name, body):
+    """Atomically create a private object or verify an identical prior publication."""
+    require(
+        Path(name).name == name and name not in ("", ".", ".."), "Unsafe archive name."
+    )
     with directory(root) as fd:
         info = os.fstat(fd)
         require(
             info.st_uid == os.getuid() and not info.st_mode & 0o077,
             "Expected an owner-only archive directory.",
         )
-        name = fingerprint + ".json"
         staging = "." + uuid4().hex + ".partial"
         file = os.open(staging, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o400, dir_fd=fd)
         try:

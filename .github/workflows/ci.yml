@@ -40,11 +40,25 @@ jobs:
           POSTGRES_PASSWORD: disposable_test_only
           POSTGRES_DB: postgres
         ports:
-          - 5432:5432
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U badger_test -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      restore:
+        image: postgres:17
+        env:
+          POSTGRES_USER: badger_test
+          POSTGRES_PASSWORD: disposable_restore_only
+          POSTGRES_DB: postgres
+        ports:
+          - 127.0.0.1:5433:5432
         options: >-
           --health-cmd "pg_isready -U badger_test -d postgres"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      BADGER_TEST_RESTORE_DSN: >-
+        host=127.0.0.1 port=5433 dbname=postgres
+        user=badger_test password=disposable_restore_only
       BADGER_TEST_ADMIN_DSN: >-
         host=127.0.0.1 port=5432 dbname=postgres
         user=badger_test password=disposable_test_only
@@ -69,6 +83,7 @@ jobs:
       # scientific I/O guards that are still active during fixture teardown.
       - run: uv run --locked pytest -o tmp_path_retention_policy=none
         env:
+          BADGER_TEST_RESTORE_CONTAINER: ${{ job.services.restore.id }}
           BADGER_D2A_TEST_CONTAINER: ${{ job.services.postgres.id }}
       - name: Storage after Python tests
         if: always()

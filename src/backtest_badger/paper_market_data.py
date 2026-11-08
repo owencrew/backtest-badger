@@ -225,65 +225,81 @@ def effective_filters(response, market, at):
     """Recheck the retained source bytes, market identity and TTL on every use."""
     try:
         obj, _ = verified_body(response, FILTERS, market)
-        (symbol,) = obj["symbols"]
-        require(
-            obj["exchangeFilters"] == []
-            and symbol["symbol"] == market.symbol
-            and symbol["baseAsset"] == market.symbol[:-4]
-            and symbol["quoteAsset"] == "USDT"
-            and symbol["status"] == "TRADING"
-            and symbol["isSpotTradingAllowed"] is True
-            and isinstance(symbol["orderTypes"], list)
-            and "MARKET" in symbol["orderTypes"],
-            "Unsupported exchange or symbol.",
+        return _filter_rules(
+            obj, market, response.end.wall, response.sha256, at, response.status
         )
-        rules = {f["filterType"]: f for f in symbol["filters"]}
-        require(len(rules) == len(symbol["filters"]), "Duplicate filter type.")
-        if unknown := rules.keys() - OTHER - ACTIVE_FIELDS.keys():
-            # Only report a bounded Binance-style type token from untrusted data.
-            name = sorted(unknown)[0]
-            label = name if re.fullmatch(r"[A-Z_]{1,48}", name) else "unknown"
-            raise MarketError("unsupported_filter:" + label, response.status)
-        for name in rules.keys() & ACTIVE_FIELDS.keys():
-            if rules[name].keys() - ACTIVE_FIELDS[name] - {"filterType"}:
-                raise MarketError("unsupported_filter_fields:" + name, response.status)
-        if "MAX_NUM_ORDERS" in rules:
-            count = rules["MAX_NUM_ORDERS"]["maxNumOrders"]
-            require(type(count) is int and count >= 1, "Unsupported order limit.")
-        lots = [rules[k] for k in ("LOT_SIZE", "MARKET_LOT_SIZE") if k in rules]
-        steps = [v for f in lots if (v := decimal_field(f["stepSize"]))]
-        maxima = [v for f in lots if (v := decimal_field(f["maxQty"]))]
-        require(steps and maxima, "Missing representable quantity step or maximum.")
-        with localcontext(money_context()):
-            exponent = min(s.as_tuple().exponent for s in steps)
-            step = Decimal(lcm(*(int(s.scaleb(-exponent)) for s in steps))).scaleb(
-                exponent
-            )
-        minimum = max(decimal_field(f["minQty"]) for f in lots)
-        nmin = Decimal(0)
-        nmax = None
-        if "MIN_NOTIONAL" in rules:
-            nmin = applicable(rules["MIN_NOTIONAL"], "applyToMarket", "minNotional")
-        if "NOTIONAL" in rules:
-            rule = rules["NOTIONAL"]
-            nmin = max(nmin, applicable(rule, "applyMinToMarket", "minNotional"))
-            nmax = applicable(rule, "applyMaxToMarket", "maxNotional") or None
-        f = Filters(
-            market.symbol,
-            response.end.wall,
-            response.sha256,
-            step,
-            minimum,
-            min(maxima),
-            nmin,
-            nmax,
-        )
-        validate_filters(f, market, at, acquired_by=at)
-        return f
     except MarketError:
         raise
     except (ValueError, TypeError, KeyError, ArithmeticError, RecursionError) as exc:
         raise MarketError("invalid_filters", response.status) from exc
+
+
+def retained_filters(body, market, observed_at, fingerprint, at):
+    """Replay archived exchangeInfo at its original persisted observation time."""
+    require(
+        0 < len(body) <= LIMIT[FILTERS] and sha256(body).hexdigest() == fingerprint,
+        "Invalid archived filter original.",
+    )
+    obj = json.loads(
+        body.decode("utf-8"), object_pairs_hook=unique, parse_constant=reject_constant
+    )
+    return _filter_rules(obj, market, observed_at, fingerprint, at, 200)
+
+
+def _filter_rules(obj, market, observed_at, fingerprint, at, status):
+    (symbol,) = obj["symbols"]
+    require(
+        obj["exchangeFilters"] == []
+        and symbol["symbol"] == market.symbol
+        and symbol["baseAsset"] == market.symbol[:-4]
+        and symbol["quoteAsset"] == "USDT"
+        and symbol["status"] == "TRADING"
+        and symbol["isSpotTradingAllowed"] is True
+        and isinstance(symbol["orderTypes"], list)
+        and "MARKET" in symbol["orderTypes"],
+        "Unsupported exchange or symbol.",
+    )
+    rules = {f["filterType"]: f for f in symbol["filters"]}
+    require(len(rules) == len(symbol["filters"]), "Duplicate filter type.")
+    if unknown := rules.keys() - OTHER - ACTIVE_FIELDS.keys():
+        # Only report a bounded Binance-style type token from untrusted data.
+        name = sorted(unknown)[0]
+        label = name if re.fullmatch(r"[A-Z_]{1,48}", name) else "unknown"
+        raise MarketError("unsupported_filter:" + label, status)
+    for name in rules.keys() & ACTIVE_FIELDS.keys():
+        if rules[name].keys() - ACTIVE_FIELDS[name] - {"filterType"}:
+            raise MarketError("unsupported_filter_fields:" + name, status)
+    if "MAX_NUM_ORDERS" in rules:
+        count = rules["MAX_NUM_ORDERS"]["maxNumOrders"]
+        require(type(count) is int and count >= 1, "Unsupported order limit.")
+    lots = [rules[k] for k in ("LOT_SIZE", "MARKET_LOT_SIZE") if k in rules]
+    steps = [v for f in lots if (v := decimal_field(f["stepSize"]))]
+    maxima = [v for f in lots if (v := decimal_field(f["maxQty"]))]
+    require(steps and maxima, "Missing representable quantity step or maximum.")
+    with localcontext(money_context()):
+        exponent = min(s.as_tuple().exponent for s in steps)
+        step = Decimal(lcm(*(int(s.scaleb(-exponent)) for s in steps))).scaleb(exponent)
+    minimum = max(decimal_field(f["minQty"]) for f in lots)
+    nmin = Decimal(0)
+    nmax = None
+    if "MIN_NOTIONAL" in rules:
+        nmin = applicable(rules["MIN_NOTIONAL"], "applyToMarket", "minNotional")
+    if "NOTIONAL" in rules:
+        rule = rules["NOTIONAL"]
+        nmin = max(nmin, applicable(rule, "applyMinToMarket", "minNotional"))
+        nmax = applicable(rule, "applyMaxToMarket", "maxNotional") or None
+    f = Filters(
+        market.symbol,
+        observed_at,
+        fingerprint,
+        step,
+        minimum,
+        min(maxima),
+        nmin,
+        nmax,
+    )
+    validate_filters(f, market, at, acquired_by=at)
+    return f
 
 
 def smoke(clock, acquire=fetch, *, filter_archive=None):
