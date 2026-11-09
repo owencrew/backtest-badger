@@ -2,6 +2,8 @@
 
 ## Stage 4D milestones
 
+[4D.3A](stage-04d3a-production-writer.md) implements the inactive financial writer and rehearses both fabricated markets through independent restore. Stage 4D.3B begins with separately authorised release and host inspection. Each market needs its own subsequent inception approval.
+
 4D.1 supplies the local integration and fabricated recovery rehearsal.
 [4D.2](stage-04d2-production-readiness.md) rehearses restricted roles, long histories,
 crash recovery and an independent restore with fabricated accounts. 4D.3 requires
@@ -19,7 +21,7 @@ activation. See the [Stage 4C handoff](stage-04c-paper-trading-persistence.md).
 capabilities are not current features. The first genuine native-minute 2024
 backtest is complete and the public website is live. The current product milestone
 is an active isolated v2 forward feed, with the website release owner-managed.
-Prospective paper-trading implementation remains a separate future scope.
+Prospective deployment and activation remain separately gated.
 
 [Stage 6A.2 — Study 002 website integration](studies/study-002-web-publication.md)
 adds the two-study Dig library and dedicated source-verified Study 002 page.
@@ -76,7 +78,7 @@ scope.
 | **4B.2E.1–5d — Replay/Reporting Integration and Guarded Operator** | Implemented; fabricated development evidence | Reusable replay/reporting components remain; E.5d installation/custody blockers are not prerequisites for the separate [E.5e local route](stage-04b2e5e-local-execution-decision.md). |
 | **4B.2E.5e–5g — Local Execution and Genuine Backtest** | Complete | One-process pinned-input runner, successful genuine preflight, one genuine 2024 replay and six verified accounts. See [E.5g results](stage-04b2e5g-first-genuine-historical-backtest.md); no tuning or model promotion. |
 | **4B.2E.5h — Research Narrative** | Documentation prepared for review | Current summaries reconciled; [Field Notes 003 and 004](field-notes/README.md) drafted; website evidence handoff added. No new research or deployment. |
-| **4C–4E — Paper Persistence, Prospective Integration and Reporting** | Future, gated | Independently approve isolated database integrity, prospective quote/worker activation and reporting. No production changes authorised. |
+| **4C–4E — Paper Persistence, Prospective Integration and Reporting** | Writer verified locally, production and reporting gated | Revision 0002, original-source admission, simulated execution and reproducible marks have passed fabricated local rehearsals. Stage 4D.3B covers deployment review. Public reporting remains a later stage. |
 | **5 — Polished Website and Public Launch** | **Live; v2 backend activated 2026-10-30** | Workers static website, permanent v1 R2 feed, indexing enabled and seven approved articles. [Stage 5B.10](stage-05b10-forward-v2-production-activation.md) records the installed isolated v2 publisher/checker, constrained qualification and scheduled acceptance. Website build-variable change, build and promotion remain owner-managed. |
 | **6 — Research and Asset-Class Expansion** | Planned | New research and asset classes are supported by documented evidence, appropriate data/execution assumptions and reproducible validation without compromising existing results. |
 

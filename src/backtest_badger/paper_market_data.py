@@ -53,6 +53,8 @@ class MarketError(ValueError):
         self.code = code
         self.status = status
         self.retry_after = retry_after
+        self.response = None
+        self.request_started_at = None
 
 
 @dataclass(frozen=True)
@@ -91,9 +93,25 @@ def _request(url, limit, clock):
             if status != 200:
                 retry = resp.headers.get("Retry-After", "")
                 retry = int(retry) if re.fullmatch(r"[0-9]{1,9}", retry) else None
-                raise MarketError(
+                error = MarketError(
                     "rate_limited" if status in (418, 429) else "http", status, retry
                 )
+                error.request_started_at = start.wall
+                try:
+                    body = resp.read(limit + 1)
+                except (CycleTimeout, OSError, HTTPException):
+                    raise error from None
+                if len(body) <= limit:
+                    error.response = Response(
+                        url,
+                        status,
+                        body,
+                        sha256(body).hexdigest(),
+                        start,
+                        clock.sample(),
+                        clock.run_id,
+                    )
+                raise error
             require(resp.geturl() == url, "Response URL changed.")
             body = bytearray()
             while len(body) <= limit:
@@ -107,6 +125,13 @@ def _request(url, limit, clock):
             length = resp.headers.get("Content-Length")
             if length is not None and length != str(len(body)):
                 raise MarketError("incomplete", status)
+    except MarketError as exc:
+        exc.request_started_at = start.wall
+        raise
+    except CycleTimeout:
+        error = MarketError("timeout", status)
+        error.request_started_at = start.wall
+        raise error from None
     except (URLError, HTTPException, OSError) as exc:
         cause = getattr(exc, "reason", exc)
         code = (
@@ -114,7 +139,9 @@ def _request(url, limit, clock):
             if isinstance(cause, gaierror)
             else ("timeout" if isinstance(cause, TimeoutError) else "connection")
         )
-        raise MarketError(code, status) from None
+        error = MarketError(code, status)
+        error.request_started_at = start.wall
+        raise error from None
     return Response(
         url, status, bytes(body), sha256(body).hexdigest(), start, end, clock.run_id
     )

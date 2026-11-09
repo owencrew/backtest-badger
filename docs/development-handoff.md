@@ -1,5 +1,9 @@
 # Development handoff — Backtest Badger
 
+## Stage 4D.3A writer handoff
+
+Use the [writer verification report](stage-04d3a-production-writer.md) for the explicit staging configuration, PostgreSQL timing measurements, failure matrix and release identification. The local entry point requires an existing fabricated cohort and an external clock observation. The operator checklist governs a future host inventory, backup rehearsal, restricted service review and separate BTC/ETH activation decisions. [Production checklist](deployment/paper-migration-activation-checklist.md)
+
 ## Stage 4D.2 readiness handoff
 
 Use the [measured rehearsal and remaining conditions](stage-04d2-production-readiness.md) and the [operator checklist](deployment/paper-migration-activation-checklist.md) for the separate Stage 4D.3 review. The Stage 4D.1 CLI remains a proposal planner. Fabricated writes are exercised through isolated PostgreSQL tests.
@@ -170,7 +174,7 @@ preserve the authorisations, limitations and tests at their original stage;
 | Earlier economics | Stage 2C hourly fixed-window round trips and Stage 2D cost diagnostics; preserve their original results |
 | Minute research | Verified native-minute release, exact hourly/minute price parity, authenticated forecast/reference publication, simple local runner and completed genuine 2024 backtest |
 | Forward evidence | Genuine timestamped forecasts, automated collection, immutable scored outcomes and prospective accuracy reports; timely/late cohorts remain distinct |
-| Paper foundations | Deterministic strategy, execution and Decimal accounting/valuation primitives; no complete prospective order/fill/portfolio service |
+| Paper foundations | Deterministic primitives, original-source admission and an inactive single-cycle financial writer verified with fabricated portfolios |
 | Hosting | Lightsail PostgreSQL and collection/scoring, plus backups, restore drills and monitoring, in the dated production snapshot |
 | Public product | Live Workers static website, genuine Binance dashboard, healthy v1 and isolated v2 R2 feeds; seven approved articles; production indexing enabled; v2 website build/promotion owner-managed |
 

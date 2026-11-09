@@ -97,6 +97,8 @@ V1 remains healthy and www still uses v1. The owner manages the remaining websit
 build-variable change, build and manual candidate promotion.
 See [`web/`](web/README.md) for local development; production excludes unapproved articles.
 
+The prospective simulated writer has completed local testing with fabricated BTCUSDT and ETHUSDT portfolios. It authenticates each original forecast, commits an order before requesting a public quote, and checks the one-second quote lifetime inside PostgreSQL before admitting the financial transaction. The default paper command still produces a proposal. Production deployment and each market's inception require separate review. [Stage 4D.3A verification](docs/stage-04d3a-production-writer.md)
+
 The [Stage 4D.2 readiness rehearsal](docs/stage-04d2-production-readiness.md) exercised restricted PostgreSQL logins, private source retention, process termination and a second-cluster restore with independent fabricated BTC and ETH accounts. Production migration and each prospective activation have separate [operator review gates](docs/deployment/paper-migration-activation-checklist.md).
 
 ## Local development

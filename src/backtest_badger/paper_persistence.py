@@ -1,7 +1,7 @@
 """Revision 0002 transactions with caller-supplied evidence and clocks."""
 
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from uuid import UUID
 
 from psycopg import sql
@@ -166,21 +166,38 @@ def _fund(cur, pid, p, at):
     return receipt
 
 
-def record_decision(conn, pid, d, *, artifact_relpath=None, prediction_id=None):
+def record_decision(
+    conn, pid, d, *, artifact_relpath=None, prediction_id=None, admit=None
+):
     with _write(conn, pid) as (cur, p):
         require(records.portfolio(p) == d.portfolio, "Decision portfolio mismatch.")
-        return _put(
+        receipt = _put(
             cur,
             "paper_decision",
             "decision_id",
             records.identity(pid, "decision", d.identity),
             records.decision_fields(pid, d, artifact_relpath, prediction_id),
         )
+        if admit:
+            admit()
+        return receipt
 
 
-def submit_order(conn, pid, order, attempt_number):
+def submit_order(conn, pid, order, attempt_number, *, prepare=None):
     require(isinstance(order, Order), "Expected immutable order intent.")
     with _write(conn, pid) as (cur, p):
+        if prepare:
+            prepared = prepare(order)
+            require(
+                replace(
+                    prepared,
+                    submitted_at=order.submitted_at,
+                    expires_at=order.expires_at,
+                )
+                == order,
+                "Submission may only refresh the intent timestamps.",
+            )
+            order = prepared
         did = records.identity(pid, "decision", order.decision.identity)
         d = cur.execute(
             "SELECT * FROM paper_decision WHERE decision_id=%s AND portfolio_id=%s",
@@ -313,7 +330,7 @@ def record_quote_failure(
         )
 
 
-def _execution(cur, portfolio, o, quote_id, filters, at, run_id):
+def execution_inputs(cur, portfolio, o, quote_id):
     q = cur.execute(
         "SELECT * FROM paper_market_event WHERE event_id=%s "
         "AND portfolio_id=%s AND "
@@ -324,12 +341,13 @@ def _execution(cur, portfolio, o, quote_id, filters, at, run_id):
     d = cur.execute(
         "SELECT * FROM paper_decision WHERE decision_id=%s", (o["decision_id"],)
     ).fetchone()
-    order = records.order(portfolio, d, o)
+    return records.order(portfolio, d, o), records.quote(portfolio, q)
+
+
+def _execution(cur, portfolio, o, quote_id, filters, at, run_id):
+    order, quote = execution_inputs(cur, portfolio, o, quote_id)
     validate_filters(filters, portfolio, at, acquired_by=order.submitted_at)
-    result = simulate_order(
-        order, records.quote(portfolio, q), filters, at, run_id=run_id
-    )
-    return result
+    return simulate_order(order, quote, filters, at, run_id=run_id)
 
 
 def reject_dust(conn, pid, oid, quote_id, filters, *, run_id, at):
@@ -341,35 +359,27 @@ def reject_dust(conn, pid, oid, quote_id, filters, *, run_id, at):
             result.reason == "EXIT_BLOCKED_DUST",
             "Supplied evidence does not establish dust.",
         )
-        terminal = _event(
-            cur,
-            pid,
-            "ORDER_REJECTED",
-            str(oid),
-            at,
-            at,
-            order=o,
-            reason_code="EXIT_BLOCKED_DUST",
-        )
-        if terminal.created:
-            cur.execute(
-                "UPDATE paper_order SET status='REJECTED' WHERE order_id=%s", (oid,)
-            )
-        _event(
-            cur,
-            pid,
-            "EXIT_BLOCKED_DUST",
-            str(oid),
-            at,
-            at,
-            order=o,
-            reason_code="EXIT_BLOCKED_DUST",
-            reference_event_id=terminal.id,
-            quote_event_id=quote_id,
-            run_id=run_id,
-            **records.filter_fields(filters),
-        )
-        return terminal
+        return _dust(cur, o, quote_id, filters, run_id, at)
+
+
+def _dust(cur, o, quote_id, filters, run_id, at):
+    pid, oid = o["portfolio_id"], o["order_id"]
+    terminal = _terminal(cur, o, "REJECTED", "EXIT_BLOCKED_DUST", at)
+    _event(
+        cur,
+        pid,
+        "EXIT_BLOCKED_DUST",
+        str(oid),
+        at,
+        at,
+        order=o,
+        reason_code="EXIT_BLOCKED_DUST",
+        reference_event_id=terminal.id,
+        quote_event_id=quote_id,
+        run_id=run_id,
+        **records.filter_fields(filters),
+    )
+    return terminal
 
 
 def terminate_order(conn, pid, oid, *, status, reason, at):
@@ -380,13 +390,16 @@ def terminate_order(conn, pid, oid, *, status, reason, at):
     require(status in ("REJECTED", "EXPIRED"), "Expected unsuccessful terminal state.")
     with _write(conn, pid) as (cur, _):
         o = _order(cur, pid, oid)
-        typ = "ORDER_REJECTED" if status == "REJECTED" else "ORDER_EXPIRED"
-        receipt = _event(cur, pid, typ, str(oid), at, at, order=o, reason_code=reason)
-        if receipt.created:
-            cur.execute(
-                "UPDATE paper_order SET status=%s WHERE order_id=%s", (status, oid)
-            )
-        return receipt
+        return _terminal(cur, o, status, reason, at)
+
+
+def _terminal(cur, o, status, reason, at):
+    pid, oid = o["portfolio_id"], o["order_id"]
+    typ = "ORDER_REJECTED" if status == "REJECTED" else "ORDER_EXPIRED"
+    receipt = _event(cur, pid, typ, str(oid), at, at, order=o, reason_code=reason)
+    if receipt.created:
+        cur.execute("UPDATE paper_order SET status=%s WHERE order_id=%s", (status, oid))
+    return receipt
 
 
 def commit_fill(conn, pid, oid, quote_id, filters, *, run_id, at, recorded_at):
@@ -401,72 +414,81 @@ def commit_fill(conn, pid, oid, quote_id, filters, *, run_id, at, recorded_at):
         result = _execution(cur, portfolio, o, quote_id, filters, at, run_id)
         order = result.order
         require(result.fill is not None, f"Fill ineligible ({result.reason}).")
-        t = result.fill.trade
-        receipt = _event(
+        if o["status"] == "SUBMITTED":
+            require(
+                snapshot.pending_order == o
+                and snapshot.account.ledger_seq == result.fill.trade.ledger_seq_before
+                and (
+                    order.side != "SELL"
+                    or snapshot.exit_decision_id == o["decision_id"]
+                ),
+                "Stale order or ledger snapshot.",
+            )
+        receipt = _post_fill(cur, o, quote_id, result, recorded_at)
+        inspect_portfolio(cur, pid)
+        return receipt
+
+
+def _post_fill(cur, o, quote_id, result, recorded_at):
+    """Complete one atomic transition inside the caller's portfolio lock."""
+    order, at, filters, run_id = result.order, result.at, result.filters, result.run_id
+    pid, oid = o["portfolio_id"], o["order_id"]
+    t = result.fill.trade
+    receipt = _event(
+        cur,
+        pid,
+        "FILL",
+        str(oid),
+        at,
+        recorded_at,
+        order=o,
+        quote_event_id=quote_id,
+        run_id=run_id,
+        simulated_qty=t.quantity,
+        simulated_price=t.price,
+        gross_notional=t.notional,
+        fee_usdt=t.fee,
+        ledger_seq_before=t.ledger_seq_before,
+        ledger_seq_after=t.ledger_seq_before + 2,
+        policy_sha256=o["policy_sha256"],
+        **records.filter_fields(filters),
+    )
+    if not receipt.created:
+        return receipt
+    for seq, m in enumerate(t.postings, t.ledger_seq_before + 1):
+        _put(
+            cur,
+            "paper_ledger_entry",
+            "ledger_entry_id",
+            records.identity(receipt.id, "posting", m.asset),
+            dict(
+                portfolio_id=pid,
+                ledger_seq=seq,
+                entry_type="FILL",
+                fill_event_id=receipt.id,
+                asset=m.asset,
+                delta_units=m.amount,
+                posted_at=recorded_at,
+            ),
+        )
+    cur.execute(
+        "UPDATE paper_portfolio SET ledger_highwater=%s WHERE portfolio_id=%s",
+        (t.ledger_seq_before + 2, pid),
+    )
+    cur.execute("UPDATE paper_order SET status='FILLED' WHERE order_id=%s", (oid,))
+    if order.side == "SELL":
+        _event(
             cur,
             pid,
-            "FILL",
-            str(oid),
+            "EXIT_SATISFIED",
+            str(o["decision_id"]),
             at,
             recorded_at,
             order=o,
-            quote_event_id=quote_id,
-            run_id=run_id,
-            simulated_qty=t.quantity,
-            simulated_price=t.price,
-            gross_notional=t.notional,
-            fee_usdt=t.fee,
-            ledger_seq_before=t.ledger_seq_before,
-            ledger_seq_after=t.ledger_seq_before + 2,
-            policy_sha256=o["policy_sha256"],
-            **records.filter_fields(filters),
+            reference_event_id=receipt.id,
+            reason_code="holdings_zero",
         )
-        if not receipt.created:
-            return receipt
-        require(
-            snapshot.pending_order == o
-            and snapshot.account.ledger_seq == t.ledger_seq_before,
-            "Stale order or ledger snapshot.",
-        )
-        for seq, m in enumerate(t.postings, t.ledger_seq_before + 1):
-            _put(
-                cur,
-                "paper_ledger_entry",
-                "ledger_entry_id",
-                records.identity(receipt.id, "posting", m.asset),
-                dict(
-                    portfolio_id=pid,
-                    ledger_seq=seq,
-                    entry_type="FILL",
-                    fill_event_id=receipt.id,
-                    asset=m.asset,
-                    delta_units=m.amount,
-                    posted_at=recorded_at,
-                ),
-            )
-        cur.execute(
-            "UPDATE paper_portfolio SET ledger_highwater=%s WHERE portfolio_id=%s",
-            (t.ledger_seq_before + 2, pid),
-        )
-        cur.execute("UPDATE paper_order SET status='FILLED' WHERE order_id=%s", (oid,))
-        if order.side == "SELL":
-            require(
-                snapshot.exit_decision_id == o["decision_id"],
-                "Missing exit obligation.",
-            )
-            _event(
-                cur,
-                pid,
-                "EXIT_SATISFIED",
-                str(o["decision_id"]),
-                at,
-                recorded_at,
-                order=o,
-                reference_event_id=receipt.id,
-                reason_code="holdings_zero",
-            )
-        inspect_portfolio(cur, pid)
-        return receipt
+    return receipt
 
 
 def record_mark(conn, pid, slot, at, *, quote=None, reason=None, inception=False):

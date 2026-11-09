@@ -43,7 +43,7 @@ def recover(conn, pid):
     """Join planner context to Stage 4C's audit in the same read-only snapshot."""
     try:
         with transaction(conn, readonly=True) as cur:
-            return _recovery_view(cur, pid)
+            return recovery_view(cur, pid, inspect_portfolio(cur, pid))
     except IntegrityIssue:
         raise
     except (
@@ -57,8 +57,7 @@ def recover(conn, pid):
         raise IntegrityIssue("invalid_portfolio_evidence", pid) from exc
 
 
-def _recovery_view(cur, pid):
-    snap = inspect_portfolio(cur, pid)
+def recovery_view(cur, pid, snap):
     p = snap.account.portfolio
     meta = cur.execute(
         "SELECT activated_at, paper_latest(portfolio_id) AS latest, "

@@ -144,11 +144,13 @@ def recovery_reader(root, state, discover):
     return read
 
 
-def record_archived_decision(conn, pid, root, decision, observation=None):
+def record_archived_decision(
+    conn, pid, root, decision, observation=None, *, admit=None
+):
     """No financial decision may precede durable, re-readable source objects."""
     if decision.forecast is None:
         require(observation is None, "Unexpected forecast for a missing horizon.")
-        return store.record_decision(conn, pid, decision)
+        return store.record_decision(conn, pid, decision, admit=admit)
     f = decision.forecast
     require(
         observation is not None and f == observation.forecast,
@@ -178,6 +180,7 @@ def record_archived_decision(conn, pid, root, decision, observation=None):
         decision,
         artifact_relpath=observation.artifact_relpath,
         prediction_id=observation.prediction_id,
+        admit=admit,
     )
 
 
@@ -193,7 +196,7 @@ def intent_reference(pid, oid, run_id):
     )
 
 
-def submit_archived_order(conn, pid, root, order, attempt, source):
+def submit_archived_order(conn, pid, root, order, attempt, source, *, prepare=None):
     """Bind the exact pre-intent filter observation even if the order never fills."""
     p = order.balances.portfolio
     require(source.run_id == order.run_id, "Intent needs this invocation's filters.")
@@ -216,7 +219,18 @@ def submit_archived_order(conn, pid, root, order, attempt, source):
     )
     pin = retain(root, forward.canonical(manifest))
     publish_once(root, intent_reference(pid, oid, order.run_id), pin.encode())
-    return store.submit_order(conn, pid, order, attempt)
+    reloaded = verify_intent(
+        root,
+        p,
+        {
+            "order_id": oid,
+            "portfolio_id": pid,
+            "run_id": order.run_id,
+            "submitted_at": order.submitted_at,
+        },
+    )
+    require(reloaded == rules, "Archived intent differs from pre-intent filters.")
+    return store.submit_order(conn, pid, order, attempt, prepare=prepare)
 
 
 def verify_intent(root, p, order):
@@ -244,7 +258,34 @@ def verify_intent(root, p, order):
 
 def archive_quote(root, quote):
     retain_body(root, quote.raw_body, quote.payload_sha256)
+    require(
+        original_bytes(root, quote.payload_sha256, LIMIT[QUOTE]) == quote.raw_body,
+        "Archived quote differs from original.",
+    )
     return quote
+
+
+def archive_failed_response(root, oid, response, reason):
+    """Pin the returned envelope even if its run, times or identity are unusable."""
+    raw = retain(root, response.body)
+    manifest = dict(
+        order=str(oid),
+        reason=reason,
+        raw=raw,
+        claimed_hash=response.sha256,
+        url=response.url,
+        status=response.status,
+        run_id=response.run_id,
+        started=response.start.wall.isoformat(),
+        received=response.end.wall.isoformat(),
+        ticks=[
+            response.start.before_ns,
+            response.start.after_ns,
+            response.end.before_ns,
+            response.end.after_ns,
+        ],
+    )
+    return "failed-response:" + retain(root, forward.canonical(manifest))
 
 
 def audit_sources(cur, pid, root):
@@ -296,6 +337,17 @@ def audit_sources(cur, pid, root):
                     original_bytes(root, e["raw_body_sha256"], LIMIT[QUOTE])
                     == e["raw_body"],
                     "Archived quote differs from database original.",
+                )
+            if e["event_type"] == "QUOTE_FAILED" and e["quote_key"].startswith(
+                "failed-response:"
+            ):
+                pin = e["quote_key"].removeprefix("failed-response:")
+                binding = json.loads(original_bytes(root, pin))
+                require(
+                    binding["order"] == str(e["order_id"])
+                    and binding["reason"] == e["reason_code"]
+                    and binding["raw"] == e["raw_body_sha256"],
+                    "Failed response archive disagrees with the order.",
                 )
             if e["reason_code"] == "INCEPTION":
                 binding = json.loads(original_bytes(root, e["quote_key"]))

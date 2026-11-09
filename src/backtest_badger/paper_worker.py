@@ -97,74 +97,81 @@ class Plan:
         )
 
 
-def plan_marks(view: Recovery, at, read_quote, read_state, clock):
+def due_slots(view: Recovery, at):
     slot = boundary(view.activated) + timedelta(minutes=10)
     if slot + WINDOW <= view.activated:
         slot += STEP
-    result = []
     while slot <= at:
         if slot not in view.slots:
-            item = {
-                "slot": slot.isoformat(),
-                "at": at.isoformat(),
-                "status": "MARK_MISSING",
-            }
-            if at < slot + WINDOW:
-                try:
-                    q = read_quote(view.state.account.portfolio, clock)
-                    require(q.run_id == clock.run_id, "Prior-run mark quote.")
-                    current = read_state()
-                    require(
-                        current.state.account.portfolio == view.state.account.portfolio,
-                        "Mark market changed.",
-                    )
-                    at = clock.now()
-                    item["at"] = at.isoformat()
-                    account = current.state.account
-                    mark = Mark(
-                        account.portfolio,
-                        q.identity,
-                        at,
-                        account.ledger_seq,
-                        q,
-                        records.fingerprint(VALUATION_POLICY),
-                        slot=slot,
-                    )
-                    value = value_account(account, mark)
-                    if slot in current.slots:
-                        item["status"] = "ALREADY_MARKED"
-                    elif value.equity is not None:
-                        item.update(
-                            status="MARK_PROPOSED",
-                            ledger_seq=account.ledger_seq,
-                            quote_sha256=q.payload_sha256,
-                            bid=str(q.bid),
-                            received_at=q.response_received_at.isoformat(),
-                        )
-                    else:
-                        item.update(
-                            status="MARK_UNAVAILABLE", reason=value.unavailable_reason
-                        )
-                except MarketError as exc:
-                    item.update(status="MARK_UNAVAILABLE", reason=exc.code)
-                    if exc.status in (418, 429):
-                        raise
-                if item["status"] == "MARK_UNAVAILABLE":
-                    discovery = clock.now()
-                    item["at"] = discovery.isoformat()
-                    if discovery >= slot + WINDOW:
-                        item["status"] = "MARK_MISSING"
-            result.append(item)
+            yield slot
         slot += STEP
+
+
+def plan_marks(view: Recovery, at, read_quote, read_state, clock):
+    result = []
+    for slot in due_slots(view, at):
+        item = {
+            "slot": slot.isoformat(),
+            "at": at.isoformat(),
+            "status": "MARK_MISSING",
+        }
+        if at < slot + WINDOW:
+            try:
+                q = read_quote(view.state.account.portfolio, clock)
+                require(q.run_id == clock.run_id, "Prior-run mark quote.")
+                current = read_state()
+                require(
+                    current.state.account.portfolio == view.state.account.portfolio,
+                    "Mark market changed.",
+                )
+                at = clock.now()
+                item["at"] = at.isoformat()
+                account = current.state.account
+                mark = Mark(
+                    account.portfolio,
+                    q.identity,
+                    at,
+                    account.ledger_seq,
+                    q,
+                    records.fingerprint(VALUATION_POLICY),
+                    slot=slot,
+                )
+                value = value_account(account, mark)
+                if slot in current.slots:
+                    item["status"] = "ALREADY_MARKED"
+                elif value.equity is not None:
+                    item.update(
+                        status="MARK_PROPOSED",
+                        ledger_seq=account.ledger_seq,
+                        quote_sha256=q.payload_sha256,
+                        bid=str(q.bid),
+                        received_at=q.response_received_at.isoformat(),
+                    )
+                else:
+                    item.update(
+                        status="MARK_UNAVAILABLE", reason=value.unavailable_reason
+                    )
+            except MarketError as exc:
+                item.update(status="MARK_UNAVAILABLE", reason=exc.code)
+                if exc.status in (418, 429):
+                    raise
+            if item["status"] == "MARK_UNAVAILABLE":
+                discovery = clock.now()
+                item["at"] = discovery.isoformat()
+                if discovery >= slot + WINDOW:
+                    item["status"] = "MARK_MISSING"
+        result.append(item)
     return tuple(result)
 
 
-def forecast_plans(view, read_forward, clock):
+def forecast_plans(view, read_forward, clock, *, one_horizon=False):
     state = view.state
     decisions, observed = [], []
     now = clock.now()
     while state.next_source_open + STEP + timedelta(minutes=1) <= now:
         opened = state.next_source_open
+        if one_horizon and opened != view.state.next_source_open:
+            break
         started = now
         evidence = read_forward(state.account.portfolio, opened, clock)
         now = clock.now()
@@ -293,6 +300,12 @@ def _active_cycle(
         plan = replace(plan, reason="forecast_source_unavailable")
     marks = plan_marks(view, clock.now(), read_quote, read_state, clock)
     plan = replace(plan, decisions=decisions, observations=observations, marks=marks)
+    return order_plan(view, state, plan, read_state, read_forward, read_filters, clock)
+
+
+def order_plan(view, state, plan, read_state, read_forward, read_filters, clock):
+    """Choose the sole permitted next attempt from a reconciled strategy state."""
+    decisions, observations = plan.decisions, plan.observations
     now = clock.now()
     if view.pending:
         result = (

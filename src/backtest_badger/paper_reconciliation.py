@@ -42,11 +42,16 @@ def transaction(conn, *, readonly=False):
             cur.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
         else:
             cur.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
-        cur.execute("SET LOCAL search_path=pg_catalog,public,pg_temp")
-        cur.execute("SET LOCAL timezone='UTC'")
-        cur.execute("SET LOCAL lock_timeout='3s'")
-        cur.execute("SET LOCAL statement_timeout='10s'")
+        configure_transaction(cur)
         yield cur
+
+
+def configure_transaction(cur):
+    """Use the revision 0002 session policy for one local transaction."""
+    cur.execute("SET LOCAL search_path=pg_catalog,public,pg_temp")
+    cur.execute("SET LOCAL timezone='UTC'")
+    cur.execute("SET LOCAL lock_timeout='3s'")
+    cur.execute("SET LOCAL statement_timeout='10s'")
 
 
 @dataclass(frozen=True)

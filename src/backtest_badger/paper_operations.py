@@ -32,6 +32,9 @@ WARNING = {
     "rejected_exits",
     "cycle_overlap",
     "repeat_failure",
+    "worker_interrupted",
+    "order_expired",
+    "order_rejected",
 }
 CRITICAL = {
     "invalid_automation",

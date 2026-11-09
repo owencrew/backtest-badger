@@ -1,5 +1,9 @@
 # Architecture
 
+## Stage 4D.3A single-cycle simulated writer
+
+An explicitly configured process holds a per-portfolio PostgreSQL advisory lock. It verifies the complete ledger and originals, admits each decision through the private archive, binds pre-intent exchangeInfo and commits one order. Only then does it request bookTicker. A separate quote observation survives interruption. Settlement locks the account, rereads the immutable order and quote, applies the Stage 4B.1 simulation, posts both assets and forces the deferred financial checks. A database clock check and COMMIT share one protocol message. A missed deadline rolls back provisional postings. A scheduled mark uses the same clock guard and pins a locked ledger prefix. The stage was exercised exclusively with fabricated financial histories. [Writer lifecycle and measurements](stage-04d3a-production-writer.md)
+
 ## Stage 4D.2 isolated operations
 
 The private archive retains the original forecast/journal bytes and the filters for each simulated intent. Recovery verifies them against immutable PostgreSQL evidence. Restricted inception, worker and reporting logins use the revision 0002 ledger. The isolated checkpoint restores schema, permissions and both fabricated portfolios to another PG17 cluster. [Readiness report](stage-04d2-production-readiness.md)

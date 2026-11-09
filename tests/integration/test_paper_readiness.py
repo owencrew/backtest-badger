@@ -382,7 +382,10 @@ def database_tool(container, dsn, program, *flags, body=None, output=None):
     return result.stdout
 
 
-def test_separate_cluster_checkpoint(test_admin, tmp_path, candle_observation):
+@pytest.mark.parametrize("use_writer", [False, True], ids=["rehearsal", "writer"])
+def test_separate_cluster_checkpoint(
+    test_admin, tmp_path, candle_observation, use_writer
+):
     target, target_dsn = restore_admin(test_admin)
     identity = uuid4().hex
     archive, pin = originals(tmp_path)
@@ -394,7 +397,12 @@ def test_separate_cluster_checkpoint(test_admin, tmp_path, candle_observation):
         with psycopg.connect(source["collector"], autocommit=True) as collector:
             save_candle(collector, candle_observation)
         upgrade(source, identifiers)
-        expected = lifecycle(source, tmp_path, archive, pin)
+        if use_writer:
+            from .test_paper_writer import writer_lifecycle
+
+            expected = writer_lifecycle(source, tmp_path, archive, pin)
+        else:
+            expected = lifecycle(source, tmp_path, archive, pin)
         cid = os.environ["BADGER_D2A_TEST_CONTAINER"]
         dest = os.environ["BADGER_TEST_RESTORE_CONTAINER"]
         assert cid != dest
