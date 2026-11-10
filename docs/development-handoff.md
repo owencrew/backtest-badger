@@ -1,5 +1,9 @@
 # Development handoff — Backtest Badger
 
+## Stage 4D.3B.1 handoff
+
+The approved host inspection found PG17 at 0001 with admin-owned legacy tables, owner-private source journals and a home-based interpreter. Resume with the isolated capacity trial, restricted source mounts, protected backup extension and migration review. The production-capable command and disabled systemd templates were rehearsed locally. Stage 4D.3B.2 installation and Stage 4D.3C per-market activation require separate owner decisions. [Preflight report and sequence](stage-04d3b1-lightsail-preflight.md)
+
 ## Stage 4D.3A writer handoff
 
 Use the [writer verification report](stage-04d3a-production-writer.md) for the explicit staging configuration, PostgreSQL timing measurements, failure matrix and release identification. The local entry point requires an existing fabricated cohort and an external clock observation. The operator checklist governs a future host inventory, backup rehearsal, restricted service review and separate BTC/ETH activation decisions. [Production checklist](deployment/paper-migration-activation-checklist.md)

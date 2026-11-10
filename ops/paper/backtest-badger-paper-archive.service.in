@@ -1,0 +1,18 @@
+[Unit]
+Description=Publish immutable paper evidence objects
+[Service]
+Type=simple
+User=badger-archive
+Group=badger-archive
+ExecStart=/usr/bin/env -i /opt/backtest-badger/paper-releases/@RELEASE@/.venv/bin/python -I -B -m backtest_badger.paper_archive_service
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+PrivateNetwork=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+ReadWritePaths=/var/lib/badger-paper-vault/originals
+InaccessiblePaths=-/etc/backtest-badger -/var/lib/backtest-badger -/run/docker.sock

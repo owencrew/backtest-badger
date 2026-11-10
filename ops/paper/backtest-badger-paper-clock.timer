@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh the trusted clock report
+
+[Timer]
+OnCalendar=*-*-* *:*:00 UTC
+AccuracySec=1s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Private create-only paper evidence socket
+[Socket]
+ListenStream=/run/badger-paper-archive.sock
+SocketUser=root
+SocketGroup=badger-paper
+SocketMode=0660
+RemoveOnStop=true

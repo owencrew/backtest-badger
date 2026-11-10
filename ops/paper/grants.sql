@@ -1,10 +1,11 @@
 -- PG17, revision 0002. Identifiers are composed by the isolated provisioner.
--- Rehearse as non-superuser database/migration owner inside one transaction.
+-- Run transactionally as the ordinary owner on a fresh database or the
+-- reviewed bootstrap administrator on a split-owner legacy database.
 REVOKE ALL ON DATABASE {database} FROM PUBLIC;
 GRANT CONNECT ON DATABASE {database} TO {worker}, {operator}, {reader};
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 GRANT USAGE ON SCHEMA public TO {worker}, {operator}, {reader};
-ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE {owner} REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
 GRANT SELECT ON market, paper_portfolio, paper_order, paper_decision,
     paper_market_event, paper_ledger_entry TO {worker}, {operator}, {reader};

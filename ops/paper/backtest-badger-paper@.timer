@@ -1,0 +1,12 @@
+[Unit]
+Description=Five-minute prospective simulated paper schedule for %i
+ConditionPathExists=/etc/backtest-badger/paper/%i.active
+
+[Timer]
+OnCalendar=*-*-* *:00/5:00 UTC
+AccuracySec=1s
+Persistent=false
+Unit=backtest-badger-paper@%i.service
+
+[Install]
+WantedBy=timers.target

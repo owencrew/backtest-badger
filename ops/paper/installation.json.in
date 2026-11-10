@@ -1,0 +1,20 @@
+{
+  "mode": "production-once",
+  "symbol": "<individually approved market>",
+  "portfolio_id": "<approved existing portfolio UUID>",
+  "config_sha256": "<canonical strategy configuration digest>",
+  "implementation_sha256": "<inception implementation manifest digest>",
+  "release": "<reviewed forty-character Git SHA>",
+  "deployment_sha256": "<sealed deployment.json digest>",
+  "machine": "<private host machine ID>",
+  "records_identity": [null, null],
+  "journals_identity": [null, null],
+  "archive_identity": [null, null],
+  "host": "127.0.0.1",
+  "port": 5432,
+  "database": "backtest_badger",
+  "database_oid": null,
+  "cluster": "<privately recorded PostgreSQL system identifier>",
+  "role": "<restricted login approved for this database>",
+  "security_sha256": "<independently reviewed privilege fingerprint>"
+}

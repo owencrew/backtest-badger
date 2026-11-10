@@ -1,6 +1,7 @@
 """Descriptor-relative access to explicitly selected local evidence directories."""
 
 import os
+import socket
 import stat
 from contextlib import contextmanager
 from hashlib import sha256
@@ -8,6 +9,33 @@ from pathlib import Path
 from uuid import uuid4
 
 from backtest_badger.paper_types import digest, require
+
+ARCHIVE_LIMIT = 1024 * 1024
+
+
+class ArchiveView:
+    """Read retained bytes from the read-only view and publish through the broker."""
+
+    def __init__(self, path, endpoint):
+        self.path = path
+        self.endpoint = endpoint
+
+    def __fspath__(self):
+        return os.fspath(self.path)
+
+    def publish(self, name, body):
+        require(len(body) <= ARCHIVE_LIMIT, "Oversized archive object.")
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as conn:
+            conn.settimeout(3)
+            conn.connect(self.endpoint)
+            conn.sendall(name.encode("ascii") + b"\n" + body)
+            conn.shutdown(socket.SHUT_WR)
+            require(conn.recv(1) == b"1", "Archive publication failed.")
+        # Acknowledgement and this independent read must refer to the same vault.
+        with directory(self.path) as fd:
+            require(
+                read_original(fd, name, len(body)) == body, "Archive view mismatch."
+            )
 
 
 @contextmanager
@@ -52,6 +80,8 @@ def retain_body(root, body, fingerprint):
 
 def publish_once(root, name, body):
     """Atomically create a private object or verify an identical prior publication."""
+    if isinstance(root, ArchiveView):
+        return root.publish(name, body)
     require(
         Path(name).name == name and name not in ("", ".", ".."), "Unsafe archive name."
     )

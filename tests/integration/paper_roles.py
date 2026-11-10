@@ -93,6 +93,17 @@ def upgrade(dsns, identifiers):
         )
 
 
+def install_identity_grants(admin_dsn, dsns, identifiers):
+    database = conninfo_to_dict(dsns["worker"])["dbname"]
+    assert re.fullmatch(r"badger_test_[0-9a-f]{32}", database)
+    with psycopg.connect(make_conninfo(admin_dsn, dbname=database)) as admin:
+        admin.execute(
+            sql.SQL((ROOT / "ops/paper/identity-grants.sql").read_text()).format(
+                **identifiers
+            )
+        )
+
+
 def restore_admin(test_admin):
     dsn = os.getenv("BADGER_TEST_RESTORE_DSN")
     if not dsn:

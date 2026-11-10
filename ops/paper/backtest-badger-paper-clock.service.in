@@ -1,0 +1,19 @@
+[Unit]
+Description=Measure the externally synchronised clock for the simulated writer
+After=chrony.service
+ConditionPathExists=/etc/backtest-badger/paper/ntp-source
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I -B /opt/backtest-badger/paper-releases/@RELEASE@/ops/paper/clock_observer.py
+RuntimeDirectory=badger-paper-clock
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+TimeoutStartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX

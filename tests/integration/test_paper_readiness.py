@@ -3,6 +3,7 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 from contextlib import closing
 from dataclasses import replace
@@ -29,7 +30,7 @@ from backtest_badger.paper_recovery import recover
 from backtest_badger.paper_types import STEP
 from backtest_badger.paper_worker import cycle
 
-from .paper_roles import isolated_roles, restore_admin, upgrade
+from .paper_roles import install_identity_grants, isolated_roles, restore_admin, upgrade
 from .paper_workload import COHORT, originals, portfolio, publish_slot
 
 pytestmark = pytest.mark.integration
@@ -398,9 +399,14 @@ def test_separate_cluster_checkpoint(
             save_candle(collector, candle_observation)
         upgrade(source, identifiers)
         if use_writer:
+            install_identity_grants(test_admin[1], source, identifiers)
+            from .paper_writer_harness import archive_service
             from .test_paper_writer import writer_lifecycle
 
-            expected = writer_lifecycle(source, tmp_path, archive, pin)
+            with archive_service(archive) as view:
+                expected = writer_lifecycle(
+                    source, tmp_path, archive, pin, archive_view=view
+                )
         else:
             expected = lifecycle(source, tmp_path, archive, pin)
         cid = os.environ["BADGER_D2A_TEST_CONTAINER"]
@@ -430,7 +436,23 @@ def test_separate_cluster_checkpoint(
                     role_names,
                 )
             assert not (tmp_path / "partial/manifest.json").exists()
-            pin = backup.capture(
+            roots = {}
+            if use_writer:
+                (tmp_path / "incidents").mkdir()
+                (tmp_path / "incidents/paper.jsonl").write_text(
+                    '{"result":"fabricated"}\n'
+                )
+                roots = {
+                    k: tmp_path / name
+                    for k, name in (
+                        ("records", "records"),
+                        ("journals", "operations"),
+                        ("runtime", "runtime"),
+                        ("incidents", "incidents"),
+                    )
+                }
+            capture = backup.capture_operational if use_writer else backup.capture
+            pin = capture(
                 db,
                 archive,
                 checkpoint,
@@ -444,7 +466,20 @@ def test_separate_cluster_checkpoint(
                 ),
                 lambda snap: schema(cid, source["owner"], snap),
                 role_names,
+                **({"roots": roots} if use_writer else {}),
             )
+        restore_started = perf_counter()
+        if use_writer:
+            independent = tmp_path / "independent"
+            shutil.copytree(checkpoint, independent)
+            financial_pin = backup.verify_operational(independent, pin)
+            sample = independent / "incidents/paper.jsonl"
+            sample.write_bytes(b"corrupt")
+            with pytest.raises(ValueError, match="Damaged operational"):
+                backup.verify_operational(independent, pin)
+            shutil.copyfile(checkpoint / "incidents/paper.jsonl", sample)
+            assert backup.verify_operational(independent, pin) == financial_pin
+            checkpoint, pin = independent / "financial", financial_pin
         data = backup.verify_bundle(checkpoint, pin)
         dump = checkpoint / "database.dump"
         body = dump.read_bytes()
@@ -478,6 +513,9 @@ def test_separate_cluster_checkpoint(
             )
         with psycopg.connect(restored["worker"], autocommit=True) as c:
             check_security(c, identifiers)
+            print(
+                "FABRICATED verified restore seconds", perf_counter() - restore_started
+            )
             pid, pin_forecast = c.execute(
                 "SELECT portfolio_id,forecast_file_sha256 FROM paper_decision "
                 "WHERE kind='FORECAST' LIMIT 1"
@@ -663,3 +701,162 @@ def test_five_minute_cycles_process_death_and_fail_closed(test_admin, tmp_path):
             assert {i["code"] for i in incidents} == {"original_missing"}
             assert len({i["key"] for i in incidents}) == 1
             assert c.execute("SELECT count(*) FROM paper_decision").fetchone() == (0,)
+
+
+def test_linux_worker_mounts_and_loopback_login(test_admin, tmp_path):
+    """Exercise the data-plane permissions inside an unprivileged Linux container."""
+    from psycopg.conninfo import conninfo_to_dict
+
+    cid = os.environ["BADGER_D2A_TEST_CONTAINER"]
+    assert re.fullmatch("[a-f0-9]{64}", cid)
+    uid, gid = os.getuid() or 65534, os.getgid() or 65534
+    image = subprocess.check_output(
+        ["docker", "--context", "default", "inspect", "--format", "{{.Image}}", cid],
+        text=True,
+    ).strip()
+    assert re.fullmatch("sha256:[a-f0-9]{64}", image)
+    with isolated_roles(*test_admin, uuid4().hex) as (dsns, ids):
+        upgrade(dsns, ids)
+        params = conninfo_to_dict(dsns["worker"])
+        secret = tmp_path / "password"
+        secret.write_text(params["password"])
+        secret.chmod(0o400)
+        if os.getuid() == 0:
+            os.chown(secret, uid, gid)
+        args = [
+            "docker",
+            "--context",
+            "default",
+            "run",
+            "--rm",
+            "--pull=never",
+            "--read-only",
+            "--cap-drop=ALL",
+            "--security-opt=no-new-privileges",
+            "--network",
+            "container:" + cid,
+            "--user",
+            f"{uid}:{gid}",
+        ]
+        for kind in ("records", "journals", "archive", "runtime"):
+            path = tmp_path / kind
+            path.mkdir(mode=0o700)
+            readonly = kind != "runtime"
+            if readonly:
+                body = path / "original.json"
+                body.write_bytes(b"fabricated")
+                body.chmod(0o600)
+                if os.getuid() == 0:
+                    os.chown(body, uid, gid)
+            if os.getuid() == 0:
+                os.chown(path, uid, gid)
+            args.extend(["-v", f"{path}:/paper/{kind}:" + ("ro" if readonly else "rw")])
+        result = subprocess.run(
+            [
+                *args,
+                "-v",
+                f"{secret}:/paper/password:ro",
+                "--entrypoint",
+                "/bin/sh",
+                image,
+                "-ec",
+                """
+             test "$(id -u)" != 0
+             for d in records journals archive; do
+               test "$(cat /paper/$d/original.json)" = fabricated
+               if (touch "/paper/$d/unexpected") 2>/dev/null; then exit 1; fi
+             done
+             umask 077
+             touch /paper/runtime/incident
+             test ! -e /run/docker.sock
+             export PGPASSWORD="$(cat /paper/password)"
+             query="SELECT current_user,has_table_privilege('paper_portfolio','INSERT')"
+             exec psql -XqAt -w -h 127.0.0.1 -U "$1" -d "$2" -c "$query"
+             """,
+                "rehearsal",
+                params["user"],
+                params["dbname"],
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip() == params["user"] + "|f"
+
+
+def test_observed_admin_owned_0001_migration(test_admin, tmp_path, candle_observation):
+    """Keep legacy ownership and the combined Stage 3 login while migrating as owner."""
+    from .conftest import ROOT, migrate
+
+    admin, base = test_admin
+    identity = uuid4().hex
+    with isolated_roles(admin, base, identity) as (dsns, ids):
+        with psycopg.connect(dsns["collector"], autocommit=True) as stage3:
+            save_candle(stage3, candle_observation)
+            before = stage3.execute("SELECT * FROM candle").fetchall()
+        target = make_conninfo(base, dbname=conninfo_to_dict(dsns["owner"])["dbname"])
+        with psycopg.connect(target, autocommit=True) as bootstrap:
+            # Reproduce the observed object-owner split on fabricated 0001 only.
+            with bootstrap.transaction():
+                bootstrap.execute(
+                    sql.SQL("ALTER DATABASE {database} OWNER TO CURRENT_USER").format(
+                        **ids
+                    )
+                )
+                for table in ("market", "candle", "candle_revision", "alembic_version"):
+                    bootstrap.execute(
+                        sql.SQL("ALTER TABLE {} OWNER TO CURRENT_USER").format(
+                            sql.Identifier(table)
+                        )
+                    )
+                bootstrap.execute(
+                    "ALTER FUNCTION reject_candle_revision_mutation() "
+                    "OWNER TO CURRENT_USER"
+                )
+                bootstrap.execute(
+                    sql.SQL("ALTER ROLE {collector} INHERIT").format(**ids)
+                )
+                bootstrap.execute(
+                    sql.SQL((ROOT / "ops/paper/legacy-owner.sql").read_text()).format(
+                        **ids
+                    )
+                )
+            migrate(dsns["owner"], "0002")
+            with bootstrap.transaction():
+                bootstrap.execute(
+                    sql.SQL((ROOT / "ops/paper/grants.sql").read_text()).format(**ids)
+                )
+                bootstrap.execute(
+                    sql.SQL(
+                        (ROOT / "ops/paper/identity-grants.sql").read_text()
+                    ).format(**ids)
+                )
+            assert bootstrap.execute(
+                "SELECT pg_get_userbyid(datdba)=current_user FROM pg_database "
+                "WHERE datname=current_database()"
+            ).fetchone() == (True,)
+            assert bootstrap.execute(
+                "SELECT relowner::regrole::text FROM pg_class "
+                "WHERE oid='paper_portfolio'::regclass"
+            ).fetchone() == (conninfo_to_dict(dsns["owner"])["user"],)
+        with psycopg.connect(dsns["collector"], autocommit=True) as stage3:
+            assert stage3.execute("SELECT * FROM candle").fetchall() == before
+            save_candle(
+                stage3,
+                replace(
+                    candle_observation,
+                    close=candle_observation.high,
+                    observed_at=candle_observation.observed_at + FIVE,
+                ),
+            )
+            assert stage3.execute(
+                "SELECT count(*) FROM candle_revision"
+            ).fetchone() == (1,)
+            deny(stage3, "SELECT * FROM paper_decision")
+        archive, manifest = originals(tmp_path)
+        with psycopg.connect(dsns["operator"], autocommit=True) as op:
+            pid = activate(op, archive, manifest, portfolio("BTCUSDT"), fx.INCEPTION)
+        with psycopg.connect(dsns["worker"], autocommit=True) as c:
+            check_security(c, ids)
+            assert recover(c, pid).state.account.ledger_seq == 1

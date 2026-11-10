@@ -17,6 +17,7 @@ import pytest
 from backtest_badger import paper_evidence as evidence
 from backtest_badger import paper_fixture as fx
 from backtest_badger.paper_market_data import FILTERS, Market, MarketError
+from backtest_badger.paper_production import security_fingerprint
 from backtest_badger.paper_recovery import recover
 from backtest_badger.paper_types import STEP
 
@@ -162,7 +163,7 @@ def test_unsuccessful_attempt_has_no_postings(staged, failure):
         assert "provider_throttled" in {r["code"] for r in result["incidents"]}
 
 
-def writer_lifecycle(dsns, root, archive, manifest):
+def writer_lifecycle(dsns, root, archive, manifest, *, archive_view=None):
     """Drive both markets through entry, hold, sticky exit, liquidation and re-entry."""
     symbols = ("BTCUSDT", "ETHUSDT")
     with psycopg.connect(dsns["operator"], autocommit=True) as op:
@@ -171,16 +172,54 @@ def writer_lifecycle(dsns, root, archive, manifest):
             for s in symbols
         }
 
+    approvals = dict.fromkeys(pids.values())
+    if archive_view is not None:
+        with psycopg.connect(dsns["worker"], autocommit=True) as c:
+            cluster, oid = c.execute(
+                "SELECT system_identifier::text, (SELECT oid FROM pg_database "
+                "WHERE datname=current_database()) FROM pg_control_system()"
+            ).fetchone()
+            for symbol, pid in pids.items():
+                approvals[pid] = dict(
+                    cluster=cluster,
+                    database_oid=oid,
+                    host=c.info.host,
+                    port=c.info.port,
+                    role=c.info.user,
+                    database=c.info.dbname,
+                    portfolio_id=str(pid),
+                    symbol=symbol,
+                    config_sha256=portfolio(symbol).config_sha256,
+                    implementation_sha256=manifest,
+                    security_sha256=security_fingerprint(c),
+                )
+
     def both(at, signals=None, **kwargs):
         if signals:
             publish_slot(root, fx.OPEN + ((at - fx.ISSUED) // STEP) * STEP, signals)
         with ThreadPoolExecutor(2) as pool:
             jobs = [
-                pool.submit(timed_writer, dsns["worker"], pid, root, at, **kwargs)
+                pool.submit(
+                    timed_writer,
+                    dsns["worker"],
+                    pid,
+                    root,
+                    at,
+                    approval=approvals[pid],
+                    archive_view=archive_view,
+                    **kwargs,
+                )
                 for pid in pids.values()
             ]
             results = [j.result() for j in jobs]
             assert all(r["result"] != "STOPPED" for r in results), results
+            if archive_view is not None:
+                for r in results:
+                    if r["result"] == "FILLED":
+                        print(
+                            "FABRICATED archive service admission ms",
+                            round(r["timings"]["receipt_to_admission_s"] * 1000, 3),
+                        )
             return [r["result"] for r in results]
 
     at = fx.ISSUED
@@ -485,3 +524,134 @@ def test_clock_lost_before_commit_rolls_back_postings(staged):
     state = snapshot(staged)
     assert state.state.account.ledger_seq == 1 and state.pending_quotes == 1
     assert timed_writer(*staged, fx.ISSUED + 35 * S)["result"] == "EXPIRED"
+
+
+def test_production_entry_shutdown_and_binding_failures(
+    test_admin, tmp_path, monkeypatch, capsys
+):
+    from backtest_badger import paper_persistence as store
+    from backtest_badger import paper_production as prod
+    from backtest_badger.paper_operations import ClockHealth
+
+    from .paper_roles import install_identity_grants
+
+    archive, manifest = originals(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir(mode=0o700)
+    p = portfolio("BTCUSDT")
+    with isolated_roles(*test_admin, uuid4().hex) as (dsns, roles):
+        upgrade(dsns, roles)
+        install_identity_grants(test_admin[1], dsns, roles)
+        with psycopg.connect(dsns["operator"], autocommit=True) as op:
+            pid = activate(op, archive, manifest, p, fx.INCEPTION)
+        publish_slot(tmp_path, fx.OPEN, {p.symbol: 0.01})
+        from psycopg.conninfo import conninfo_to_dict
+
+        params = conninfo_to_dict(dsns["worker"])
+        with psycopg.connect(
+            dsns["worker"],
+            autocommit=True,
+            options="-c search_path=pg_catalog,public,pg_temp",
+        ) as c:
+            cluster, oid = c.execute(
+                "SELECT system_identifier::text,(SELECT oid FROM pg_database "
+                "WHERE datname=current_database()) FROM pg_control_system()"
+            ).fetchone()
+            approved = dict(
+                cluster=cluster,
+                database_oid=oid,
+                role=c.info.user,
+                host=c.info.host,
+                port=c.info.port,
+                database=c.info.dbname,
+                portfolio_id=str(pid),
+                symbol=p.symbol,
+                config_sha256=p.config_sha256,
+                implementation_sha256=manifest,
+                security_sha256=security_fingerprint(c),
+            )
+        config = prod.WriterConfig(
+            pid,
+            p.symbol,
+            p.config_sha256,
+            tmp_path / "records",
+            tmp_path / "operations",
+            archive,
+            runtime,
+        )
+        settings = approved.copy()
+        # Replace only the external OS installation, UTC and public HTTPS boundaries.
+        monkeypatch.setattr(
+            prod, "installed", lambda *_: (settings, config, params["password"])
+        )
+        at = fx.ISSUED
+        monkeypatch.setattr(prod, "Clock", lambda: fx.fixed_clock(at))
+        monkeypatch.setattr(prod, "shared_provider", lambda _: transport)
+        current = None
+        monkeypatch.setattr(prod, "clock_health", lambda _: current)
+        args = ["production-once", "--market", p.symbol, "--release", "c" * 40]
+        for key, wrong in (
+            ("cluster", "0"),
+            ("database_oid", 0),
+            ("portfolio_id", str(uuid4())),
+            ("symbol", "ETHUSDT"),
+            ("implementation_sha256", "0" * 64),
+            ("security_sha256", "0" * 64),
+        ):
+            settings[key] = wrong
+            assert prod.main(args) == 1
+            assert json.loads(capsys.readouterr().out)["result"] == "PREFLIGHT_FAILED"
+            settings[key] = approved[key]
+        assert prod.main(args) == 1
+        assert (
+            json.loads(capsys.readouterr().out)["incidents"][0]["code"]
+            == "clock_uncertain"
+        )
+        current = ClockHealth(True, at, timedelta(milliseconds=1))
+        post = store._post_fill
+
+        def interrupt(*a, **kw):
+            post(*a, **kw)
+            signal.raise_signal(signal.SIGTERM)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(store, "_post_fill", interrupt)
+            assert prod.main(args) == 2
+            assert json.loads(capsys.readouterr().out)["result"] == "INTERRUPTED"
+        with psycopg.connect(dsns["worker"], autocommit=True) as c:
+            view = recover(c, pid)
+            assert view.pending is not None and view.state.account.ledger_seq == 1
+        at += S
+        assert prod.main(args) == 0
+        assert json.loads(capsys.readouterr().out)["result"] == "REJECTED"
+        with psycopg.connect(dsns["worker"], autocommit=True) as c:
+            assert recover(c, pid).state.account.ledger_seq == 1
+        # The emergency role stop targets only the paper login on this database.
+        from psycopg import sql
+
+        with (
+            psycopg.connect(dsns["worker"], autocommit=True) as worker,
+            psycopg.connect(dsns["collector"], autocommit=True) as collector,
+        ):
+            admin = test_admin[0]
+            admin.execute(sql.SQL("ALTER ROLE {} NOLOGIN").format(roles["worker"]))
+            assert worker.execute("SELECT 1").fetchone() == (1,)
+            with pytest.raises(psycopg.OperationalError):
+                psycopg.connect(dsns["worker"], connect_timeout=2)
+            terminated = admin.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                "WHERE datname=%s AND usename=%s",
+                (approved["database"], approved["role"]),
+            ).fetchall()
+            assert terminated == [(True,)]
+            with pytest.raises(psycopg.OperationalError):
+                worker.execute("SELECT 1")
+            assert collector.execute("SELECT count(*) FROM market").fetchone() == (2,)
+            with psycopg.connect(dsns["reader"], autocommit=True) as reader:
+                assert reader.execute(
+                    "SELECT entry_type FROM paper_ledger_entry WHERE portfolio_id=%s",
+                    (pid,),
+                ).fetchall() == [("INITIAL_FUNDING",)]
+                assert reader.execute(
+                    "SELECT status FROM paper_order WHERE portfolio_id=%s", (pid,)
+                ).fetchall() == [("REJECTED",)]

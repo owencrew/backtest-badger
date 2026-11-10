@@ -1,5 +1,9 @@
 # Architecture
 
+## Stage 4D.3B.1 deployment boundary
+
+The proposed paper process uses a separate immutable release, root-controlled install and per-market activation files, systemd credentials and a restricted database login. The shared-snapshot checkpoint also binds original source directories, runtime state and incident exports. [Trust boundaries and evidence](stage-04d3b1-lightsail-preflight.md)
+
 ## Stage 4D.3A single-cycle simulated writer
 
 An explicitly configured process holds a per-portfolio PostgreSQL advisory lock. It verifies the complete ledger and originals, admits each decision through the private archive, binds pre-intent exchangeInfo and commits one order. Only then does it request bookTicker. A separate quote observation survives interruption. Settlement locks the account, rereads the immutable order and quote, applies the Stage 4B.1 simulation, posts both assets and forces the deferred financial checks. A database clock check and COMMIT share one protocol message. A missed deadline rolls back provisional postings. A scheduled mark uses the same clock guard and pins a locked ledger prefix. The stage was exercised exclusively with fabricated financial histories. [Writer lifecycle and measurements](stage-04d3a-production-writer.md)

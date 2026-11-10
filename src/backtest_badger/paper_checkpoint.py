@@ -227,3 +227,89 @@ def verify_restored(conn, target, receipt, schema_dump, role_names):
             )
             for r in ids
         }
+
+
+# The supervisor quiesces every producer, including the journal exporter, before
+# calling this layer. Unexpected members (links, subdirectories, partials) stop
+# publication. A trusted backup operator owns the fresh checkpoint directory.
+OPERATIONAL = {"records", "journals", "runtime", "incidents"}
+
+
+def operational_files(roots, destination=None):
+    require(set(roots) == OPERATIONAL, "Incomplete operational coverage.")
+    inventory = {}
+    for kind, root in sorted(roots.items()):
+        members = {}
+        if destination:
+            (destination / kind).mkdir(mode=0o700)
+        with directory(root) as fd:
+            for name in sorted(os.listdir(fd)):
+                with os.fdopen(
+                    os.open(
+                        name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd
+                    ),
+                    "rb",
+                ) as source:
+                    info = os.fstat(source.fileno())
+                    require(
+                        S_ISREG(info.st_mode) and not name.endswith(".partial"),
+                        "Review unfinished or unexpected operational evidence.",
+                    )
+                    if destination:
+                        with (destination / kind / name).open("xb") as copy:
+                            while block := source.read(1024 * 1024):
+                                copy.write(block)
+                            copy.flush()
+                            os.fsync(copy.fileno())
+                        source.seek(0)
+                    members[name] = file_digest(source, "sha256").hexdigest()
+        inventory[kind] = members
+    return inventory
+
+
+def capture_operational(conn, archive, target, dump, schema_dump, role_names, roots):
+    """Capture the financial and file checkpoint while producers are paused."""
+    target.mkdir(mode=0o700, exist_ok=False)
+    first = operational_files(roots, target)
+    identity = capture(
+        conn, archive, target / "financial", dump, schema_dump, role_names
+    )
+    require(
+        first == operational_files(roots),
+        "Operational files changed during checkpoint.",
+    )
+    manifest = json.dumps(
+        {"financial": identity, "files": first}, sort_keys=True
+    ).encode()
+    (target / "receipt.json").write_bytes(manifest)
+    receipt = sha256(manifest).hexdigest()
+    verify_operational(target, receipt)
+    for path in (
+        target / "receipt.json",
+        *(target / k for k in OPERATIONAL),
+        target,
+        target.parent,
+    ):
+        fd = os.open(path, os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+    return receipt
+
+
+def verify_operational(target, receipt):
+    with directory(target) as fd:
+        require(
+            set(os.listdir(fd)) == OPERATIONAL | {"financial", "receipt.json"},
+            "Unexpected operational checkpoint members.",
+        )
+        manifest = read_original(fd, "receipt.json", 64 * 1024 * 1024)
+    require(sha256(manifest).hexdigest() == receipt, "Wrong operational receipt.")
+    data = json.loads(manifest)
+    require(
+        operational_files({k: target / k for k in OPERATIONAL}) == data["files"],
+        "Damaged operational evidence.",
+    )
+    verify_bundle(target / "financial", data["financial"])
+    return data["financial"]

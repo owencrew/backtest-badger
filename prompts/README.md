@@ -1,5 +1,7 @@
 # Prompt archive
 
+[Stage 4D.3B.1 — Lightsail production preflight and deployment preparation](stage-04-paper/stage-04d3b1-lightsail-preflight.md) archives the complete request.
+
 The complete Stage 4D.3A request is archived with its local implementation and pre-activation verification scope. [Production simulated writer prompt](stage-04-paper/stage-04d3a-production-writer.md)
 
 [Stage 4D.2 production readiness and isolated paper-trading rehearsal](stage-04-paper/stage-04d2-production-readiness.md) is the archived operational milestone request.

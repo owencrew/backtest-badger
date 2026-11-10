@@ -1,5 +1,9 @@
 # Roadmap
 
+## Stage 4D.3B.1 — Lightsail preflight
+
+Local deployment preparation includes market-specific authorization, restricted unit templates, a chrony observer and a nine-table checkpoint with original/runtime evidence. The host inventory is complete. The next installation review requires a sealed paper release, source mount proof, extended production recovery and representative capacity measurements. [Preflight evidence](stage-04d3b1-lightsail-preflight.md)
+
 ## Stage 4D milestones
 
 [4D.3A](stage-04d3a-production-writer.md) implements the inactive financial writer and rehearses both fabricated markets through independent restore. Stage 4D.3B begins with separately authorised release and host inspection. Each market needs its own subsequent inception approval.

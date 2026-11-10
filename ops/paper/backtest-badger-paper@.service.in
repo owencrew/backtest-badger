@@ -1,0 +1,43 @@
+[Unit]
+Description=One prospective simulated paper cycle for %i
+After=network-online.target time-sync.target backtest-badger-paper-archive.socket
+Requires=backtest-badger-paper-archive.socket
+ConditionPathExists=/etc/backtest-badger/paper/%i.json
+ConditionPathExists=/etc/backtest-badger/paper/%i.active
+RequiresMountsFor=/run/badger-paper-sources/records /run/badger-paper-sources/journals /var/lib/badger-paper/archive
+
+[Service]
+Type=oneshot
+User=badger-paper
+Group=badger-paper
+UMask=0077
+# Substitute the reviewed full SHA at installation; no shared current symlink.
+WorkingDirectory=/opt/backtest-badger/paper-releases/@RELEASE@
+LoadCredential=db-password:/etc/backtest-badger/paper/worker.password
+ExecStart=/usr/bin/env -i /opt/backtest-badger/paper-releases/@RELEASE@/.venv/bin/python -I -B -m backtest_badger.paper_production production-once --release @RELEASE@ --market %i
+TimeoutStartSec=240
+TimeoutStopSec=15
+KillMode=control-group
+Restart=no
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+BindReadOnlyPaths=/run/badger-paper-sources/records /run/badger-paper-sources/journals /var/lib/badger-paper/archive
+ReadWritePaths=/var/lib/badger-paper/runtime
+InaccessiblePaths=-/var/lib/badger-paper-vault -/run/docker.sock -/var/lib/backtest-badger -/etc/backtest-badger/worker.env -/etc/backtest-badger/s3-backup.env -/etc/backtest-badger/restic-password -/etc/backtest-badger/paper/worker.password
+MemoryHigh=384M
+MemoryMax=512M
+CPUQuota=100%
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
